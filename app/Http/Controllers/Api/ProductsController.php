@@ -25,7 +25,6 @@ class ProductsController extends Controller {
         $dataInsert = [
             'ProductName' => $request->input('ProductName'),
             'CategoryID' => $request->input('CategoryID'),
-            'MainImageURL' => $request->input('MainImageURL'),
             'Price' => $request->input('Price'),
             'SalePrice' => $request->input('SalePrice'),
             'ShortDescription' => $request->input('ShortDescription'),
@@ -33,28 +32,44 @@ class ProductsController extends Controller {
             'Status' => $request->input('Status'),
         ];
     
+        // Xử lý ảnh chính nếu có
+        if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
+            $file = $request->file('MainImageURL');
+            $extension = $file->getClientOriginalExtension();
+            $filename = time() . '.' . $extension;
+            $path = public_path('product_images');
+            $file->move($path, $filename);
+    
+            // Cập nhật đường dẫn hình ảnh vào mảng dữ liệu
+            $dataInsert['MainImageURL'] = 'product_images/' . $filename;
+        }
+    
         // Thêm sản phẩm vào bảng products và lấy ID của sản phẩm mới tạo
         $productId = $this->repoProducts->addProduct($dataInsert);
     
         // Xử lý ảnh nếu có
-        if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            $file = $request->file('image');
-            $extension = $file->getClientOriginalExtension();
-            $filename = time() . '.' . $extension;
-            $path = public_path('product_images'); // Thay đổi tên thư mục nếu cần
-            $file->move($path, $filename);
-            
-            // Thêm ảnh vào bảng product_images
-            DB::table('product_images')->insert([
-                'ProductID' => $productId, // Liên kết với sản phẩm mới
-                'ImagePath' => 'product_images/' . $filename, // Đường dẫn đến ảnh
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                if ($image->isValid()) { // Kiểm tra từng file riêng biệt
+                    $extension = $image->getClientOriginalExtension();
+                    $filename = time() . '.' . $extension;
+                    $path = public_path('product_images');
+                    $image->move($path, $filename);
+    
+                    // Thêm ảnh vào bảng product_images
+                    DB::table('product_images')->insert([
+                        'ProductID' => $productId,
+                        'ImagePath' => 'product_images/' . $filename,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
         }
     
         return response()->json(['success' => true, 'message' => 'Product added successfully!'], 201);
     }
+    
     
     
     
@@ -95,10 +110,45 @@ class ProductsController extends Controller {
         ];
     
         // Gọi phương thức updateProduct
-        $this->repoProducts->updateProduct($dataUpdate, $id); // Chú ý ở đây
+        $this->repoProducts->updateProduct($dataUpdate, $id); // Cập nhật thông tin sản phẩm
+    
+        // Xử lý ảnh chính nếu có
+        if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
+            $file = $request->file('MainImageURL');
+            $extension = $file->getClientOriginalExtension();
+            $filename = time() . '.' . $extension;
+            $path = public_path('product_images'); // Đường dẫn thư mục ảnh
+            $file->move($path, $filename);
+            
+            // Cập nhật lại đường dẫn ảnh chính
+            $dataUpdate['MainImageURL'] = 'product_images/' . $filename;
+            $product->MainImageURL = $dataUpdate['MainImageURL'];
+            $product->save(); // Lưu lại thay đổi
+        }
+    
+        // Xử lý các ảnh khác nếu có
+        if ($request->hasFile('images') && is_array($request->file('images'))) {
+            foreach ($request->file('images') as $file) {
+                if ($file->isValid()) {
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = time() . rand(1, 1000) . '.' . $extension; // Đảm bảo tên file duy nhất
+                    $path = public_path('product_images');
+                    $file->move($path, $filename);
+    
+                    // Thêm ảnh vào bảng product_images
+                    DB::table('product_images')->insert([
+                        'ProductID' => $id, // Liên kết với sản phẩm
+                        'ImagePath' => 'product_images/' . $filename,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
     
         return response()->json(['message' => 'Cập nhật sản phẩm thành công!', 'data' => $dataUpdate], 200);
     }
+    
     
     public function delete($id)
     {

@@ -16,7 +16,7 @@ class ProductRequest extends FormRequest
         return [
             'ProductName' => 'required|string|max:255',
             'CategoryID' => 'required|exists:categories,CategoryID', // Kiểm tra CategoryID có tồn tại trong bảng categories
-            'MainImageURL' => 'required|string|max:255',
+            'MainImageURL' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:255',
             'Price' => 'required|numeric|min:0', // Giá không âm
             'SalePrice' => 'nullable|required|numeric|min:0', // Giá khuyến mãi không âm
             'ShortDescription' => 'nullable|required|string|max:500', // Mô tả ngắn tối đa 500 ký tự

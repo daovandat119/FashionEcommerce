@@ -22,7 +22,7 @@ class CategoriesController extends Controller
         return response()->json(['message' => 'Success', 'data' => $categories], 200);
     }
 
-    public function add(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'CategoryID' => 'required|unique:categories',
