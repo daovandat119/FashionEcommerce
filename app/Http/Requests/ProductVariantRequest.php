@@ -23,6 +23,9 @@ class ProductVariantRequest extends FormRequest
             'Price' => 'required|numeric|min:0',
         ];
     }
+    
+    
+
 
     public function messages()
     {

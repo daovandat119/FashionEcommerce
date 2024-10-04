@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Categories;
 use App\Models\Products;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 
 class CategoriesController extends Controller
@@ -103,15 +103,10 @@ class CategoriesController extends Controller
 }
 public function delete($id)
 {
-    // Xóa các sản phẩm thuộc danh mục này
+    $deletedVariantsCount = ProductVariant::deleteVariantsByCategory($id);
+
     $deletedProductsCount = Products::where('CategoryID', $id)->delete();
 
-    // Xóa các bản ghi liên quan trong bảng order_items cho các sản phẩm đã xóa
-    DB::table('order_items')->whereIn('ProductID', function($query) use ($id) {
-        $query->select('ProductID')->from('products')->where('CategoryID', $id);
-    })->delete();
-
-    // Xóa danh mục
     $deletedCategoryCount = $this->repoCategories->deleteCategory($id);
 
     if ($deletedCategoryCount > 0) {
@@ -120,6 +115,9 @@ public function delete($id)
         return response()->json(['message' => 'Category not found or cannot be deleted'], 404);
     }
 }
+
+
+
 
 
     

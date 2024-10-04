@@ -7,6 +7,7 @@ use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\ProductVariantRequest;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Colors;
 use App\Models\Sizes;
@@ -19,12 +20,6 @@ class ProductVariantController extends Controller
         return response()->json(['message' => 'Success', 'data' => $variants], 200);
     }
 
-   
-
-    
-
-   
-    
     
     public function store(ProductVariantRequest $request)
     {
@@ -58,32 +53,17 @@ class ProductVariantController extends Controller
     
         // Phản hồi lại thông tin
         $message = 'Thêm biến thể sản phẩm thành công.';
-        if (!empty($existingVariants)) {
-            $message .= ' Một số biến thể đã tồn tại: ' . implode(', ', $existingVariants);
-        }
+       
     
         return response()->json([
             'message' => $message,
-            'added_variants' => $addedVariants,
-            'existing_variants' => $existingVariants,
+            'Đã Thêm Thành Công' => $addedVariants,
+            
         ]);
     }
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
     public function show($id)
     {
         $variant = ProductVariant::find($id);
@@ -97,7 +77,7 @@ class ProductVariantController extends Controller
 
   
 
-    public function update(ProductVariantRequest $request, $id)
+    public function update(Request $request, $id)
     {
         // Tìm biến thể sản phẩm theo ID
         $variant = ProductVariant::find($id);
@@ -106,16 +86,29 @@ class ProductVariantController extends Controller
             return response()->json(['message' => 'Biến thể không tồn tại'], 404);
         }
     
+        // Xác thực dữ liệu đầu vào
+        $validator = Validator::make($request->all(), [
+            'Quantity' => 'required|integer|min:1', // Số lượng là bắt buộc và phải là số nguyên lớn hơn 0
+            'Price' => 'required|numeric|min:0',    // Giá là bắt buộc và phải là số dương
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Có lỗi xảy ra!',
+                'errors' => $validator->errors()
+            ], 400);
+        }
+    
+        // Cập nhật thông tin biến thể
         $variant->update([
-            'ProductID' => $request->input('ProductID'),
-            'SizeID' => $request->input('SizeID'),
-            'ColorID' => $request->input('ColorID'),
             'Quantity' => $request->input('Quantity'),
             'Price' => $request->input('Price'),
         ]);
     
         return response()->json(['message' => 'Cập nhật thành công!', 'data' => $variant], 200);
     }
+    
+    
     
 
     public function delete($id)

@@ -79,18 +79,17 @@ class ColorsController extends Controller
 
     public function delete($id)
     {
-        // Xóa các biến thể sản phẩm liên quan (nếu có)
-        DB::table('product_variants')->where('ColorID', $id)->delete();
+        $deletedVariantsCount = Colors::deleteVariantsByColor($id);
     
-        // Xóa color
         $deletedColorCount = $this->repoColors->deleteColor($id);
     
         if ($deletedColorCount > 0) {
-            return response()->json(['message' => 'Color and related product variants deleted successfully'], 200);
+            return response()->json(['message' => 'Màu và các biến thể sản phẩm liên quan đã được xóa'], 200);
         } else {
-            return response()->json(['message' => 'Color not found or cannot be deleted'], 404);
+            return response()->json(['message' => 'Lỗi không xóa được Màu'], 404);
         }
     }
+    
     
     
 }

@@ -37,3 +37,9 @@ class Categories extends Model
         return DB::table($this->table)->where('CategoryID', $id)->delete();
     }
 }
+
+
+
+
+
+

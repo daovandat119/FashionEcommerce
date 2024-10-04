@@ -40,5 +40,9 @@ class Colors extends Model
     {
         return DB::table($this->table)->where('ColorID', $id)->delete();
     }
+    public static function deleteVariantsByColor($colorId)
+    {
+        return DB::table('product_variants')->where('ColorID', $colorId)->delete();
+    }
 }
 

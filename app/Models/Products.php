@@ -46,4 +46,11 @@ class Products extends Model
     {
         return DB::table($this->table)->where('ProductID', $id)->delete(); // Đảm bảo 'id' là tên cột đúng
     }
+    public static function deleteOrderItemsByCategoryId($categoryId)
+    {
+        return DB::table('order_items')->whereIn('ProductID', function($query) use ($categoryId) {
+            $query->select('ProductID')->from('products')->where('CategoryID', $categoryId);
+        })->delete();
+    }
+    
 }
