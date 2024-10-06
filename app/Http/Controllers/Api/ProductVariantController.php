@@ -5,13 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Requests\ProductVariantRequest;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use App\Models\Colors;
 use App\Models\Products;
-use App\Models\Sizes;
 
 class ProductVariantController extends Controller
 {
@@ -25,7 +20,6 @@ class ProductVariantController extends Controller
     {
         $addedVariants = [];
         $existingVariants = [];
-        $errorVariants = [];
 
         $product = Products::findOrFail($request->ProductID);
         $priceValidation = $this->validateAndProcessPrice($request->Price, $product);
@@ -75,26 +69,26 @@ class ProductVariantController extends Controller
     public function update(Request $request, $id)
     {
         $variant = ProductVariant::find($id);
-    
+
         if (!$variant) {
             return response()->json(['message' => 'Biến thể không tồn tại'], 404);
         }
-    
+
         $product = Products::findOrFail($variant->ProductID);
         $priceValidation = $this->validateAndProcessPrice($request->input('Price'), $product);
-    
+
         if (!$priceValidation['isValid']) {
             return response()->json([
                 'message' => 'Có lỗi xảy ra!',
                 'errors' => ['Price' => [$priceValidation['errorMessage']]]
             ], 400);
         }
-    
+
         $variant->update([
             'Quantity' => $request->input('Quantity'),
             'Price' => $request->input('Price'),
         ]);
-    
+
         return response()->json(['message' => 'Cập nhật thành công!', 'data' => $variant], 200);
     }
 
