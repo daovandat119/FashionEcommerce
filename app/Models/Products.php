@@ -17,10 +17,13 @@ class Products extends Model
 
     public function listProducts()
     {
-        return DB::table($this->table)
-            ->select($this->table . '.*', 'cate.CategoryName as category_name') // Chỉnh sửa theo tên cột trong categories
-            ->join('categories as cate', 'cate.CategoryID', '=', $this->table . '.CategoryID') // Đảm bảo tên cột là 'CategoryID'
-            ->get();
+        $query = DB::table($this->table)
+            ->select($this->table . '.*', 'categories.CategoryName as category_name')
+            ->join('categories', 'categories.CategoryID', '=', $this->table . '.CategoryID');
+    
+        dd($query->toSql(), $query->getBindings());
+    
+        return $query->get();
     }
 
 

@@ -50,6 +50,8 @@ Route::prefix('product-variants')->group(function () {
     Route::delete('/{id}', [ProductVariantController::class, 'delete']);
 });
 
+Route::get('products/variants/{id}', [ProductsController::class, 'getProductVariants']);
+
 
 
 

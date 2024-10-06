@@ -11,6 +11,9 @@ class Sizes extends Model
     use HasFactory;
 
     protected $table = 'sizes';
+    protected $primaryKey = 'SizeID';  // Thêm dòng này
+    public $incrementing = false;  // Thêm dòng này nếu SizeID không phải là auto-increment
+    protected $keyType = 'string'; 
 
     public function listSizes()
     {

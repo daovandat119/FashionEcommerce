@@ -12,7 +12,9 @@ class Colors extends Model
     use HasFactory;
 
     protected $table = 'colors';
-
+    protected $primaryKey = 'ColorID';  // Thêm dòng này
+    public $incrementing = false;  // Thêm dòng này nếu ColorID không phải là auto-increment
+    protected $keyType = 'string'; 
     public function listColors()
     {
         return DB::table($this->table)->get();
