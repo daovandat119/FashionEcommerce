@@ -13,4 +13,6 @@ class AdminController extends Controller
         // Logic cho dashboard admin
         return response()->json(['message' => 'Welcome to the admin dashboard']);
     }
+
+    
 }
