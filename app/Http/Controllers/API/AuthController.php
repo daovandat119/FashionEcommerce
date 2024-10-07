@@ -27,10 +27,10 @@ class AuthController extends Controller
             return response()->json(['message' => 'Thông tin đăng nhập không hợp lệ'], 401);
         }
 
-        // Tạo token cho người dùng
+       
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Kiểm tra role của người dùng và trả về thông báo tương ứng
+      
         if ($user->role->RoleName === 'Admin') {
             return response()->json(['message' => 'Đăng nhập thành công trang quản trị', 'token' => $token]);
         } else {
@@ -58,7 +58,7 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'RoleID' => 2, // Gán RoleID mặc định cho user mới là 2 (User)
+            'RoleID' => 2, 
             'Username' => $request->Username,
             'Email' => $request->Email,
             'Password' => Hash::make($request->Password),
