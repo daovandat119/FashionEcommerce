@@ -1,10 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
-<<<<<<< HEAD
 use App\Http\Controllers\API\AdminController;
-=======
->>>>>>> 88fbe015b0dc8abab2adcaa9083d1d45d45ce125
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,15 +19,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-<<<<<<< HEAD
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
-Route::post('/addd3', [AuthController::class, 'addd3']);
+// Route admin dashboard với middleware kiểm tra vai trò Admin
+Route::middleware(['auth:sanctum', 'role:Admin'])->post('/admin/dashboard', [AdminController::class, 'index']);
 
-=======
-Route::post('/register', [AuthController::class, 'register']);
+// Route login và register
 Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
->>>>>>> 88fbe015b0dc8abab2adcaa9083d1d45d45ce125
+Route::post('/register', [AuthController::class, 'register']);
