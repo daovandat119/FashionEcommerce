@@ -4,24 +4,23 @@ use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\ColorsController;
 use App\Http\Controllers\Api\SizeController;
+use App\Http\Controllers\Api\CartItemsController;
 use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('products', [ProductsController::class, 'index']);  
-Route::post('products', [ProductsController::class, 'store']); 
-Route::get('products/{id}', [ProductsController::class, 'edit']);  
-Route::put('products/{id}', [ProductsController::class, 'update']);  
+Route::get('products', [ProductsController::class, 'index']);
+Route::post('products', [ProductsController::class, 'store']);
+Route::get('products/{id}', [ProductsController::class, 'edit']);
+Route::put('products/{id}', [ProductsController::class, 'update']);
 Route::delete('products/{id}', [ProductsController::class, 'delete'])->name('product.delete');
- 
-
 
 Route::prefix('categories')->group(function () {
-    Route::get('/', [CategoriesController::class, 'index']);  
-    Route::post('/', [CategoriesController::class, 'store']); 
-    Route::get('/{id}', [CategoriesController::class, 'edit']); 
-    Route::put('/{id}', [CategoriesController::class, 'update']); 
-    Route::delete('/{id}', [CategoriesController::class, 'delete']); 
+    Route::get('/', [CategoriesController::class, 'index']);
+    Route::post('/', [CategoriesController::class, 'store']);
+    Route::get('/{id}', [CategoriesController::class, 'edit']);
+    Route::put('/{id}', [CategoriesController::class, 'update']);
+    Route::delete('/{id}', [CategoriesController::class, 'delete']);
 });
 
 
@@ -35,11 +34,11 @@ Route::prefix('colors')->group(function () {
 });
 
 Route::prefix('sizes')->group(function () {
-    Route::get('/', [SizeController::class, 'index']);  
-    Route::post('/', [SizeController::class, 'store']); 
-    Route::get('/{id}', [SizeController::class, 'edit']); 
-    Route::put('/{id}', [SizeController::class, 'update']); 
-    Route::delete('/{id}', [SizeController::class, 'delete']); 
+    Route::get('/', [SizeController::class, 'index']);
+    Route::post('/', [SizeController::class, 'store']);
+    Route::get('/{id}', [SizeController::class, 'edit']);
+    Route::put('/{id}', [SizeController::class, 'update']);
+    Route::delete('/{id}', [SizeController::class, 'delete']);
 });
 
 Route::prefix('product-variants')->group(function () {
@@ -49,6 +48,15 @@ Route::prefix('product-variants')->group(function () {
     Route::put('/{id}', [ProductVariantController::class, 'update']);
     Route::delete('/{id}', [ProductVariantController::class, 'delete']);
 });
+
+Route::prefix('/cart-items')->group(function () {
+    Route::get('/', [CartItemsController::class, 'index']);
+    Route::post('/', [CartItemsController::class, 'store']);
+    Route::patch('/{id}', [CartItemsController::class, 'update']);
+    Route::delete('/{id}', [CartItemsController::class, 'destroy']);
+});
+
+
 
 Route::get('products/variants/{id}', [ProductsController::class, 'getProductVariants']);
 

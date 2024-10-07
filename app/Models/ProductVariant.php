@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ProductVariant extends Model
 {
@@ -18,6 +19,16 @@ class ProductVariant extends Model
         'Quantity',
         'Price',
     ];
+
+    public function getProductVariantByID($ProductID,$SizeID,$ColorID)
+    {
+        $variantID = DB::table('product_variants')
+            ->where('ProductID', $ProductID)
+            ->where('SizeID', $SizeID)
+            ->where('ColorID', $ColorID)
+            ->first();
+        return $variantID;
+    }
 
     public function product()
     {
