@@ -29,15 +29,16 @@ class AuthController extends Controller
             return response()->json(['message' => 'Thông tin đăng nhập không hợp lệ'], 401);
         }
 
-        // Tạo token cho người dùng
+       
         $token = $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'message' => 'Đăng nhập thành công',
+            'token' => $token,
+           
+        ], 200);
+        
 
-        // Kiểm tra role của người dùng và trả về thông báo tương ứng
-        if ($user->role->RoleName === 'Admin') {
-            return response()->json(['message' => 'Đăng nhập thành công trang quản trị', 'token' => $token]);
-        } else {
-            return response()->json(['message' => 'Đăng nhập thành công trang người dùng', 'token' => $token]);
-        }
+       
     }
 
     public function register(Request $request)
@@ -53,10 +54,7 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // Chỉ admin mới có quyền đăng ký người dùng mới
-        if (auth()->user() && auth()->user()->role->RoleName !== 'Admin') {
-            return response()->json(['message' => 'Bạn không có quyền để tạo người dùng mới'], 403);
-        }
+       
 
         $imagePath = null;
         if ($request->hasFile('Image')) {
