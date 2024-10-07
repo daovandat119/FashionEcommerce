@@ -8,22 +8,21 @@ use App\Http\Controllers\Api\CartItemsController;
 use App\Http\Controllers\Api\ProductVariantController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('products', [ProductsController::class, 'index']);
-Route::post('products', [ProductsController::class, 'store']);
-Route::get('products/{id}', [ProductsController::class, 'edit']);
-Route::put('products/{id}', [ProductsController::class, 'update']);
-Route::delete('products/{id}', [ProductsController::class, 'delete'])->name('product.delete');
+Route::prefix('products')->group(function () {
+    Route::get('/', [ProductsController::class, 'index']);
+    Route::post('/', [ProductsController::class, 'store']);
+    Route::get('/{id}', [ProductsController::class, 'edit']);
+    Route::post('/{id}', [ProductsController::class, 'update']);
+    Route::delete('/{id}', [ProductsController::class, 'delete']);
+});
 
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoriesController::class, 'index']);
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
     Route::put('/{id}', [CategoriesController::class, 'update']);
-    Route::delete('/{id}', [CategoriesController::class, 'delete']);
+    Route::delete('/', [CategoriesController::class, 'delete']);
 });
-
-
 
 Route::prefix('colors')->group(function () {
     Route::get('/', [ColorsController::class, 'index']); // Lấy danh sách màu
@@ -56,10 +55,5 @@ Route::prefix('/cart-items')->group(function () {
     Route::delete('/{id}', [CartItemsController::class, 'destroy']);
 });
 
-
-
 Route::get('products/variants/{id}', [ProductsController::class, 'getProductVariants']);
-
-
-
 

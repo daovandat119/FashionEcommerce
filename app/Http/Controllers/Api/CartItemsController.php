@@ -16,7 +16,6 @@ class CartItemsController extends Controller
     public function __construct()
     {
         $this->repoCartItems = new CartItems();
-        $this->repoCart = new Cart();
     }
 
     public function index()

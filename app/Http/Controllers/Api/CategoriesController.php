@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Categories;
-use App\Models\Products;
-use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use App\Http\Requests\CategoriesRequest;
 
 class CategoriesController extends Controller
 {
@@ -22,103 +21,82 @@ class CategoriesController extends Controller
         return response()->json(['message' => 'Success', 'data' => $categories], 200);
     }
 
-    public function store(Request $request)
+    public function store(CategoriesRequest $request)
     {
-        $request->validate([
-            'CategoryID' => 'required|unique:categories',
-            'CategoryName' => 'required|unique:categories',
-            'Status' => 'required',
-        ], [
-            'CategoryID.required' => ':attribute không được bỏ trống',
-            'CategoryID.unique' => ':attribute đã tồn tại',
-            'CategoryName.required' => ':attribute không được bỏ trống',
-            'CategoryName.unique' => ':attribute đã tồn tại',
-            'Status.required' => ':attribute không được bỏ trống',
-        ], [
-            'CategoryID' => 'Mã danh mục',
-            'CategoryName' => 'Tên danh mục',
-            'Status' => 'Trạng thái'
-        ]);
-
         $dataInsert = [
-            'CategoryID' => $request->input('CategoryID'),
             'CategoryName' => $request->input('CategoryName'),
-            'Status' => $request->input('Status'),
+            'Status' => 'ACTIVE'
         ];
 
         $this->repoCategories->addCategory($dataInsert);
 
         return response()->json([
-            'message' => 'Success',
+            'message' => 'Category created successfully',
             'data' => $dataInsert
         ], 201);
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
 
         $category = $this->repoCategories->getDetail($id);
-        
+
         if (!$category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
-    
-        return response()->json($category);
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $category
+        ], 200);
     }
-    
 
+    public function update(CategoriesRequest $request, $id)
+    {
+        $category = $this->repoCategories->getDetail($id);
 
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
 
-    public function update(Request $request, $id)
-{
-    // Validate input
-    $request->validate([
-        'CategoryID' => 'required|unique:categories,CategoryID,' . $id . ',CategoryID',
-        'CategoryName' => 'required',
-        'Status' => 'required',
-    ], [
-        'CategoryID.required' => ':attribute không được bỏ trống',
-        'CategoryID.unique' => ':attribute đã tồn tại',
-        'CategoryName.required' => ':attribute không được bỏ trống',
-        'Status.required' => ':attribute không được bỏ trống',
-    ], [
-        'CategoryID' => 'Mã danh mục',
-        'CategoryName' => 'Tên danh mục',
-        'Status' => 'Trạng thái'
-    ]);
+        $dataUpdate = [
+            'CategoryName' => $request->input('CategoryName'),
+        ];
 
-    // Update data
-    $dataUpdate = [
-        'CategoryID' => $request->input('CategoryID'),
-        'CategoryName' => $request->input('CategoryName'),
-        'Status' => $request->input('Status'),
-    ];
+        $this->repoCategories->updateCategory($id, $dataUpdate);
 
-    $this->repoCategories->updateCategory($id, $dataUpdate);
+        $updatedCategory = $this->repoCategories->getDetail($id);
 
-    // Tạo response với header
-    return response()
-        ->json(['message' => "Cập nhật thành công cho danh mục {$dataUpdate['CategoryID']}!", 'data' => $dataUpdate], 200)
-        ->header('Content-Type', 'application/json')
-        ->header('X-Custom-Header', 'Your Value Here'); // Thay đổi hoặc thêm header tùy ý
-}
-public function delete($id)
-{
-    $deletedVariantsCount = ProductVariant::deleteVariantsByCategory($id);
-
-    $deletedProductsCount = Products::where('CategoryID', $id)->delete();
-
-    $deletedCategoryCount = $this->repoCategories->deleteCategory($id);
-
-    if ($deletedCategoryCount > 0) {
-        return response()->json(['message' => 'Category and related products deleted successfully'], 200);
-    } else {
-        return response()->json(['message' => 'Category not found or cannot be deleted'], 404);
+        return response()->json([
+            'message' => 'Category updated successfully',
+            'data' => $updatedCategory
+        ], 200);
     }
-}
 
+    public function delete(Request $request)
+    {
+        // Retrieve the 'ids' input and split it into an array
+        $ids = $request->input('ids');
+        $idArray = explode(',', $ids);
+        $results = [];
 
+        foreach ($idArray as $id) {
+            $id = trim($id); // Trim any whitespace from the ID
+            $category = $this->repoCategories->getDetail($id);
 
+            if (!$category) {
+                $results[] = ['id' => $id, 'message' => 'Category not found'];
+                continue;
+            }
 
+            $this->repoCategories->deleteCategoryAndRelatedData($id);
 
-    
+            $results[] = ['id' => $id, 'message' => 'Deleted successfully'];
+        }
+
+        return response()->json([
+            'message' => 'Operation completed',
+            'results' => $results
+        ], 200);
+    }
 }

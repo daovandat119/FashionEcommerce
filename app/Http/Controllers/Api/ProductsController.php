@@ -7,8 +7,8 @@ use App\Models\Categories;
 use App\Models\Products;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
-use App\Http\Requests\ProductRequest;
-use Illuminate\Support\Facades\DB;
+use App\Models\ProductImage;
+use App\Http\Requests\ProductsRequest;
 
 class ProductsController extends Controller
 {
@@ -25,13 +25,52 @@ class ProductsController extends Controller
         return response()->json($listProducts);
     }
 
-    public function store(ProductRequest $request)
+    public function store(ProductsRequest $request)
     {
-        $dataInsert = $this->prepareProductData($request);
-        $productId = $this->repoProducts->addProduct($dataInsert);
-        $this->handleProductImages($request, $productId);
+        $category = (new Categories())->getDetail($request->CategoryID);
 
-        return response()->json(['success' => true, 'message' => 'Product added successfully!'], 201);
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        $data = [
+            'ProductName' => $request->ProductName,
+            'CategoryID' => $request->CategoryID,
+            'Price' => $request->Price,
+            'SalePrice' => $request->SalePrice,
+            'ShortDescription' => $request->ShortDescription,
+            'Description' => $request->Description,
+        ];
+
+        if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
+            $file = $request->file('MainImageURL');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('product_images'), $filename);
+            $data['MainImageURL'] = 'product_images/' . $filename;
+        }
+
+        $productId = $this->repoProducts->addProduct($data);
+
+        if ($request->hasFile('ImagePath')) {
+            $imagePaths = [];
+            foreach ($request->file('ImagePath') as $image) {
+                if ($image->isValid()) {
+                    $filename = time() . rand(1, 1000) . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('product_images'), $filename);
+                    $imagePaths[] = 'product_images/' . $filename;
+                }
+            }
+            $imagePath = implode(',', $imagePaths);
+            (new ProductImage())->createProductImage($productId, $imagePath);
+            return response()->json([
+                'success' => true,
+                'message' => 'Operation completed successfully',
+                'data' => [
+                    'product' => $productId,
+                ]
+            ], 201);
+        }
+
     }
 
     public function edit($id)
@@ -42,42 +81,32 @@ class ProductsController extends Controller
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        return response()->json($product);
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully',
+            'data' => [
+                'product' => $product,
+            ]
+        ], 200);
     }
 
-    public function update(ProductRequest $request, $id)
+    public function update(ProductsRequest $request, $id)
     {
-        $product = Products::find($id);
+        $product = $this->repoProducts->getDetail($id);
         if (!$product) {
             return response()->json(['message' => 'Product not found.'], 404);
         }
 
-        $dataUpdate = $this->prepareProductData($request);
-        $this->repoProducts->updateProduct($dataUpdate, $id);
-        $this->handleProductImages($request, $id);
+        $data = [
+            'ProductName' => $request->ProductName,
+            'CategoryID' => $request->CategoryID,
+            'Price' => $request->Price,
+            'SalePrice' => $request->SalePrice,
+            'ShortDescription' => $request->ShortDescription,
+            'Description' => $request->Description,
+        ];
 
-        return response()->json(['message' => 'Product updated successfully!', 'data' => $dataUpdate], 200);
-    }
-
-    public function delete($id)
-    {
-        $product = Products::find($id);
-
-        if ($product) {
-            $product->delete();
-            return response()->json(['success' => true, 'message' => 'Product deleted successfully'], 200);
-        }
-
-        return response()->json(['success' => false, 'message' => 'Product not found'], 404);
-    }
-
-    private function prepareProductData(ProductRequest $request)
-    {
-        $data = $request->only([
-            'ProductName', 'CategoryID', 'Price', 'SalePrice',
-            'ShortDescription', 'Description', 'Status'
-        ]);
-
+        // Handle the main image update
         if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
             $file = $request->file('MainImageURL');
             $filename = time() . '.' . $file->getClientOriginalExtension();
@@ -85,52 +114,45 @@ class ProductsController extends Controller
             $data['MainImageURL'] = 'product_images/' . $filename;
         }
 
-        return $data;
-    }
+        // Update the product data
+        $this->repoProducts->updateProduct($id, $data);
 
-    private function handleProductImages(Request $request, $productId)
-    {
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
+        // Handle additional images
+        if ($request->hasFile('ImagePath')) {
+            $imagePaths = [];
+            foreach ($request->file('ImagePath') as $image) {
                 if ($image->isValid()) {
                     $filename = time() . rand(1, 1000) . '.' . $image->getClientOriginalExtension();
                     $image->move(public_path('product_images'), $filename);
-
-                    DB::table('product_images')->insert([
-                        'ProductID' => $productId,
-                        'ImagePath' => 'product_images/' . $filename,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                    $imagePaths[] = 'product_images/' . $filename;
                 }
             }
+            $imagePath = implode(',', $imagePaths);
+            (new ProductImage())->updateProductImage($id, $imagePath);
+            return response()->json([
+                'success' => true,
+                'message' => 'Operation completed successfully',
+                'data' => [
+                    'product' => $id,
+                ]
+            ], 201);
         }
     }
 
-    public function getProductVariants($productId)
+    public function delete($id)
     {
-        $product = Products::find($productId);
+        $product = $this->repoProducts->getDetail($id);
 
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        $variants = ProductVariant::where('ProductID', $productId)
-            ->with(['size', 'color'])
-            ->get()
-            ->map(function ($variant) {
-                return [
-                    'VariantID' => $variant->VariantID,
-                    'Size' => $variant->size->SizeName,
-                    'Color' => $variant->color->ColorName,
-                    'Quantity' => $variant->Quantity,
-                    'Price' => $variant->Price,
-                ];
-            });
+        $this->repoProducts->deleteProduct($product->CategoryID);
 
         return response()->json([
-            'product' => $product,
-            'variants' => $variants
+            'success' => true,
+            'message' => 'Product deleted successfully',
         ], 200);
     }
 }
+
