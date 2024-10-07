@@ -15,7 +15,7 @@ class User extends Authenticatable
     protected $primaryKey = 'UserID'; // Khóa chính
 
     protected $fillable = [
-        'RoleID',  // Thêm RoleID để xác định vai trò của người dùng
+        'RoleID',
         'Username',
         'Email',
         'Password',
@@ -25,7 +25,13 @@ class User extends Authenticatable
         'CodeExpired',
     ];
 
-    // Thêm quan hệ Role
+    protected $hidden = [
+        'Password', // Ẩn mật khẩu trong JSON
+        'CodeId',
+        'CodeExpired',
+    ];
+
+    // Mối quan hệ với Role
     public function role()
     {
         return $this->belongsTo(Role::class, 'RoleID', 'RoleID');

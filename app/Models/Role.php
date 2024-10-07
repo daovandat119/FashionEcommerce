@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     use HasFactory;
-    protected $table = 'roles'; // Tên bảng
 
+    protected $table = 'roles'; // Tên bảng
     protected $primaryKey = 'RoleID'; // Khóa chính
 
     protected $fillable = [

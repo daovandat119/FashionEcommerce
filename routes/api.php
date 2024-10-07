@@ -20,9 +20,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Route admin dashboard với middleware kiểm tra vai trò Admin
-Route::middleware(['auth:sanctum', 'role:Admin'])->post('/admin/dashboard', [AdminController::class, 'index']);
+// routes/api.php
 
-// Route login và register
-Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+

@@ -1,5 +1,6 @@
 <?php
 
+// app/Http/Controllers/API/AuthController.php
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
@@ -10,9 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-
-
-
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -44,7 +42,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'Username' => 'required|string|max:255',
+            'Username' => 'required|string|max:255|unique:users',
             'Email' => 'required|string|email|max:255|unique:users',
             'Password' => 'required|string|min:6',
             'Image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -52,11 +50,6 @@ class AuthController extends Controller
     
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
-        }
-    
-        // Chỉ admin mới có quyền đăng ký người dùng mới
-        if (auth()->user() && auth()->user()->role->RoleName !== 'Admin') {
-            return response()->json(['message' => 'Bạn không có quyền để tạo người dùng mới'], 403);
         }
     
         $imagePath = null;
@@ -78,9 +71,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-     
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Đã đăng xuất thành công']);
     }
 }
+
