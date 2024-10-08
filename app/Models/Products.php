@@ -48,6 +48,8 @@ class Products extends Model
         ->first();
     }
 
+
+
     public function updateProduct($id,$data)
     {
         return DB::table($this->table)->where('ProductID', $id)->update([
@@ -61,9 +63,7 @@ class Products extends Model
         ]);
     }
 
-
-
-    public function deleteCategoryAndRelatedData($categoryId)
+    public function deleteProductAndRelatedData($id)
     {
         // Start a database transaction
         DB::beginTransaction();
@@ -72,18 +72,18 @@ class Products extends Model
             // Delete product variants related to the products in the specified category
             DB::table('product_variants')
                 ->join('products', 'product_variants.ProductID', '=', 'products.ProductID')
-                ->where('products.CategoryID', $categoryId)
+                ->where('products.ProductID', $id)
                 ->delete();
 
             // Delete product images related to the products in the specified category
             DB::table('product_images')
                 ->join('products', 'product_images.ProductID', '=', 'products.ProductID')
-                ->where('products.CategoryID', $categoryId)
+                    ->where('products.ProductID', $id)
                 ->delete();
 
             // Delete products related to the category
             DB::table('products')
-                ->where('CategoryID', $categoryId)
+                ->where('ProductID', $id)
                 ->delete();
 
             DB::commit();
@@ -94,13 +94,21 @@ class Products extends Model
             DB::rollBack();
 
             // Log the error or handle it as needed
-            \Log::error('Error deleting category and related data: ' . $e->getMessage(), [
-                'categoryId' => $categoryId,
+            \Log::error('Error deleting product and related data: ' . $e->getMessage(), [
+                    'ProductID' => $id,
                 'error' => $e
             ]);
 
             return false;
         }
+    }
+
+
+    public function viewProduct($id)
+    {
+        return DB::table($this->table)->where('ProductID', $id)->update([
+            'Views' => DB::raw('Views + 1')
+        ]);
     }
 
 }

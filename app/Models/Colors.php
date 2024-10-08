@@ -14,7 +14,7 @@ class Colors extends Model
     protected $table = 'colors';
     protected $primaryKey = 'ColorID';  // Thêm dòng này
     public $incrementing = false;  // Thêm dòng này nếu ColorID không phải là auto-increment
-    protected $keyType = 'string'; 
+    protected $keyType = 'string';
     public function listColors()
     {
         return DB::table($this->table)->get();
@@ -22,7 +22,9 @@ class Colors extends Model
 
     public function addColor($data)
     {
-        return DB::table($this->table)->insert($data);
+        return DB::table($this->table)->insert([
+            'ColorName' => $data['ColorName'],
+        ]);
     }
 
     public function getDetail($id)
@@ -30,21 +32,22 @@ class Colors extends Model
         return DB::table($this->table)->where('ColorID', $id)->first();
     }
 
-   
+
     public function updateColor($id, $dataUpdate)
     {
         return DB::table($this->table)
             ->where('ColorID', $id)
-            ->update($dataUpdate);
+            ->update([
+                'ColorName' => $dataUpdate['ColorName'],
+            ]);
     }
 
     public function deleteColor($id)
     {
-        return DB::table($this->table)->where('ColorID', $id)->delete();
+        return DB::table($this->table)
+            ->where('ColorID', $id)
+            ->delete();
     }
-    public static function deleteVariantsByColor($colorId)
-    {
-        return DB::table('product_variants')->where('ColorID', $colorId)->delete();
-    }
+
 }
 

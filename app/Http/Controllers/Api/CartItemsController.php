@@ -29,13 +29,6 @@ class CartItemsController extends Controller
     {
         $userId = 4;
 
-        $request->validate([
-            'productID' => 'required|integer',
-            'sizeID' => 'required|integer',
-            'colorID' => 'required|integer',
-            'quantity' => 'required|integer|min:1',
-        ]);
-
         $cart = (new Cart())->getCartByUserID($userId);
         if (!$cart) {
             (new Cart())->createCart($userId);
@@ -91,13 +84,6 @@ class CartItemsController extends Controller
     public function update(Request $request, $id)
     {
         $userId = 4;
-
-        $request->validate([
-            'productID' => 'required|integer',
-            'sizeID' => 'required|integer',
-            'colorID' => 'required|integer',
-            'quantity' => 'required|integer|min:1',
-        ]);
 
         $cart = (new Cart())->getCartByUserID($userId);
 

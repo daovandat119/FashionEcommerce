@@ -20,28 +20,60 @@ class ProductVariant extends Model
         'Price',
     ];
 
-    public function getProductVariantByID($ProductID,$SizeID,$ColorID)
+    public function getAll($ProductID)
     {
-        $variantID = DB::table('product_variants')
+        return DB::table($this->table)
+            ->join('sizes', 'product_variants.SizeID', '=', 'sizes.SizeID')
+            ->join('colors', 'product_variants.ColorID', '=', 'colors.ColorID')
+            ->select('product_variants.*', 'sizes.SizeName', 'colors.ColorName')
+            ->where('product_variants.ProductID', $ProductID)
+            ->get();
+    }
+
+    public function getVariantByID($ProductID,$SizeID,$ColorID)
+    {
+        return DB::table('product_variants')
             ->where('ProductID', $ProductID)
             ->where('SizeID', $SizeID)
             ->where('ColorID', $ColorID)
             ->first();
-        return $variantID;
     }
 
-    public function product()
-    {
-        return $this->belongsTo(Products::class, 'ProductID');
+    public function createVariant($data){
+        return DB::table('product_variants')
+            ->insert([
+                'ProductID' => $data['ProductID'],
+                'SizeID' => $data['SizeID'],
+                'ColorID' => $data['ColorID'],
+                'Quantity' => $data['Quantity'],
+                'Price' => $data['Price'],
+                'Status' => $data['Status'] ?? 'active', // Thêm giá trị mặc định cho Status
+            ]);
     }
 
-    public function size()
-    {
-        return $this->belongsTo(Sizes::class, 'SizeID');
+    public function checkVariantExists($ProductID,$SizeID,$ColorID){
+        return DB::table('product_variants')
+            ->where('ProductID', $ProductID)
+            ->where('SizeID', $SizeID)
+            ->where('ColorID', $ColorID)
+            ->exists();
     }
 
-    public function color()
-    {
-        return $this->belongsTo(Colors::class, 'ColorID');
+    public function updateVariant($data){
+        return DB::table('product_variants')
+            ->where('ProductID', $data['ProductID'])
+            ->where('SizeID', $data['SizeID'])
+            ->where('ColorID', $data['ColorID'])
+            ->update([
+                'Quantity' => $data['Quantity'],
+                'Price' => $data['Price'],
+            ]);
+    }
+
+
+    public function deleteVariant($id){
+        return DB::table('product_variants')
+            ->where('VariantID', $id)
+            ->delete();
     }
 }

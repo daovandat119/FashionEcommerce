@@ -24,19 +24,14 @@ class SizeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'SizeID' => 'required|unique:sizes',
             'SizeName' => 'required',
         ], [
-            'SizeID.required' => ':attribute không được bỏ trống',
-            'SizeID.unique' => ':attribute đã tồn tại',
             'SizeName.required' => ':attribute không được bỏ trống',
         ], [
-            'SizeID' => 'Mã kích thước',
             'SizeName' => 'Tên kích thước',
         ]);
 
         $dataInsert = [
-            'SizeID' => $request->input('SizeID'),
             'SizeName' => $request->input('SizeName'),
         ];
 
@@ -48,7 +43,7 @@ class SizeController extends Controller
     public function edit($id)
     {
         $size = $this->repoSizes->getDetail($id);
-        
+
         if (!$size) {
             return response()->json(['message' => 'Size not found'], 404);
         }
@@ -58,20 +53,10 @@ class SizeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'SizeID' => 'required|unique:sizes,SizeID,' . $id . ',SizeID',
-            'SizeName' => 'required',
-        ], [
-            'SizeID.required' => ':attribute không được bỏ trống',
-            'SizeID.unique' => ':attribute đã tồn tại',
-            'SizeName.required' => ':attribute không được bỏ trống',
-        ], [
-            'SizeID' => 'Mã kích thước',
-            'SizeName' => 'Tên kích thước',
-        ]);
+
+        $size = $this->repoSizes->getDetail($id);
 
         $dataUpdate = [
-            'SizeID' => $request->input('SizeID'),
             'SizeName' => $request->input('SizeName'),
         ];
 
@@ -82,17 +67,15 @@ class SizeController extends Controller
 
     public function delete($id)
     {
-        // Xóa các biến thể sản phẩm liên quan (nếu có)
-        DB::table('product_variants')->where('SizeID', $id)->delete();
-    
-        // Xóa size
-        $deletedSizeCount = $this->repoSizes->deleteSize($id);
-    
-        if ($deletedSizeCount > 0) {
-            return response()->json(['message' => 'Size and related product variants deleted successfully'], 200);
-        } else {
-            return response()->json(['message' => 'Size not found or cannot be deleted'], 404);
+        $size = $this->repoSizes->getDetail($id);
+
+        if (!$size) {
+            return response()->json(['message' => 'Size not found'], 404);
         }
+
+        $this->repoSizes->deleteSize($id);
+
+        return response()->json(['message' => 'Xóa thành công!'], 200);
     }
-    
+
 }

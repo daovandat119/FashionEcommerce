@@ -11,9 +11,6 @@ class Sizes extends Model
     use HasFactory;
 
     protected $table = 'sizes';
-    protected $primaryKey = 'SizeID';  // Thêm dòng này
-    public $incrementing = false;  // Thêm dòng này nếu SizeID không phải là auto-increment
-    protected $keyType = 'string'; 
 
     public function listSizes()
     {
@@ -22,7 +19,9 @@ class Sizes extends Model
 
     public function addSize($data)
     {
-        return DB::table($this->table)->insert($data);
+        return DB::table($this->table)->insert([
+            'SizeName' => $data['SizeName'],
+        ]);
     }
 
     public function getDetail($id)
@@ -34,11 +33,15 @@ class Sizes extends Model
     {
         return DB::table($this->table)
             ->where('SizeID', $id)
-            ->update($dataUpdate);
+            ->update([
+                'SizeName' => $dataUpdate['SizeName'],
+            ]);
     }
 
     public function deleteSize($id)
     {
-        return DB::table($this->table)->where('SizeID', $id)->delete();
+        return DB::table($this->table)
+            ->where('SizeID', $id)
+            ->delete();
     }
 }

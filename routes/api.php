@@ -13,7 +13,8 @@ Route::prefix('products')->group(function () {
     Route::post('/', [ProductsController::class, 'store']);
     Route::get('/{id}', [ProductsController::class, 'edit']);
     Route::post('/{id}', [ProductsController::class, 'update']);
-    Route::delete('/{id}', [ProductsController::class, 'delete']);
+    Route::delete('/', [ProductsController::class, 'delete']);
+    Route::post('/view/{id}', [ProductsController::class, 'view']);
 });
 
 Route::prefix('categories')->group(function () {
@@ -36,15 +37,16 @@ Route::prefix('sizes')->group(function () {
     Route::get('/', [SizeController::class, 'index']);
     Route::post('/', [SizeController::class, 'store']);
     Route::get('/{id}', [SizeController::class, 'edit']);
-    Route::put('/{id}', [SizeController::class, 'update']);
+    Route::post('/{id}', [SizeController::class, 'update']);
     Route::delete('/{id}', [SizeController::class, 'delete']);
+
 });
 
 Route::prefix('product-variants')->group(function () {
-    Route::get('/', [ProductVariantController::class, 'index']);
+    Route::post('/productID', [ProductVariantController::class, 'index']);
     Route::post('/', [ProductVariantController::class, 'store']);
-    Route::get('/{id}', [ProductVariantController::class, 'show']);
-    Route::put('/{id}', [ProductVariantController::class, 'update']);
+    Route::post('/getVariantByID', [ProductVariantController::class, 'show']);
+    Route::put('/', [ProductVariantController::class, 'update']);
     Route::delete('/{id}', [ProductVariantController::class, 'delete']);
 });
 

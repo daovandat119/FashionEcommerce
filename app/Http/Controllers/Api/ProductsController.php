@@ -25,7 +25,7 @@ class ProductsController extends Controller
         return response()->json($listProducts);
     }
 
-    public function store(ProductsRequest $request)
+    public function store(Request $request)
     {
         $category = (new Categories())->getDetail($request->CategoryID);
 
@@ -90,7 +90,7 @@ class ProductsController extends Controller
         ], 200);
     }
 
-    public function update(ProductsRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $product = $this->repoProducts->getDetail($id);
         if (!$product) {
@@ -139,20 +139,45 @@ class ProductsController extends Controller
         }
     }
 
-    public function delete($id)
+    public function delete(Request $request)
     {
-        $product = $this->repoProducts->getDetail($id);
 
-        if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
+        $ids = explode(',', $request->ids);
+
+        foreach ($ids as $id) {
+            $product = $this->repoProducts->getDetail($id);
+
+            if (!$product) {
+                return response()->json(['message' => "Product with ID $id not found"], 404);
+            }
+
+
+            $this->repoProducts->deleteProductAndRelatedData($id);
         }
-
-        $this->repoProducts->deleteProduct($product->CategoryID);
 
         return response()->json([
             'success' => true,
-            'message' => 'Product deleted successfully',
+            'message' => 'Products deleted successfully',
         ], 200);
     }
+
+    public function view($id)
+    {
+        // Tìm sản phẩm theo ID
+        $product = $this->repoProducts->getDetail($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found.'], 404);
+        }
+
+        // Tăng số lượt xem lên 1
+        $this->repoProducts->viewProduct($id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product view count updated successfully',
+        ], 200);
+    }
+
 }
 

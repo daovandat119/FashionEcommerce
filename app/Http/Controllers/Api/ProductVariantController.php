@@ -10,37 +10,44 @@ use App\Models\Products;
 
 class ProductVariantController extends Controller
 {
-    public function index()
+    protected $repoProductVariant;
+
+    public function __construct(ProductVariant $repoProductVariant)
     {
-        $variants = ProductVariant::all();
+        $this->repoProductVariant = $repoProductVariant;
+    }
+
+    public function index(Request $request)
+    {
+        $variants = $this->repoProductVariant->getAll($request->ProductID);
         return response()->json(['message' => 'Success', 'data' => $variants], 200);
     }
 
-    public function store(ProductVariantRequest $request)
+    public function store(Request $request)
     {
         $addedVariants = [];
         $existingVariants = [];
+        $product = (new Products())->getDetail($request->ProductID);
 
-        $product = Products::findOrFail($request->ProductID);
-        $priceValidation = $this->validateAndProcessPrice($request->Price, $product);
-
-        if (!$priceValidation['isValid']) {
-            return response()->json([
-                'message' => 'Lỗi giá',
-                'errors' => ['Price' => [$priceValidation['errorMessage']]]
-            ], 400);
+        if(!$product){
+            return response()->json(['message' => 'Product not found'], 404);
         }
 
-        foreach ($request->SizeID as $sizeID) {
-            foreach ($request->ColorIDs as $colorID) {
-                if (!$this->checkVariantExists($request->ProductID, $sizeID, $colorID)) {
-                    ProductVariant::create([
+        $sizeIDs = explode(',', $request->SizeID);
+        $colorIDs = explode(',', $request->ColorID);
+
+        foreach ($sizeIDs as $sizeID) {
+            foreach ($colorIDs as $colorID) {
+                if (!$this->repoProductVariant->checkVariantExists($request->ProductID, $sizeID, $colorID)) {
+                    $data = [
                         'ProductID' => $request->ProductID,
                         'SizeID' => $sizeID,
                         'ColorID' => $colorID,
                         'Quantity' => $request->Quantity,
                         'Price' => $request->Price,
-                    ]);
+                        'Status' => 'ACTIVE',
+                    ];
+                    $this->repoProductVariant->createVariant($data);
                     $addedVariants[] = "ProductID: {$request->ProductID}, SizeID: {$sizeID}, ColorID: {$colorID}";
                 } else {
                     $existingVariants[] = "ProductID: {$request->ProductID}, SizeID: {$sizeID}, ColorID: {$colorID}";
@@ -55,9 +62,9 @@ class ProductVariantController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show(Request $request)
     {
-        $variant = ProductVariant::find($id);
+        $variant = $this->repoProductVariant->getVariantByID($request->ProductID, $request->SizeID, $request->ColorID);
 
         if (!$variant) {
             return response()->json(['message' => 'Variant not found'], 404);
@@ -66,65 +73,33 @@ class ProductVariantController extends Controller
         return response()->json($variant);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $variant = ProductVariant::find($id);
+        $product = (new Products())->getDetail($request->ProductID);
 
-        if (!$variant) {
-            return response()->json(['message' => 'Biến thể không tồn tại'], 404);
+        if(!$product){
+            return response()->json(['message' => 'Product not found'], 404);
         }
 
-        $product = Products::findOrFail($variant->ProductID);
-        $priceValidation = $this->validateAndProcessPrice($request->input('Price'), $product);
+        $data = [
+            'ProductID' => $request->ProductID,
+            'SizeID' => $request->SizeID,
+            'ColorID' => $request->ColorID,
+            'Quantity' => $request->Quantity,
+            'Price' => $request->Price,
+        ];
 
-        if (!$priceValidation['isValid']) {
-            return response()->json([
-                'message' => 'Có lỗi xảy ra!',
-                'errors' => ['Price' => [$priceValidation['errorMessage']]]
-            ], 400);
-        }
 
-        $variant->update([
-            'Quantity' => $request->input('Quantity'),
-            'Price' => $request->input('Price'),
-        ]);
+        $variant = $this->repoProductVariant->updateVariant($data);
 
-        return response()->json(['message' => 'Cập nhật thành công!', 'data' => $variant], 200);
+        return response()->json(['message' => 'Cập nhật thành công!', 'data' => $data], 200);
     }
 
     public function delete($id)
     {
-        $variant = ProductVariant::find($id);
+        $variant = $this->repoProductVariant->deleteVariant($id);
 
-        if (!$variant) {
-            return response()->json(['message' => 'Variant not found'], 404);
-        }
-
-        $variant->delete();
-
-        return response()->json(['message' => 'Variant deleted successfully!'], 200);
+        return response()->json(['message' => 'Xóa thành công!', 'data' => $variant], 200);
     }
 
-    private function checkVariantExists($productId, $sizeId, $colorId)
-    {
-        return ProductVariant::where('ProductID', $productId)
-            ->where('SizeID', $sizeId)
-            ->where('ColorID', $colorId)
-            ->exists();
-    }
-
-    private function validateAndProcessPrice($price, $product)
-    {
-        $minPrice = min($product->Price, $product->SalePrice);
-        $maxPrice = max($product->Price, $product->SalePrice);
-
-        if ($price < $minPrice || $price > $maxPrice) {
-            return [
-                'isValid' => false,
-                'errorMessage' => "Giá ({$price}) nằm ngoài khoảng cho phép ($minPrice - $maxPrice)"
-            ];
-        }
-
-        return ['isValid' => true];
-    }
 }

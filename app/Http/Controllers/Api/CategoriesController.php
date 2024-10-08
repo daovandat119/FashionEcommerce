@@ -21,7 +21,7 @@ class CategoriesController extends Controller
         return response()->json(['message' => 'Success', 'data' => $categories], 200);
     }
 
-    public function store(CategoriesRequest $request)
+    public function store(Request $request)
     {
         $dataInsert = [
             'CategoryName' => $request->input('CategoryName'),
@@ -51,7 +51,7 @@ class CategoriesController extends Controller
         ], 200);
     }
 
-    public function update(CategoriesRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $category = $this->repoCategories->getDetail($id);
 
