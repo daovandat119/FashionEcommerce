@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Colors;
-use App\Models\Products;
 use Illuminate\Http\Request;
 
 class ColorsController extends Controller

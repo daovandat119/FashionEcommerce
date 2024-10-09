@@ -8,14 +8,14 @@ class UpdateProductVariantRequest extends FormRequest
 {
     public function authorize()
     {
-        return true; // Cho phép tất cả người dùng gửi yêu cầu
+        return true; 
     }
 
     public function rules()
     {
         return [
-            'Quantity' => 'required|integer|min:1', // Số lượng là bắt buộc và phải là số nguyên lớn hơn 0
-            'Price' => 'required|numeric|min:0',    // Giá là bắt buộc và phải là số dương
+            'Quantity' => 'required|integer|min:1', 
+            'Price' => 'required|numeric|min:0',  
         ];
     }
 

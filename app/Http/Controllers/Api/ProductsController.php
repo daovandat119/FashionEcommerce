@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Categories;
 use App\Models\Products;
-use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use App\Models\ProductImage;
-use App\Http\Requests\ProductsRequest;
 
 class ProductsController extends Controller
 {
