@@ -1,10 +1,9 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Sizes;
-use Illuminate\Http\Request;
+use App\Http\Requests\SizeRequest;
 
 class SizeController extends Controller
 {
@@ -21,16 +20,8 @@ class SizeController extends Controller
         return response()->json(['message' => 'Success', 'data' => $sizes], 200);
     }
 
-    public function store(Request $request)
+    public function store(SizeRequest $request)
     {
-        $request->validate([
-            'SizeName' => 'required',
-        ], [
-            'SizeName.required' => ':attribute không được bỏ trống',
-        ], [
-            'SizeName' => 'Tên kích thước',
-        ]);
-
         $dataInsert = [
             'SizeName' => $request->input('SizeName'),
         ];
@@ -51,7 +42,7 @@ class SizeController extends Controller
         return response()->json($size);
     }
 
-    public function update(Request $request, $id)
+    public function update(SizeRequest $request, $id)
     {
 
         $size = $this->repoSizes->getDetail($id);

@@ -3,8 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Products;
-use Illuminate\Validation\Rule;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ProductVariantRequest extends FormRequest
 {
@@ -15,44 +15,47 @@ class ProductVariantRequest extends FormRequest
 
     public function rules()
     {
-        $product = Products::findOrFail($this->input('ProductID'));
-        $minPrice = min($product->Price, $product->SalePrice);
-        $maxPrice = max($product->Price, $product->SalePrice);
-
         return [
             'ProductID' => 'required|exists:products,ProductID',
-            'SizeID' => 'required|array',
+            'SizeID' => 'required',
             'SizeID.*' => 'exists:sizes,SizeID',
-            'ColorIDs' => 'required|array',
-            'ColorIDs.*' => 'exists:colors,ColorID',
+            'ColorID' => 'required',
+            'ColorID.*' => 'exists:colors,ColorID',
             'Quantity' => 'required|integer|min:0',
-            'Price' => [
-                'required',
-                'numeric',
-                'min:0',
-                "between:$minPrice,$maxPrice",
-            ],
+            'Price' => 'required|numeric|min:0',
         ];
     }
 
     public function messages()
     {
         return [
-            'ProductID.required' => 'ID sản phẩm là bắt buộc.',
-            'ProductID.exists' => 'ID sản phẩm không tồn tại.',
-            'SizeID.required' => 'ID kích thước là bắt buộc.',
-            'SizeID.array' => 'ID kích thước phải là một mảng.',
-            'SizeID.*.exists' => 'ID kích thước không tồn tại.',
-            'ColorIDs.required' => 'ID màu sắc là bắt buộc.',
-            'ColorIDs.array' => 'ID màu sắc phải là một mảng.',
-            'ColorIDs.*.exists' => 'ID màu sắc không tồn tại.',
-            'Quantity.required' => 'Số lượng là bắt buộc.',
-            'Quantity.integer' => 'Số lượng phải là số nguyên.',
-            'Quantity.min' => 'Số lượng không được âm.',
-            'Price.required' => 'Giá là bắt buộc.',
-            'Price.numeric' => 'Giá phải là số.',
-            'Price.min' => 'Giá không được âm.',
-            'Price.between' => 'Giá sản phẩm biến thể phải nằm trong khoảng từ :min đến :max.',
+            'ProductID.required' => 'The product ID is required.',
+            'ProductID.exists' => 'The selected product does not exist.',
+            'SizeID.required' => 'The size ID is required.',
+            'ColorID.required' => 'The color ID is required.',
+            'Quantity.required' => 'The quantity is required.',
+            'Quantity.integer' => 'The quantity must be an integer.',
+            'Quantity.min' => 'The quantity must be at least 0.',
+            'Price.required' => 'The price is required.',
+            'Price.numeric' => 'The price must be a number.',
+            'Price.min' => 'The price must be at least 0.',
         ];
     }
+
+    public function attributes()
+    {
+        return [
+            'ProductID' => 'product ID',
+            'SizeID' => 'size ID',
+            'ColorID' => 'color ID',
+            'Quantity' => 'quantity',
+            'Price' => 'price',
+        ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json($validator->errors(), 422));
+    }
+
 }

@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 class CartItemsController extends Controller
 {
     protected $repoCartItems;
-    protected $repoCart;
 
     public function __construct()
     {

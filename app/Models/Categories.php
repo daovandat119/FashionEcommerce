@@ -35,6 +35,13 @@ class Categories extends Model
             ->update($dataUpdate);
     }
 
+    public function getCategoryByName($categoryName)
+        {
+            return DB::table($this->table)
+        ->where('CategoryName', $categoryName)
+            ->first();
+    }
+
     public function deleteCategory($id)
     {
         return DB::table($this->table)->where('CategoryID', $id)->delete();

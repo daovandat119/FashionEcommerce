@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
-use Illuminate\Http\Request;
 use App\Http\Requests\ProductVariantRequest;
+use Illuminate\Http\Request;
 use App\Models\Products;
 
 class ProductVariantController extends Controller
 {
     protected $repoProductVariant;
 
-    public function __construct(ProductVariant $repoProductVariant)
+    public function __construct()
     {
-        $this->repoProductVariant = $repoProductVariant;
+        $this->repoProductVariant = new ProductVariant();
     }
 
     public function index(Request $request)
@@ -23,7 +23,7 @@ class ProductVariantController extends Controller
         return response()->json(['message' => 'Success', 'data' => $variants], 200);
     }
 
-    public function store(Request $request)
+    public function store(ProductVariantRequest $request)
     {
         $addedVariants = [];
         $existingVariants = [];
@@ -70,10 +70,10 @@ class ProductVariantController extends Controller
             return response()->json(['message' => 'Variant not found'], 404);
         }
 
-        return response()->json($variant);
+        return response()->json(['message' => 'Success', 'data' => $variant], 200);
     }
 
-    public function update(Request $request)
+    public function update(ProductVariantRequest $request)
     {
         $product = (new Products())->getDetail($request->ProductID);
 

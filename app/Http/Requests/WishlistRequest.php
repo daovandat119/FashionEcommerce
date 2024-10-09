@@ -6,43 +6,39 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CategoriesRequest extends FormRequest
+class WishlistRequest extends FormRequest
 {
-
-    public function authorize(): bool
+    public function authorize()
     {
         return true;
     }
 
-
-    public function rules(): array
+    public function rules()
     {
         $id = $this->route('id');
         return [
-            'CategoryName' => 'required|unique:categories,CategoryName,' . $id . ',CategoryID',
+            'ProductID' => 'required|exists:products,ProductID,' . $id . ',ProductID',
         ];
     }
 
-
-    public function messages(): array
+    public function messages()
     {
         return [
-            'CategoryName.required' => ':attribute không được bỏ trống',
-            'CategoryName.unique' => ':attribute đã tồn tại',
+            'ProductID.required' => 'The product ID is required.',
+            'ProductID.exists' => 'The selected product does not exist.',
         ];
     }
 
-
-    public function attributes(): array
+    public function attributes()
     {
         return [
-            'CategoryName' => 'Tên danh mục',
+            'ProductID' => 'product ID',
         ];
     }
-
 
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
+    
 }

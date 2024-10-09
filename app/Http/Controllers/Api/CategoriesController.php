@@ -20,7 +20,7 @@ class CategoriesController extends Controller
         return response()->json(['message' => 'Success', 'data' => $categories], 200);
     }
 
-    public function store(Request $request)
+    public function store(CategoriesRequest $request)
     {
         $dataInsert = [
             'CategoryName' => $request->input('CategoryName'),
@@ -37,7 +37,6 @@ class CategoriesController extends Controller
 
     public function edit($id)
     {
-
         $category = $this->repoCategories->getDetail($id);
 
         if (!$category) {
@@ -50,7 +49,7 @@ class CategoriesController extends Controller
         ], 200);
     }
 
-    public function update(Request $request, $id)
+    public function update(CategoriesRequest $request, $id)
     {
         $category = $this->repoCategories->getDetail($id);
 
@@ -58,8 +57,10 @@ class CategoriesController extends Controller
             return response()->json(['message' => 'Category not found'], 404);
         }
 
+        $newCategoryName = $request->input('CategoryName');
+
         $dataUpdate = [
-            'CategoryName' => $request->input('CategoryName'),
+            'CategoryName' => $newCategoryName,
         ];
 
         $this->repoCategories->updateCategory($id, $dataUpdate);
@@ -74,13 +75,12 @@ class CategoriesController extends Controller
 
     public function delete(Request $request)
     {
-        // Retrieve the 'ids' input and split it into an array
         $ids = $request->input('ids');
         $idArray = explode(',', $ids);
         $results = [];
 
         foreach ($idArray as $id) {
-            $id = trim($id); // Trim any whitespace from the ID
+            $id = trim($id);
             $category = $this->repoCategories->getDetail($id);
 
             if (!$category) {

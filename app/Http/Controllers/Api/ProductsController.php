@@ -23,7 +23,7 @@ class ProductsController extends Controller
         return response()->json($listProducts);
     }
 
-    public function store(Request $request)
+    public function store(ProductsRequest $request)
     {
         $category = (new Categories())->getDetail($request->CategoryID);
 

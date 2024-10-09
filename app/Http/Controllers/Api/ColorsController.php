@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Colors;
-use Illuminate\Http\Request;
+use App\Http\Requests\ColorRequest;
 
 class ColorsController extends Controller
 {
@@ -22,7 +21,7 @@ class ColorsController extends Controller
         return response()->json(['message' => 'Success', 'data' => $colors], 200);
     }
 
-    public function store(Request $request)
+    public function store(ColorRequest $request)
     {
         $data = [
             'ColorName' => $request->input('ColorName'),
@@ -44,7 +43,7 @@ class ColorsController extends Controller
         return response()->json(['message' => 'Success', 'data' => $color], 200);
     }
 
-    public function update(Request $request, $id)
+    public function update(ColorRequest $request, $id)
     {
         $color = $this->repoColors->getDetail($id);
 
@@ -72,7 +71,6 @@ class ColorsController extends Controller
         $this->repoColors->deleteColor($id);
         return response()->json(['message' => 'Xóa thành công!'], 200);
     }
-
 
 
 }

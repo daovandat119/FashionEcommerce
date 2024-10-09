@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ColorsController;
 use App\Http\Controllers\Api\SizeController;
 use App\Http\Controllers\Api\CartItemsController;
 use App\Http\Controllers\Api\ProductVariantController;
+use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('products')->group(function () {
@@ -57,5 +58,16 @@ Route::prefix('/cart-items')->group(function () {
     Route::delete('/{id}', [CartItemsController::class, 'destroy']);
 });
 
-Route::get('products/variants/{id}', [ProductsController::class, 'getProductVariants']);
+Route::prefix('/wishlist')->group(function () {
+    Route::post('/', [WishlistController::class, 'create']);
+    Route::get('/', [WishlistController::class, 'index']);
+    Route::delete('/{id}', [WishlistController::class, 'destroy']);
+});
+
+
+Route::prefix('/order')->group(function () {
+    Route::post('/', [OrderController::class, 'create']);
+    Route::get('/', [OrderController::class, 'index']);
+    Route::delete('/{id}', [OrderController::class, 'destroy']);
+});
 

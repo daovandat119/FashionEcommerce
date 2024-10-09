@@ -6,43 +6,39 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CategoriesRequest extends FormRequest
+class SizeRequest extends FormRequest
 {
-
-    public function authorize(): bool
+    public function authorize()
     {
         return true;
     }
 
-
-    public function rules(): array
+    public function rules()
     {
         $id = $this->route('id');
         return [
-            'CategoryName' => 'required|unique:categories,CategoryName,' . $id . ',CategoryID',
+            'SizeName' => 'required|unique:sizes,SizeName,' . $id . ',SizeID',
         ];
     }
 
-
-    public function messages(): array
+    public function messages()
     {
         return [
-            'CategoryName.required' => ':attribute không được bỏ trống',
-            'CategoryName.unique' => ':attribute đã tồn tại',
+            'SizeName.required' => 'The size name is required.',
+            'SizeName.unique' => 'The size name is already exists.',
         ];
     }
 
-
-    public function attributes(): array
+    public function attributes()
     {
         return [
-            'CategoryName' => 'Tên danh mục',
+            'SizeName' => 'size name',
         ];
     }
-
 
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
+
 }
