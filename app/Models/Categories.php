@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log; 
 class Categories extends Model
 {
     use HasFactory;
@@ -70,7 +70,7 @@ class Categories extends Model
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Error deleting category and related data: ' . $e->getMessage());
+            Log::error('Error deleting category and related data: ' . $e->getMessage());
 
             return false;
         }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log; 
 use App\Models\ProductImage;
 
 class Products extends Model
@@ -47,8 +48,6 @@ class Products extends Model
         ->where('products.ProductID', $id)
         ->first();
     }
-
-
 
     public function updateProduct($id,$data)
     {
@@ -94,7 +93,7 @@ class Products extends Model
             DB::rollBack();
 
             // Log the error or handle it as needed
-            \Log::error('Error deleting product and related data: ' . $e->getMessage(), [
+            Log::error('Error deleting product and related data: ' . $e->getMessage(), [
                     'ProductID' => $id,
                 'error' => $e
             ]);
