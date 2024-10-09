@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\CartItems;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use App\Http\Requests\CartItemRequest;
 
 class CartItemsController extends Controller
 {
@@ -24,7 +25,7 @@ class CartItemsController extends Controller
         return response()->json(['message' => 'Success', 'data' => $cartItems], 200);
     }
 
-    public function store(Request $request)
+    public function store(CartItemRequest $request)
     {
         $userId = 4;
 
@@ -34,7 +35,7 @@ class CartItemsController extends Controller
             $cart = (new Cart())->getCartByUserID($userId);
         }
 
-        $productVariant = (new ProductVariant())->getProductVariantByID($request->productID, $request->sizeID, $request->colorID);
+        $productVariant = (new ProductVariant())->getVariantByID($request->productID, $request->sizeID, $request->colorID);
         if (!$productVariant) {
             return response()->json(['message' => 'Product variant not found'], 404);
         }
@@ -80,7 +81,7 @@ class CartItemsController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(CartItemRequest $request, $id)
     {
         $userId = 4;
 
@@ -90,26 +91,18 @@ class CartItemsController extends Controller
             return response()->json(['message' => 'Cart not found'], 404);
         }
 
-        $productVariant = (new ProductVariant())->getProductVariantByID($request->productID, $request->sizeID, $request->colorID);
+        $productVariant = (new ProductVariant())->getVariantByID($request->productID, $request->sizeID, $request->colorID);
 
         if (!$productVariant) {
             return response()->json(['message' => 'Product variant not found'], 404);
         }
 
-        $cartItem = $this->repoCartItems->getCartItemByCartID($cart->CartID, $request->productID, $productVariant->VariantID);
-
-        if (!$cartItem) {
-            return response()->json(['message' => 'Cart item not found'], 404);
-        }
-
-        $newQuantity = $cartItem->Quantity + $request->quantity;
-
-        if ($newQuantity > $productVariant->Quantity) {
+        if ($request->quantity > $productVariant->Quantity) {
             return response()->json(['message' => 'Quantity is not enough'], 400);
         }
 
         $data = [
-            'quantity' => $newQuantity,
+            'quantity' => $request->quantity,
         ];
 
         $updateCartItems = $this->repoCartItems->updateCartItem($id, $data);

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\SizeController;
 use App\Http\Controllers\Api\CartItemsController;
 use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\AddressController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('products')->group(function () {
@@ -27,11 +28,11 @@ Route::prefix('categories')->group(function () {
 });
 
 Route::prefix('colors')->group(function () {
-    Route::get('/', [ColorsController::class, 'index']); // Lấy danh sách màu
-    Route::post('/', [ColorsController::class, 'store']); // Tạo mới một màu
-    Route::get('/{id}', [ColorsController::class, 'edit']); // Lấy thông tin chi tiết của một màu
-    Route::put('/{id}', [ColorsController::class, 'update']); // Cập nhật màu
-    Route::delete('/{id}', [ColorsController::class, 'delete']); // Xóa màu
+    Route::get('/', [ColorsController::class, 'index']);
+    Route::post('/', [ColorsController::class, 'store']);
+    Route::get('/{id}', [ColorsController::class, 'edit']);
+    Route::put('/{id}', [ColorsController::class, 'update']);
+    Route::delete('/{id}', [ColorsController::class, 'delete']);
 });
 
 Route::prefix('sizes')->group(function () {
@@ -40,7 +41,6 @@ Route::prefix('sizes')->group(function () {
     Route::get('/{id}', [SizeController::class, 'edit']);
     Route::post('/{id}', [SizeController::class, 'update']);
     Route::delete('/{id}', [SizeController::class, 'delete']);
-
 });
 
 Route::prefix('product-variants')->group(function () {
@@ -64,10 +64,19 @@ Route::prefix('/wishlist')->group(function () {
     Route::delete('/{id}', [WishlistController::class, 'destroy']);
 });
 
-
 Route::prefix('/order')->group(function () {
     Route::post('/', [OrderController::class, 'create']);
     Route::get('/', [OrderController::class, 'index']);
     Route::delete('/{id}', [OrderController::class, 'destroy']);
+    Route::get('/{id}', [OrderController::class, 'edit']);
+    Route::post('/{id}', [OrderController::class, 'update']);
 });
 
+Route::prefix('/address')->group(function () {
+    Route::get('/', [AddressController::class, 'index']);
+    Route::post('/', [AddressController::class, 'store']);
+    Route::get('/{id}', [AddressController::class, 'edit']);
+    Route::put('/{id}', [AddressController::class, 'update']);
+    Route::delete('/{id}', [AddressController::class, 'delete']);
+    Route::get('/setDefaultAddress/{id}', [AddressController::class, 'setDefaultAddress']);
+});

@@ -23,4 +23,19 @@ class Order extends Model
         ]);
     }
 
+    public function getOrder($id)
+    {
+        return DB::table($this->table)->where('OrderID', $id)->first();
+    }
+
+    public function updateOrder($id, $data)
+    {
+        return DB::table($this->table)->where('OrderID', $id)->update($data);
+    }
+
+    public function deleteOrder($id)
+    {
+        return DB::table($this->table)->where('OrderID', $id)->delete();
+    }
+
 }

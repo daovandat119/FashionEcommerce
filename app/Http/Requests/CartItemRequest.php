@@ -15,11 +15,10 @@ class CartItemRequest extends FormRequest
 
     public function rules()
     {
-        $id = $this->route('id');
         return [
-            'productID' => 'required|exists:product_variants,ProductID,' . $id . ',ProductVariantID',
-            'sizeID' => 'required|exists:product_variants,SizeID,' . $id . ',ProductVariantID',
-            'colorID' => 'required|exists:product_variants,ColorID,' . $id . ',ProductVariantID ',
+            'productID' => 'required|exists:product_variants,ProductID',
+            'sizeID' => 'required|exists:product_variants,SizeID',
+            'colorID' => 'required|exists:product_variants,ColorID',
             'quantity' => 'required|integer|min:1',
         ];
     }
