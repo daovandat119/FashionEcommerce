@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Wishlist;
+use App\Http\Requests\WishlistRequest;
 
 
 class WishlistController extends Controller
@@ -15,7 +16,7 @@ class WishlistController extends Controller
         $this->wishlist = new Wishlist();
     }
 
-    public function create(Request $request)
+    public function create(WishlistRequest $request)
     {
         $userID = 4;
 
