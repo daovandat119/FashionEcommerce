@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('UserID')->constrained('users', 'UserID');
             $table->foreignId('AddressID')->constrained('addresses', 'AddressID');
             $table->foreignId('CartID')->constrained('carts', 'CartID');
-            $table->decimal('TotalAmount',10,2);
             $table->foreignId('OrderStatusID')->constrained('order_statuses', 'OrderStatusID');
+            $table->string('OrderCode');
             $table->timestamps();
         });
     }

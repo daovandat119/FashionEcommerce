@@ -25,10 +25,12 @@ class AddressController extends Controller
 
     public function store(AddressRequest $request)
     {
-        $address = $this->repoAddress->getAddressByUserID($request->input('UserID'));
+        $userId = 4;
+
+        $address = $this->repoAddress->getAddressByUserID($userId);
 
         $data = [
-            'UserID' => $request->input('UserID'),
+            'UserID' => $userId,
             'UserName' => $request->input('UserName'),
             'Address' => $request->input('Address'),
             'PhoneNumber' => $request->input('PhoneNumber'),

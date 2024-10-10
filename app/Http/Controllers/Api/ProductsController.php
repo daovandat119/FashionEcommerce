@@ -7,6 +7,7 @@ use App\Models\Categories;
 use App\Models\Products;
 use Illuminate\Http\Request;
 use App\Models\ProductImage;
+use App\Http\Requests\ProductsRequest;
 
 class ProductsController extends Controller
 {
@@ -25,6 +26,7 @@ class ProductsController extends Controller
 
     public function store(ProductsRequest $request)
     {
+
         $category = (new Categories())->getDetail($request->CategoryID);
 
         if (!$category) {
@@ -88,7 +90,7 @@ class ProductsController extends Controller
         ], 200);
     }
 
-    public function update(Request $request, $id)
+    public function update(ProductsRequest $request, $id)
     {
         $product = $this->repoProducts->getDetail($id);
         if (!$product) {

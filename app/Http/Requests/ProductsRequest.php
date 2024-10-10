@@ -26,10 +26,10 @@ class ProductsRequest extends FormRequest
     {
         $id = $this->route('id');
         return [
-            'CategoryID' => 'required|exists:categories,CategoryID,' . $id . ',CategoryID',
+            'CategoryID' => 'required|exists:categories,CategoryID',
             'ProductName' => 'required|unique:products,ProductName,' . $id . ',ProductID',
             'MainImageURL' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'ImagePath' => 'required|array',            
+            'ImagePath' => 'required|array',
             'ImagePath.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'Price' => 'required|numeric|min:0',
             'SalePrice' => 'nullable|numeric|min:0|lte:Price',

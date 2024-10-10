@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CartItemsController;
 use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('products')->group(function () {
@@ -65,11 +66,10 @@ Route::prefix('/wishlist')->group(function () {
 });
 
 Route::prefix('/order')->group(function () {
-    Route::post('/', [OrderController::class, 'create']);
+    Route::post('/', [OrderController::class, 'store']);
     Route::get('/', [OrderController::class, 'index']);
-    Route::delete('/{id}', [OrderController::class, 'destroy']);
-    Route::get('/{id}', [OrderController::class, 'edit']);
-    Route::post('/{id}', [OrderController::class, 'update']);
+    Route::get('/{id}', [OrderController::class, 'getOrderById']);
+    Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
 });
 
 Route::prefix('/address')->group(function () {

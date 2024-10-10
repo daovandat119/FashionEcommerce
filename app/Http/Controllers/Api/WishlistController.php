@@ -16,7 +16,7 @@ class WishlistController extends Controller
         $this->wishlist = new Wishlist();
     }
 
-    public function create(WishlistRequest $request)
+    public function create(Request $request)
     {
         $userID = 4;
 
