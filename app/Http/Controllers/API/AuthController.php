@@ -5,16 +5,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Mail\VerifyAccount;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Tymon\JWTAuth\Facades\JWTAuth;
+
+
 
 
 class AuthController extends Controller
@@ -23,37 +22,46 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'Email' => 'required|string|email',
-            'Password' => 'required|string',
+            'Password' => 'required|string|min:6',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+    
 
-        $credentials = $request->only('Email', 'Password');
-
-        if (!$token = JWTAuth::attempt($credentials)) {
+        $user = User::where('Email', $request->Email)->first();
+    
+        
+        if (!$user || !Hash::check($request->Password, $user->Password)) {
             return response()->json(['message' => 'Thông tin đăng nhập không hợp lệ'], 401);
         }
+    
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+    
         return response()->json([
             'message' => 'Đăng nhập thành công',
             'token' => $token,
         ], 200);
     }
 
-    public function getUserFromToken()
+    public function getUserInfo(Request $request)
     {
-        try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['message' => 'Người dùng không tìm thấy'], 404);
-            }
-        } catch (Exception $e) {
-            return response()->json(['message' => 'Token không hợp lệ hoặc hết hạn'], 401);
+       
+        $user = Auth::guard('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Người dùng không tìm thấy'], 404);
         }
 
-        return response()->json(['user' => $user], 200);
+        return response()->json([
+            'user' => $user,
+        ], 200);
     }
+    
+
+
 
 
 

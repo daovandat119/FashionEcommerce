@@ -5,11 +5,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes; // Thêm SoftDeletes
 
     protected $table = 'users'; // Tên bảng
     protected $primaryKey = 'UserID'; // Khóa chính
@@ -26,7 +26,7 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'Password', // Ẩn mật khẩu trong JSON
+        'Password', 
         'CodeId',
         'CodeExpired',
     ];
@@ -36,5 +36,4 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'RoleID', 'RoleID');
     }
-
 }
