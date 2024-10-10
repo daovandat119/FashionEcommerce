@@ -5,10 +5,17 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VerifyAccount;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Exception;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class AuthController extends Controller
 {
@@ -23,23 +30,32 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $user = User::where('Email', $request->Email)->first();
+        $credentials = $request->only('Email', 'Password');
 
-        if (!$user || !Hash::check($request->Password, $user->Password)) {
+        if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json(['message' => 'Thông tin đăng nhập không hợp lệ'], 401);
         }
 
-       
-        $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json([
             'message' => 'Đăng nhập thành công',
             'token' => $token,
-           
         ], 200);
-        
-
-       
     }
+
+    public function getUserFromToken()
+    {
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['message' => 'Người dùng không tìm thấy'], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Token không hợp lệ hoặc hết hạn'], 401);
+        }
+
+        return response()->json(['user' => $user], 200);
+    }
+
+
 
     public function register(Request $request)
     {
@@ -54,8 +70,6 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-       
-
         $imagePath = null;
         if ($request->hasFile('Image')) {
             $image = $request->file('Image');
@@ -63,14 +77,28 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'RoleID' => 2, // Gán RoleID mặc định cho user mới là 2 (User)
+            'RoleID' => 2,
             'Username' => $request->Username,
             'Email' => $request->Email,
             'Password' => Hash::make($request->Password),
             'Image' => $imagePath,
         ]);
 
-        return response()->json(['message' => 'Đăng ký thành công, người dùng đã được tạo.'], 201);
+
+        return response()->json(['message' => 'Đăng ký thành công, vui lòng kiểm tra email để xác nhận tài khoản của bạn.'], 201);
+    }
+
+    public function testEmail()
+    {
+        try {
+            Mail::raw('Đây là một email test.', function ($message) {
+                $message->to('tranductruong2k4hb@gmail.com')
+                    ->subject('Test Email');
+            });
+            return 'Email đã được gửi!';
+        } catch (Exception $e) {
+            return 'Có lỗi xảy ra: ' . $e->getMessage();
+        }
     }
 
     public function logout(Request $request)
