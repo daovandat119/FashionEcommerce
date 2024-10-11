@@ -13,7 +13,7 @@ class PaymentsTableSeeder extends Seeder
     public function run()
     {
         DB::table('payments')->insert([
-            ['OrderID' => 1, 'PaymentMethodID' => 1, 'PaymentStatusID' => 1, 'Amount' => 719.98],
+            ['OrderID' => 1, 'PaymentMethodID' => 1, 'PaymentStatusID' => 1],
         ]);
     }
 }

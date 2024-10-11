@@ -17,15 +17,15 @@ class OrdersTableSeeder extends Seeder
                 'UserID' => 1,
                 'AddressID' => 1,
                 'CartID' => 1,
-                'TotalAmount' => 719.98,
-                'OrderStatusID' => 1
+                'OrderStatusID' => 1,
+                'OrderCode' => '1234567890'
             ],
             [
                 'UserID' => 2,
                 'AddressID' => 1,
                 'CartID' => 1,
-                'TotalAmount' => 29.98,
-                'OrderStatusID' => 2
+                'OrderStatusID' => 2,
+                'OrderCode' => '1234567890'
             ],
         ]);
     }
