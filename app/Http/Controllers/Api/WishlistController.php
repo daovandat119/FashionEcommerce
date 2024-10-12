@@ -16,12 +16,12 @@ class WishlistController extends Controller
         $this->wishlist = new Wishlist();
     }
 
-    public function create(Request $request)
+    public function create(WishlistRequest $request)
     {
-        $userID = 4;
+        $userId = auth()->id();
 
         $data = [
-            'UserID' => $userID,
+            'UserID' => $userId,
             'ProductID' => $request->ProductID,
         ];
 
@@ -36,19 +36,19 @@ class WishlistController extends Controller
 
     public function index()
     {
-        $userID = 4;
+        $userId = auth()->id();
 
-        $wishlist = $this->wishlist->getWishlistByUserID($userID);
+        $wishlist = $this->wishlist->getWishlistByUserID($userId);
 
         return response()->json(['message' => 'Success', 'data' => $wishlist], 200);
     }
 
     public function destroy($id)
     {
-        $userID = 4;
+        $userId = auth()->id();
 
         $data = [
-            'UserID' => $userID,
+            'UserID' => $userId,
             'WishlistID' => $id,
         ];
 

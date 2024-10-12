@@ -8,7 +8,7 @@ use App\Models\Cart;
 use App\Models\OrderItems;
 use Illuminate\Support\Str;
 use App\Models\Payments;
-
+use App\Http\Requests\OrderRequest;
 class OrderController extends Controller
 {
     protected $order;
@@ -20,14 +20,16 @@ class OrderController extends Controller
 
     public function index()
     {
-        $userId = 4;
+        $userId = auth()->id();
+
         $order = $this->order->getOrder($userId);
+
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
 
-    public function store(Request $request)
+    public function store(OrderRequest $request)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $cart = (new Cart())->getCartByUserID($userId);
 
@@ -68,15 +70,19 @@ class OrderController extends Controller
 
     public function getOrderById($id)
     {
-        $userId = 4;
+        $userId = auth()->id();
+
         $order = $this->order->getOrderById($userId, $id);
+
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
 
     public function updateOrderStatus(Request $request, $id)
     {
-        $userId = 4;
+        $userId = auth()->id();
+
         $order = $this->order->updateOrderStatus($userId, $id, $request->OrderStatusID);
+
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
 
