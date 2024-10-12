@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class Authcontroller extends Controller
+class AuthController extends Controller
 {
     public function login(AuthRequest $request)
     {
@@ -22,7 +22,6 @@ class Authcontroller extends Controller
                 'Email' => ['The provided credentials are incorrect.'],
             ]);
         }
-
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -63,7 +62,6 @@ class Authcontroller extends Controller
             'UserID' => $user->UserID,
             'Username' => $user->Username,
             'Email' => $user->Email,
-
 
         ]], 200);
     }

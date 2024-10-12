@@ -18,14 +18,15 @@ class AddressController extends Controller
 
     public function index()
     {
-        $userId = 4;
+        $userId = auth()->id();
+
         $address = $this->repoAddress->getAddressByUserID($userId);
         return response()->json(['message' => 'Success', 'data' => $address], 200);
     }
 
     public function store(AddressRequest $request)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $address = $this->repoAddress->getAddressByUserID($userId);
 
@@ -44,7 +45,7 @@ class AddressController extends Controller
 
     public function edit($id)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $address = $this->repoAddress->getAddressByID($id, $userId);
 
@@ -57,7 +58,7 @@ class AddressController extends Controller
 
     public function update(AddressRequest $request, $id)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $address = $this->repoAddress->getAddressByID($id, $userId);
 
@@ -80,7 +81,7 @@ class AddressController extends Controller
 
     public function setDefaultAddress($id)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $address = $this->repoAddress->getAddressByID($id, $userId);
 
@@ -95,7 +96,7 @@ class AddressController extends Controller
 
     public function delete($id)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $address = $this->repoAddress->getAddressByID($id, $userId);
 

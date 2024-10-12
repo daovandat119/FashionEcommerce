@@ -20,14 +20,15 @@ class CartItemsController extends Controller
 
     public function index()
     {
-        $userId = 4;
+        $userId = auth()->id();
+
         $cartItems = $this->repoCartItems->getCartItem($userId);
         return response()->json(['message' => 'Success', 'data' => $cartItems], 200);
     }
 
     public function store(CartItemRequest $request)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $cart = (new Cart())->getCartByUserID($userId);
         if (!$cart) {
@@ -83,7 +84,7 @@ class CartItemsController extends Controller
 
     public function update(CartItemRequest $request, $id)
     {
-        $userId = 4;
+        $userId = auth()->id();
 
         $cart = (new Cart())->getCartByUserID($userId);
 
@@ -117,6 +118,7 @@ class CartItemsController extends Controller
     public function destroy(Request $request)
     {
         $ids = $request->input('ids');
+
         $deleteCartItemsCount = 0;
 
         foreach ($ids as $id) {
