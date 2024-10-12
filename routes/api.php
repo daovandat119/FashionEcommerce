@@ -8,8 +8,10 @@ use App\Http\Controllers\Api\CartItemsController;
 use App\Http\Controllers\Api\ProductVariantController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\OrderController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductsController::class, 'index']);
@@ -80,3 +82,9 @@ Route::prefix('/address')->group(function () {
     Route::delete('/{id}', [AddressController::class, 'delete']);
     Route::get('/setDefaultAddress/{id}', [AddressController::class, 'setDefaultAddress']);
 });
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+// Route::get('/user', [AuthController::class, 'user']);
+
+Route::middleware('auth:sanctum')->get('user', [AuthController::class, 'getUserInfo']);
