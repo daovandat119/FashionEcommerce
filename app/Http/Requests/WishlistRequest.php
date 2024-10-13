@@ -15,9 +15,8 @@ class WishlistRequest extends FormRequest
 
     public function rules()
     {
-        $id = $this->route('id');
         return [
-            'ProductID' => 'required|exists:products,ProductID,' . $id . ',ProductID',
+            'ProductID' => 'required|exists:products,ProductID',
         ];
     }
 
@@ -40,5 +39,5 @@ class WishlistRequest extends FormRequest
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
-    
+
 }

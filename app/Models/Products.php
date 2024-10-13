@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 use App\Models\ProductImage;
 
 class Products extends Model
@@ -15,12 +15,15 @@ class Products extends Model
     protected $table = 'products';
     protected $primaryKey = 'ProductID';
 
-    public function listProducts()
+    public function listProducts($search, $offset, $limit)
     {
         return DB::table($this->table)
             ->select("{$this->table}.*", 'categories.CategoryName as category_name', 'product_images.ImagePath as image_path')
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
             ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
+            ->where('products.ProductName', 'like', "%{$search}%")
+            ->skip($offset)
+            ->take($limit)
             ->get();
     }
 
@@ -68,19 +71,17 @@ class Products extends Model
         DB::beginTransaction();
 
         try {
-            // Delete product variants related to the products in the specified category
+
             DB::table('product_variants')
                 ->join('products', 'product_variants.ProductID', '=', 'products.ProductID')
                 ->where('products.ProductID', $id)
                 ->delete();
 
-            // Delete product images related to the products in the specified category
             DB::table('product_images')
                 ->join('products', 'product_images.ProductID', '=', 'products.ProductID')
                     ->where('products.ProductID', $id)
                 ->delete();
 
-            // Delete products related to the category
             DB::table('products')
                 ->where('ProductID', $id)
                 ->delete();
@@ -89,10 +90,8 @@ class Products extends Model
 
             return true;
         } catch (\Exception $e) {
-            // Rollback the transaction in case of an error
             DB::rollBack();
 
-            // Log the error or handle it as needed
             Log::error('Error deleting product and related data: ' . $e->getMessage(), [
                     'ProductID' => $id,
                 'error' => $e
@@ -108,6 +107,29 @@ class Products extends Model
         return DB::table($this->table)->where('ProductID', $id)->update([
             'Views' => DB::raw('Views + 1')
         ]);
+    }
+
+    public function updateProductAndRelatedStatus($id, $status)
+    {
+        DB::beginTransaction();
+
+        try {
+            DB::table($this->table)
+                ->where('ProductID', $id)
+                ->update(['Status' => $status]);
+
+            DB::table('product_variants')
+                ->join('products', 'product_variants.ProductID', '=', 'products.ProductID')
+                ->where('products.ProductID', $id)
+                ->update(['product_variants.Status' => $status]);
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating product and related status: ' . $e->getMessage());
+            return false;
+        }
     }
 
 }

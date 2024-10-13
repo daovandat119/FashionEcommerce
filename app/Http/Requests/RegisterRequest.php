@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class RegisterRequest extends FormRequest
 {
@@ -36,7 +38,23 @@ class RegisterRequest extends FormRequest
             'Email.unique' => 'Email đã tồn tại.',
             'Password.required' => 'Mật khẩu là bắt buộc.',
             'Password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
-            
+
         ];
     }
+
+    public function attributes()
+    {
+        return [
+            'Username' => 'Tên',
+            'Email' => 'Email',
+            'Password' => 'Mật khẩu',
+        ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json($validator->errors(), 422));
+    }
+
+
 }
