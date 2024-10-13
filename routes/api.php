@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\CheckAdmin;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\ColorsController;
@@ -12,8 +14,19 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// CRUD User
+Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('admin/users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::delete('/{id}', [UserController::class, 'destroy']);
+    Route::post('/restore/{id}', [UserController::class, 'restore']);
+});
+
+
 
 Route::get('/products', [ProductsController::class, 'index']);
 Route::middleware('auth:sanctum')->prefix('products')->group(function () {
