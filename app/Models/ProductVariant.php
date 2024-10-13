@@ -76,4 +76,11 @@ class ProductVariant extends Model
             ->where('VariantID', $id)
             ->delete();
     }
+
+    public function updateStatus($id, $status)
+    {
+        return DB::table($this->table)
+            ->where('VariantID', $id)
+            ->update(['Status' => $status]);
+    }
 }

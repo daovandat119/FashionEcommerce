@@ -18,10 +18,20 @@ class ProductsController extends Controller
         $this->repoProducts = new Products();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $listProducts = $this->repoProducts->listProducts();
-        return response()->json($listProducts);
+        $listProducts = $this->repoProducts->listProducts(
+            $request->input('Search'),
+            $request->input('Page', 1),
+            $request->input('Limit', 10)
+        );
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $listProducts,
+            'Page' => $request->input('Page', 1),
+            'Limit' => $request->input('Limit', 10)
+        ], 200);
     }
 
     public function store(ProductsRequest $request)
@@ -106,7 +116,6 @@ class ProductsController extends Controller
             'Description' => $request->Description,
         ];
 
-        // Handle the main image update
         if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
             $file = $request->file('MainImageURL');
             $filename = time() . '.' . $file->getClientOriginalExtension();
@@ -114,10 +123,8 @@ class ProductsController extends Controller
             $data['MainImageURL'] = 'product_images/' . $filename;
         }
 
-        // Update the product data
         $this->repoProducts->updateProduct($id, $data);
 
-        // Handle additional images
         if ($request->hasFile('ImagePath')) {
             $imagePaths = [];
             foreach ($request->file('ImagePath') as $image) {
@@ -163,19 +170,34 @@ class ProductsController extends Controller
 
     public function view($id)
     {
-        // Tìm sản phẩm theo ID
         $product = $this->repoProducts->getDetail($id);
 
         if (!$product) {
             return response()->json(['message' => 'Product not found.'], 404);
         }
 
-        // Tăng số lượt xem lên 1
         $this->repoProducts->viewProduct($id);
 
         return response()->json([
             'success' => true,
             'message' => 'Product view count updated successfully',
+        ], 200);
+    }
+
+
+    public function updateStatus(Request $request, $id)
+    {
+        $product = $this->repoProducts->getDetail($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found.'], 404);
+        }
+
+        $this->repoProducts->updateProductAndRelatedStatus($id, $request->input('Status'));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product status updated successfully',
         ], 200);
     }
 

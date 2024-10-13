@@ -102,4 +102,9 @@ class ProductVariantController extends Controller
         return response()->json(['message' => 'Xóa thành công!', 'data' => $variant], 200);
     }
 
+    // public function updateStatus(Request $request, $id)
+    // {
+    //     $this->repoProductVariant->updateStatus($id, $request->input('Status'));
+    // }
+
 }

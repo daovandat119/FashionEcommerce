@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 class Categories extends Model
 {
     use HasFactory;
@@ -13,9 +13,13 @@ class Categories extends Model
     protected $table = 'categories';
     public $timestamps = false;
 
-    public function listCategories()
+    public function listCategories($search, $offset, $limit)
     {
-        return DB::table($this->table)->get();
+        return DB::table($this->table)
+        ->where('CategoryName', 'like', "%{$search}%")
+        ->skip($offset)
+        ->take($limit)
+        ->get();
     }
 
     public function addCategory($data)
@@ -82,6 +86,40 @@ class Categories extends Model
             return false;
         }
     }
+
+    public function updateCategoryAndRelatedStatus($categoryId, $status)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Update status of product variants
+            DB::table('product_variants')
+                ->join('products', 'product_variants.ProductID', '=', 'products.ProductID')
+                ->where('products.CategoryID', $categoryId)
+                ->update(['product_variants.Status' => $status]);
+
+            // Update status of products
+            DB::table('products')
+                ->where('CategoryID', $categoryId)
+                ->update(['Status' => $status]);
+
+            // Update status of the category
+            DB::table($this->table)
+                ->where('CategoryID', $categoryId)
+                ->update(['Status' => $status]);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error updating category and related data: ' . $e->getMessage());
+
+            return false;
+        }
+    }
+
 }
 
 

@@ -29,12 +29,13 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('admin/users')->group(
 
 
 Route::get('/products', [ProductsController::class, 'index']);
+Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::middleware('auth:sanctum')->prefix('products')->group(function () {
     Route::post('/', [ProductsController::class, 'store']);
     Route::get('/{id}', [ProductsController::class, 'edit']);
     Route::post('/{id}', [ProductsController::class, 'update']);
     Route::delete('/', [ProductsController::class, 'delete']);
-    Route::post('/view/{id}', [ProductsController::class, 'view']);
+    Route::post('/status/{id}', [ProductsController::class, 'updateStatus']);
 });
 
 Route::get('/categories', [CategoriesController::class, 'index']);
@@ -43,6 +44,7 @@ Route::middleware('auth:sanctum')->prefix('categories')->group(function () {
     Route::get('/{id}', [CategoriesController::class, 'edit']);
     Route::put('/{id}', [CategoriesController::class, 'update']);
     Route::delete('/', [CategoriesController::class, 'delete']);
+    Route::post('/status/{id}', [CategoriesController::class, 'updateStatus']);
 });
 
 Route::middleware('auth:sanctum')->prefix('colors')->group(function () {
@@ -60,7 +62,6 @@ Route::middleware('auth:sanctum')->prefix('sizes')->group(function () {
     Route::post('/{id}', [SizeController::class, 'update']);
     Route::delete('/{id}', [SizeController::class, 'delete']);
 });
-
 
 Route::middleware('auth:sanctum')->prefix('product-variants')->group(function () {
     Route::post('/productID', [ProductVariantController::class, 'index']);
