@@ -18,19 +18,18 @@ class CheckAdmin
 
             $user = Auth::user();
 
-            // Kiểm tra xem vai trò của người dùng có phải là Admin không
             if ($user->role && $user->role->RoleName === 'Admin') {
-                return $next($request); 
+                return $next($request);
             }
         }
 
         abort(403, 'Không đủ quyền');
 
     }
-    
+
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
-        'auth.admin' => \App\Http\Middleware\CheckAdmin::class, // Thêm dòng nà
+        'auth.admin' => \App\Http\Middleware\CheckAdmin::class,
     ];
 
 }
