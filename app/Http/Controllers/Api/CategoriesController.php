@@ -5,7 +5,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Categories;
 use Illuminate\Http\Request;
 use App\Http\Requests\CategoriesRequest;
-
 class CategoriesController extends Controller
 {
     protected $repoCategories;
@@ -15,10 +14,21 @@ class CategoriesController extends Controller
         $this->repoCategories = new Categories();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $categories = $this->repoCategories->listCategories();
-        return response()->json(['message' => 'Success', 'data' => $categories], 200);
+        $categories = $this->repoCategories->listCategories(
+            $request->input('Search'),
+            $request->input('Page', 1),
+            $request->input('Limit', 10)
+        );
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $categories,
+            'Page' => $request->input('Page', 1),
+            'Limit' => $request->input('Limit', 10)
+        ], 200);
+
     }
 
     public function store(CategoriesRequest $request)
@@ -99,4 +109,22 @@ class CategoriesController extends Controller
             'results' => $results
         ], 200);
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $category = $this->repoCategories->getDetail($id);
+
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        $this->repoCategories->updateCategoryAndRelatedStatus($id, $request->input('Status'));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category status updated successfully',
+        ], 200);
+    }
+
+
 }
