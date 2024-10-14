@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UsersTableSeeder extends Seeder
 {
@@ -13,12 +13,12 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->insert([
+        $users = [
             [
                 'RoleID' => 1,
                 'Username' => 'admin',
                 'Email' => 'admin@example.com',
-                'Password' => bcrypt('password'),
+                'Password' => Hash::make('password'),
                 'IsActive' => true,
                 'CodeId' => null,
                 'CodeExpired' => null,
@@ -27,12 +27,18 @@ class UsersTableSeeder extends Seeder
                 'RoleID' => 2,
                 'Username' => 'user1',
                 'Email' => 'user1@example.com',
-                'Password' => bcrypt('password'),
+                'Password' => Hash::make('password'),
                 'IsActive' => true,
                 'CodeId' => null,
                 'CodeExpired' => null
             ],
-        ]);
-    }
+        ];
 
+        foreach ($users as $user) {
+            DB::table('users')->updateOrInsert(
+                ['Email' => $user['Email']],
+                $user
+            );
+        }
+    }
 }

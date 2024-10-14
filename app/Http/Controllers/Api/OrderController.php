@@ -12,7 +12,7 @@ use App\Http\Requests\OrderRequest;
 class OrderController extends Controller
 {
     protected $order;
-
+//
     public function __construct()
     {
         $this->order = new Order();
@@ -29,6 +29,7 @@ class OrderController extends Controller
 
     public function store(OrderRequest $request)
     {
+        //
         $userId = auth()->id();
 
         $cart = (new Cart())->getCartByUserID($userId);

@@ -16,7 +16,7 @@ class CategoriesController extends Controller
 
     public function index(Request $request)
     {
-
+//
         $total = $this->repoCategories->countCategories();
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
@@ -28,7 +28,7 @@ class CategoriesController extends Controller
         );
 
         $totalPage = ceil($total / $limit);
-
+//
         return response()->json([
             'message' => 'Success',
             'data' => $categories,
@@ -38,7 +38,7 @@ class CategoriesController extends Controller
         ], 200);
 
     }
-
+    //
     public function store(CategoriesRequest $request)
     {
         $dataInsert = [

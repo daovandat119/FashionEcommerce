@@ -18,6 +18,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         return response()->json($user);
     }
+    //
     public function destroy($id)
     {
         $user = User::findOrFail($id);

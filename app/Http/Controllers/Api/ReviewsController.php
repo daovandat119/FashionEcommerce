@@ -25,7 +25,7 @@ class ReviewsController extends Controller
             'data' => $reviews,
         ], 200);
     }
-
+//
     public function store(Request $request)
     {
         $userId = auth()->id();
