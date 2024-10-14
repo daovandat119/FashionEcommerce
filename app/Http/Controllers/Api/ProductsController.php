@@ -20,17 +20,24 @@ class ProductsController extends Controller
 
     public function index(Request $request)
     {
+        $total = $this->repoProducts->countProducts();
+        $page = $request->input('Page', 1);
+        $limit = $request->input('Limit', 10);
+
         $listProducts = $this->repoProducts->listProducts(
             $request->input('Search'),
-            $request->input('Page', 1),
-            $request->input('Limit', 10)
+            ($page - 1) * $limit,
+            $limit
         );
+
+        $totalPage = ceil($total / $limit);
 
         return response()->json([
             'message' => 'Success',
             'data' => $listProducts,
-            'Page' => $request->input('Page', 1),
-            'Limit' => $request->input('Limit', 10)
+            'totalPage' => $totalPage,
+            'page' => $page,
+            'limit' => $limit
         ], 200);
     }
 

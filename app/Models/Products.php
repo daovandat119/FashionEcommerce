@@ -132,4 +132,9 @@ class Products extends Model
         }
     }
 
+    public function countProducts()
+    {
+        return DB::table($this->table)->count();
+    }
+
 }
