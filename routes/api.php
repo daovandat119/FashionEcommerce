@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Api\UserController;
@@ -28,15 +29,15 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(functi
 
 Route::get('/products', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
+Route::get('/products/{id}', [ProductsController::class, 'edit']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(function () {
     Route::post('/', [ProductsController::class, 'store']);
-    Route::get('/{id}', [ProductsController::class, 'edit']);
     Route::post('/{id}', [ProductsController::class, 'update']);
     Route::delete('/', [ProductsController::class, 'delete']);
     Route::post('/status/{id}', [ProductsController::class, 'updateStatus']);
 });
 
-Route::get('/categories', [CategoriesController::class, 'index']);
+Route::get('categories', [CategoriesController::class, 'index']);
 Route::middleware(['auth:sanctum, auth.user'])->prefix('categories')->group(function () {
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
@@ -102,8 +103,3 @@ Route::get('/reviews/{id}', [ReviewsController::class, 'index']);
 Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/', [ReviewsController::class, 'store']);
 });
-
-
-
-
-

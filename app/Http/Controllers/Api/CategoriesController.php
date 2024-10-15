@@ -32,6 +32,7 @@ class CategoriesController extends Controller
         return response()->json([
             'message' => 'Success',
             'data' => $categories,
+            'total' => $total,
             'totalPage' => $totalPage,
             'page' => $page,
             'limit' => $limit

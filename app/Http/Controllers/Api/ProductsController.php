@@ -35,6 +35,7 @@ class ProductsController extends Controller
         return response()->json([
             'message' => 'Success',
             'data' => $listProducts,
+            'total' => $total,
             'totalPage' => $totalPage,
             'page' => $page,
             'limit' => $limit
@@ -87,7 +88,6 @@ class ProductsController extends Controller
                 ]
             ], 201);
         }
-
     }
 
     public function edit($id)
@@ -207,6 +207,4 @@ class ProductsController extends Controller
             'message' => 'Product status updated successfully',
         ], 200);
     }
-
 }
-
