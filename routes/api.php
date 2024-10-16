@@ -58,7 +58,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(functi
     Route::get('/', [SizeController::class, 'index']);
     Route::post('/', [SizeController::class, 'store']);
     Route::get('/{id}', [SizeController::class, 'edit']);
-    Route::post('/{id}', [SizeController::class, 'update']);
+    Route::put('/{id}', [SizeController::class, 'update']);
     Route::delete('/{id}', [SizeController::class, 'delete']);
 });
 
