@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Models\Categories;
 use Illuminate\Http\Request;
 use App\Http\Requests\CategoriesRequest;
+
 class CategoriesController extends Controller
 {
     protected $repoCategories;
@@ -16,7 +18,7 @@ class CategoriesController extends Controller
 
     public function index(Request $request)
     {
-//
+        //
         $total = $this->repoCategories->countCategories();
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
@@ -28,7 +30,7 @@ class CategoriesController extends Controller
         );
 
         $totalPage = ceil($total / $limit);
-//
+        //
         return response()->json([
             'message' => 'Success',
             'data' => $categories,
@@ -37,7 +39,6 @@ class CategoriesController extends Controller
             'page' => $page,
             'limit' => $limit
         ], 200);
-
     }
     //
     public function store(CategoriesRequest $request)
@@ -134,6 +135,4 @@ class CategoriesController extends Controller
             'message' => 'Category status updated successfully',
         ], 200);
     }
-
-
 }

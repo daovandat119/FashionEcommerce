@@ -29,7 +29,7 @@ class ProductsRequest extends FormRequest
             'CategoryID' => 'required|exists:categories,CategoryID',
             'ProductName' => 'required|unique:products,ProductName,' . $id . ',ProductID',
             'MainImageURL' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'ImagePath' => 'required|array',
+            'ImagePath' => 'required',
             'ImagePath.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'Price' => 'required|numeric|min:0',
             'SalePrice' => 'nullable|numeric|min:0|lte:Price',
@@ -81,6 +81,4 @@ class ProductsRequest extends FormRequest
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
-
-
 }
