@@ -28,9 +28,9 @@ class ProductsRequest extends FormRequest
         return [
             'CategoryID' => 'required|exists:categories,CategoryID',
             'ProductName' => 'required|unique:products,ProductName,' . $id . ',ProductID',
-            'MainImageURL' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'MainImageURL' => 'required|image|mimes:jpeg,png,jpg,gif|max:10000',
             'ImagePath' => 'required',
-            'ImagePath.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'ImagePath.*' => 'image|mimes:jpeg,png,jpg,gif|max:10000',
             'Price' => 'required|numeric|min:0',
             'SalePrice' => 'nullable|numeric|min:0|lte:Price',
             'ShortDescription' => 'nullable|string|max:255',

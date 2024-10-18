@@ -23,11 +23,13 @@ class ProductsController extends Controller
         $total = $this->repoProducts->countProducts();
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
+        $categoryId = $request->input('CategoryID');
 
         $listProducts = $this->repoProducts->listProducts(
             $request->input('Search'),
             ($page - 1) * $limit,
-            $limit
+            $limit,
+            $categoryId
         );
 
         $totalPage = ceil($total / $limit);
@@ -109,6 +111,7 @@ class ProductsController extends Controller
 
     public function update(ProductsRequest $request, $id)
     {
+
         $product = $this->repoProducts->getDetail($id);
         if (!$product) {
             return response()->json(['message' => 'Product not found.'], 404);

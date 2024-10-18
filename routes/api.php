@@ -38,7 +38,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(fun
 });
 
 Route::get('categories', [CategoriesController::class, 'index']);
-Route::middleware(['auth:sanctum, auth.user'])->prefix('categories')->group(function () {
+Route::middleware(['auth:sanctum, auth.admin'])->prefix('categories')->group(function () {
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
     Route::put('/{id}', [CategoriesController::class, 'update']);
