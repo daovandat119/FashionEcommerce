@@ -8,6 +8,8 @@ use App\Models\Products;
 use Illuminate\Http\Request;
 use App\Models\ProductImage;
 use App\Http\Requests\ProductsRequest;
+use Cloudinary\Cloudinary;
+use Cloudinary\Api\Upload\UploadApi;
 
 class ProductsController extends Controller
 {
@@ -46,7 +48,6 @@ class ProductsController extends Controller
 
     public function store(ProductsRequest $request)
     {
-
         $category = (new Categories())->getDetail($request->CategoryID);
 
         if (!$category) {
@@ -63,10 +64,8 @@ class ProductsController extends Controller
         ];
 
         if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
-            $file = $request->file('MainImageURL');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('product_images'), $filename);
-            $data['MainImageURL'] = 'product_images/' . $filename;
+            $uploadedFileUrl = (new UploadApi())->upload($request->file('MainImageURL')->getRealPath())['secure_url'];
+            $data['MainImageURL'] = $uploadedFileUrl;
         }
 
         $productId = $this->repoProducts->addProduct($data);
@@ -75,19 +74,17 @@ class ProductsController extends Controller
             $imagePaths = [];
             foreach ($request->file('ImagePath') as $image) {
                 if ($image->isValid()) {
-                    $filename = time() . rand(1, 1000) . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('product_images'), $filename);
-                    $imagePaths[] = 'product_images/' . $filename;
+                    $uploadedFileUrl = (new UploadApi())->upload($image->getRealPath())['secure_url'];
+                    $imagePaths[] = $uploadedFileUrl;
                 }
             }
             $imagePath = implode(',', $imagePaths);
+
             (new ProductImage())->createProductImage($productId, $imagePath);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Operation completed successfully',
-                'data' => [
-                    'product' => $productId,
-                ]
+                'message' => 'Product created successfully',
             ], 201);
         }
     }
@@ -111,7 +108,6 @@ class ProductsController extends Controller
 
     public function update(ProductsRequest $request, $id)
     {
-
         $product = $this->repoProducts->getDetail($id);
         if (!$product) {
             return response()->json(['message' => 'Product not found.'], 404);
@@ -127,33 +123,28 @@ class ProductsController extends Controller
         ];
 
         if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
-            $file = $request->file('MainImageURL');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('product_images'), $filename);
-            $data['MainImageURL'] = 'product_images/' . $filename;
+            $uploadedFileUrl = (new UploadApi())->upload($request->file('MainImageURL')->getRealPath())['secure_url'];
+            $data['MainImageURL'] = $uploadedFileUrl;
         }
 
         $this->repoProducts->updateProduct($id, $data);
 
         if ($request->hasFile('ImagePath')) {
-            $imagePaths = [];
+
+            // (new ProductImage())->deleteProductImages($id);
+
             foreach ($request->file('ImagePath') as $image) {
                 if ($image->isValid()) {
-                    $filename = time() . rand(1, 1000) . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('product_images'), $filename);
-                    $imagePaths[] = 'product_images/' . $filename;
+                    $uploadedFileUrl = (new UploadApi())->upload($image->getRealPath())['secure_url'];
+                    (new ProductImage())->createProductImage($id, $uploadedFileUrl);
                 }
             }
-            $imagePath = implode(',', $imagePaths);
-            (new ProductImage())->updateProductImage($id, $imagePath);
-            return response()->json([
-                'success' => true,
-                'message' => 'Operation completed successfully',
-                'data' => [
-                    'product' => $id,
-                ]
-            ], 201);
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully',
+        ], 200);
     }
 
     public function delete(Request $request)
@@ -167,7 +158,6 @@ class ProductsController extends Controller
             if (!$product) {
                 return response()->json(['message' => "Product with ID $id not found"], 404);
             }
-
 
             $this->repoProducts->deleteProductAndRelatedData($id);
         }
