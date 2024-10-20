@@ -20,13 +20,14 @@ use App\Http\Controllers\Api\ReviewsController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
     Route::post('/restore/{id}', [UserController::class, 'restore']);
 });
-
+                                      
 Route::get('/products', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::get('/products/{id}', [ProductsController::class, 'edit']);

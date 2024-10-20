@@ -106,9 +106,11 @@ class ProductsController extends Controller
         ], 200);
     }
 
-    public function update(ProductsRequest $request, $id)
+    public function update(Request $request, $id)
     {
+
         $product = $this->repoProducts->getDetail($id);
+
         if (!$product) {
             return response()->json(['message' => 'Product not found.'], 404);
         }
@@ -125,26 +127,36 @@ class ProductsController extends Controller
         if ($request->hasFile('MainImageURL') && $request->file('MainImageURL')->isValid()) {
             $uploadedFileUrl = (new UploadApi())->upload($request->file('MainImageURL')->getRealPath())['secure_url'];
             $data['MainImageURL'] = $uploadedFileUrl;
+        } else {
+            $data['MainImageURL'] = $request->MainImageURL;
         }
 
         $this->repoProducts->updateProduct($id, $data);
 
+
         if ($request->hasFile('ImagePath')) {
-
-            // (new ProductImage())->deleteProductImages($id);
-
+            $imagePaths = [];
             foreach ($request->file('ImagePath') as $image) {
                 if ($image->isValid()) {
                     $uploadedFileUrl = (new UploadApi())->upload($image->getRealPath())['secure_url'];
-                    (new ProductImage())->createProductImage($id, $uploadedFileUrl);
+                    $imagePaths[] = $uploadedFileUrl;
                 }
             }
-        }
+            $imagePath = implode(',', $imagePaths);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-        ], 200);
+            (new ProductImage())->updateProductImage($id, $imagePath);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product update successfully',
+            ], 201);
+        } else {
+            (new ProductImage())->updateProductImage($id, $request->image_path);
+            return response()->json([
+                'success' => true,
+                'message' => 'Product update successfully',
+            ], 201);
+        }
     }
 
     public function delete(Request $request)
