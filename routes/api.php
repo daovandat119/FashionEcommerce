@@ -27,7 +27,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(functi
     Route::delete('/{id}', [UserController::class, 'destroy']);
     Route::post('/restore/{id}', [UserController::class, 'restore']);
 });
-                                      
+
 Route::get('/products', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::get('/products/{id}', [ProductsController::class, 'edit']);
@@ -63,10 +63,11 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(functi
     Route::delete('/{id}', [SizeController::class, 'delete']);
 });
 
+Route::post('/getVariantByID', [ProductVariantController::class, 'show']);
 Route::middleware(['auth:sanctum'])->prefix('product-variants')->group(function () {
     Route::post('/productID', [ProductVariantController::class, 'index']);
     Route::post('/', [ProductVariantController::class, 'store']);
-    Route::post('/getVariantByID', [ProductVariantController::class, 'show']);
+    Route::get('/{VariantID}', [ProductVariantController::class, 'showAdmin']);
     Route::put('/', [ProductVariantController::class, 'update']);
     Route::delete('/{id}', [ProductVariantController::class, 'delete']);
 });

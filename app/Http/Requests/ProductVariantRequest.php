@@ -29,16 +29,16 @@ class ProductVariantRequest extends FormRequest
     public function messages()
     {
         return [
-            'ProductID.required' => 'The product ID is required.',
-            'ProductID.exists' => 'The selected product does not exist.',
-            'SizeID.required' => 'The size ID is required.',
-            'ColorID.required' => 'The color ID is required.',
-            'Quantity.required' => 'The quantity is required.',
-            'Quantity.integer' => 'The quantity must be an integer.',
-            'Quantity.min' => 'The quantity must be at least 0.',
-            'Price.required' => 'The price is required.',
-            'Price.numeric' => 'The price must be a number.',
-            'Price.min' => 'The price must be at least 0.',
+            'ProductID.required' => 'Trường ID sản phẩm là bắt buộc.',
+            'ProductID.exists' => 'Sản phẩm đã chọn không tồn tại.',
+            'SizeID.required' => 'Trường ID kích thước là bắt buộc.',
+            'ColorID.required' => 'Trường ID màu sắc là bắt buộc.',
+            'Quantity.required' => 'Trường số lượng là bắt buộc.',
+            'Quantity.integer' => 'Số lượng phải là một số nguyên.',
+            'Quantity.min' => 'Số lượng phải lớn hơn hoặc bằng 0.',
+            'Price.required' => 'Trường giá là bắt buộc.',
+            'Price.numeric' => 'Giá phải là một số.',
+            'Price.min' => 'Giá phải lớn hơn hoặc bằng 0.',
         ];
     }
 

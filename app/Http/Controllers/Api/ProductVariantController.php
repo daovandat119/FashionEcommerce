@@ -26,10 +26,16 @@ class ProductVariantController extends Controller
     public function store(ProductVariantRequest $request)
     {
         $addedVariants = [];
+
+
+
+
+
+        
         $existingVariants = [];
         $product = (new Products())->getDetail($request->ProductID);
 
-        if(!$product){
+        if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
 
@@ -73,11 +79,22 @@ class ProductVariantController extends Controller
         return response()->json(['message' => 'Success', 'data' => $variant], 200);
     }
 
+    public function showAdmin(Request $request)
+    {
+        $variant = $this->repoProductVariant->getVariantByIDAdmin($request->VariantID);
+
+        if (!$variant) {
+            return response()->json(['message' => 'Variant not found'], 404);
+        }
+
+        return response()->json(['message' => 'Success', 'data' => $variant], 200);
+    }
+
     public function update(ProductVariantRequest $request)
     {
         $product = (new Products())->getDetail($request->ProductID);
 
-        if(!$product){
+        if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
 

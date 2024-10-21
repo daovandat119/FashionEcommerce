@@ -132,7 +132,7 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Category status updated successfully',
+            'message' => 'Trạng thái cập nhật thành công',
         ], 200);
     }
 }
