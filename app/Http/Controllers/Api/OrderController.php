@@ -12,7 +12,7 @@ use App\Http\Requests\OrderRequest;
 class OrderController extends Controller
 {
     protected $order;
-//tao ham
+
     public function __construct()
     {
         $this->order = new Order();
