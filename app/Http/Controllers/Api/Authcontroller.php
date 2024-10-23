@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use App\Mail\NewPasswordEmail;
 
-class AuthController extends Controller
+class Authcontroller extends Controller
 {
     public function login(AuthRequest $request)
     {

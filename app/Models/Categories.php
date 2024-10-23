@@ -13,8 +13,14 @@ class Categories extends Model
     protected $table = 'categories';
     public $timestamps = false;
 
+    public function countCategories()
+    {
+        return DB::table($this->table)->count();
+    }
+
     public function listCategories($search, $offset, $limit)
     {
+
         return DB::table($this->table)
         ->where('CategoryName', 'like', "%{$search}%")
         ->skip($offset)

@@ -24,8 +24,8 @@ class SizeRequest extends FormRequest
     public function messages()
     {
         return [
-            'SizeName.required' => 'The size name is required.',
-            'SizeName.unique' => 'The size name is already exists.',
+            'SizeName.required' => 'Vui lòng nhập Size.',
+            'SizeName.unique' => 'Size đã tồn tại.',
         ];
     }
 

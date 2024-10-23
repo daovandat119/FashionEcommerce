@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Models\Categories;
 use Illuminate\Http\Request;
 use App\Http\Requests\CategoriesRequest;
+
 class CategoriesController extends Controller
 {
     protected $repoCategories;
@@ -16,21 +18,29 @@ class CategoriesController extends Controller
 
     public function index(Request $request)
     {
+        //
+        $total = $this->repoCategories->countCategories();
+        $page = $request->input('Page', 1);
+        $limit = $request->input('Limit', 10);
+
         $categories = $this->repoCategories->listCategories(
             $request->input('Search'),
-            $request->input('Page', 1),
-            $request->input('Limit', 10)
+            ($page - 1) * $limit,
+            $limit
         );
 
+        $totalPage = ceil($total / $limit);
+        //
         return response()->json([
             'message' => 'Success',
             'data' => $categories,
-            'Page' => $request->input('Page', 1),
-            'Limit' => $request->input('Limit', 10)
+            'total' => $total,
+            'totalPage' => $totalPage,
+            'page' => $page,
+            'limit' => $limit
         ], 200);
-
     }
-
+    //
     public function store(CategoriesRequest $request)
     {
         $dataInsert = [
@@ -122,9 +132,7 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Category status updated successfully',
+            'message' => 'Trạng thái cập nhật thành công',
         ], 200);
     }
-
-
 }

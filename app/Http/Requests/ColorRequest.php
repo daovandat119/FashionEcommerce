@@ -19,8 +19,8 @@ class ColorRequest extends FormRequest
     public function messages()
     {
         return [
-            'ColorName.required' => 'The color name is required.',
-            'ColorName.unique' => 'The color name is already exists.',
+            'ColorName.required' => 'Vui lòng nhập tên màu.',
+            'ColorName.unique' => 'Màu đã tồn tại.',
         ];
     }
 

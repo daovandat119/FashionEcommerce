@@ -29,6 +29,7 @@ class OrderController extends Controller
 
     public function store(OrderRequest $request)
     {
+        //
         $userId = auth()->id();
 
         $cart = (new Cart())->getCartByUserID($userId);
@@ -39,7 +40,6 @@ class OrderController extends Controller
             'UserID' => $userId,
             'AddressID' => $request->AddressID,
             'CartID' => $cart->CartID,
-            'OrderStatusID' => $request->OrderStatusID,
             'OrderCode' => $codeOrder,
         ];
 
@@ -59,14 +59,14 @@ class OrderController extends Controller
         $paymentData = [
             'OrderID' => $orderID,
             'PaymentMethodID' => $request->PaymentMethodID,
-            'PaymentStatusID' => $request->PaymentStatusID,
+            'PaymentStatusID' => ($request->PaymentMethodID == 1) ? 1 : 2,
         ];
 
         (new Payments())->createPayment($paymentData);
 
         return response()->json(['message' => 'Success', 'data' => $orderItemData], 200);
     }
-
+//tao oder
 
     public function getOrderById($id)
     {

@@ -1,5 +1,10 @@
 <?php
 
+
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckAdmin;
+
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CategoriesController;
@@ -12,10 +17,13 @@ use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReviewsController;
+
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Support\Facades\Route;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+
+
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -23,6 +31,7 @@ Route::get('/email/verify/{id}', [AuthController::class, 'verify'])
     ->name('verification.verify');
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+
 
 
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(function () {
@@ -34,15 +43,18 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(functi
 
 Route::get('/products', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
+Route::get('/products/{id}', [ProductsController::class, 'edit']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(function () {
     Route::post('/', [ProductsController::class, 'store']);
-    Route::get('/{id}', [ProductsController::class, 'edit']);
     Route::post('/{id}', [ProductsController::class, 'update']);
     Route::delete('/', [ProductsController::class, 'delete']);
     Route::post('/status/{id}', [ProductsController::class, 'updateStatus']);
 });
 
 Route::get('/categories', [CategoriesController::class, 'index']);
+
+Route::get('categories', [CategoriesController::class, 'index']);
+
 Route::middleware(['auth:sanctum, auth.admin'])->prefix('categories')->group(function () {
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
@@ -63,14 +75,15 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(functi
     Route::get('/', [SizeController::class, 'index']);
     Route::post('/', [SizeController::class, 'store']);
     Route::get('/{id}', [SizeController::class, 'edit']);
-    Route::post('/{id}', [SizeController::class, 'update']);
+    Route::put('/{id}', [SizeController::class, 'update']);
     Route::delete('/{id}', [SizeController::class, 'delete']);
 });
 
+Route::post('/getVariantByID', [ProductVariantController::class, 'show']);
 Route::middleware(['auth:sanctum'])->prefix('product-variants')->group(function () {
     Route::post('/productID', [ProductVariantController::class, 'index']);
     Route::post('/', [ProductVariantController::class, 'store']);
-    Route::post('/getVariantByID', [ProductVariantController::class, 'show']);
+    Route::get('/{VariantID}', [ProductVariantController::class, 'showAdmin']);
     Route::put('/', [ProductVariantController::class, 'update']);
     Route::delete('/{id}', [ProductVariantController::class, 'delete']);
 });
@@ -108,8 +121,3 @@ Route::get('/reviews/{id}', [ReviewsController::class, 'index']);
 Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/', [ReviewsController::class, 'store']);
 });
-
-
-
-
-

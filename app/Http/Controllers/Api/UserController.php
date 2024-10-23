@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -7,10 +8,28 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::where('IsActive', true)->get();
-        return response()->json($users);
+        $total = User::count();
+        $page = $request->input('Page', 1);
+        $limit = $request->input('Limit', 10);
+        $offset = ($page - 1) * $limit;
+
+
+        $users = User::skip($offset)
+            ->take($limit)
+            ->get();
+
+        $totalPage = ceil($total / $limit);
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $users,
+            'total' => $total,
+            'totalPage' => $totalPage,
+            'page' => $page,
+            'limit' => $limit
+        ], 200);
     }
 
     public function show($id)
@@ -18,6 +37,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         return response()->json($user);
     }
+    //
     public function destroy($id)
     {
         $user = User::findOrFail($id);

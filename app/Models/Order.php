@@ -19,7 +19,7 @@ class Order extends Model
             'UserID' => $data['UserID'],
             'AddressID' => $data['AddressID'],
             'CartID' => $data['CartID'],
-            'OrderStatusID' => $data['OrderStatusID'],
+            'OrderStatusID' => 1,
             'OrderCode' => $data['OrderCode'],
         ]);
     }
