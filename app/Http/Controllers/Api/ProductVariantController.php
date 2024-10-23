@@ -26,12 +26,6 @@ class ProductVariantController extends Controller
     public function store(ProductVariantRequest $request)
     {
         $addedVariants = [];
-
-
-
-
-
-        
         $existingVariants = [];
         $product = (new Products())->getDetail($request->ProductID);
 
