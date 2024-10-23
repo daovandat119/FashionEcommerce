@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 use App\Models\Order;
 use App\Http\Controllers\Controller;
-use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\OrderItems;
@@ -47,12 +46,10 @@ class OrderController extends Controller
         $orderID = $this->order->createOrder($dataOrder);
 
         foreach ($request->products as $product) {
-            $VariantID = (new ProductVariant())->getVariantByID($product['ProductID'],$product['ColorID'],$product['SizeID']);
-
             $orderItemData = [
                 'OrderID' => $orderID,
                 'ProductID' => $product['ProductID'],
-                'VariantID' => $VariantID->VariantID,
+                'VariantID' => $product['VariantID'],
                 'Quantity' => $product['Quantity'],
             ];
 
