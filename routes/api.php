@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CategoriesController;
@@ -13,11 +12,18 @@ use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReviewsController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/email/verify/{id}', [AuthController::class, 'verify'])
+    ->name('verification.verify');
+Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+
 
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
@@ -37,7 +43,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(fun
 });
 
 Route::get('/categories', [CategoriesController::class, 'index']);
-Route::middleware(['auth:sanctum, auth.user'])->prefix('categories')->group(function () {
+Route::middleware(['auth:sanctum, auth.admin'])->prefix('categories')->group(function () {
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
     Route::put('/{id}', [CategoriesController::class, 'update']);
