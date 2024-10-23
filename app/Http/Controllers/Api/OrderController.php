@@ -59,7 +59,7 @@ class OrderController extends Controller
         $paymentData = [
             'OrderID' => $orderID,
             'PaymentMethodID' => $request->PaymentMethodID,
-            'PaymentStatusID' => $request->PaymentStatusID,
+            'PaymentStatusID' => ($request->PaymentMethodID == 1) ? 1 : 2,
         ];
 
         (new Payments())->createPayment($paymentData);
