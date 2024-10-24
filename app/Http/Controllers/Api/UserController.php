@@ -47,7 +47,7 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Người dùng đã bị vô hiệu hóa']);
     }
-
+//
     public function restore($id)
     {
         $user = User::findOrFail($id);

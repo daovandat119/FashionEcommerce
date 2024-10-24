@@ -23,7 +23,7 @@ class CategoriesRequest extends FormRequest
         ];
     }
 
-
+//
     public function messages(): array
     {
         return [
@@ -32,7 +32,7 @@ class CategoriesRequest extends FormRequest
         ];
     }
 
-
+//
     public function attributes(): array
     {
         return [
@@ -40,9 +40,10 @@ class CategoriesRequest extends FormRequest
         ];
     }
 
-
+//
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
 }
+//

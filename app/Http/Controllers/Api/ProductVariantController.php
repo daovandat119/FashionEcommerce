@@ -27,16 +27,15 @@ class ProductVariantController extends Controller
     {
         $addedVariants = [];
 
-
-
-
-
-        
         $existingVariants = [];
         $product = (new Products())->getDetail($request->ProductID);
 
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        if ($request->Price > $product->Price) {
+            return response()->json(['message' => 'Giá không thể lớn hơn giá sản phẩm'], 404);
         }
 
         $sizeIDs = explode(',', $request->SizeID);
