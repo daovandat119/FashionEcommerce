@@ -10,14 +10,13 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $total = User::where('IsActive', true)->count();
+        $total = User::count();
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
         $offset = ($page - 1) * $limit;
 
 
-        $users = User::where('IsActive', true)
-            ->skip($offset)
+        $users = User::skip($offset)
             ->take($limit)
             ->get();
 

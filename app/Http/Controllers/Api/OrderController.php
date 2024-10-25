@@ -12,7 +12,7 @@ use App\Http\Requests\OrderRequest;
 class OrderController extends Controller
 {
     protected $order;
-//tao ham
+
     public function __construct()
     {
         $this->order = new Order();
@@ -40,7 +40,6 @@ class OrderController extends Controller
             'UserID' => $userId,
             'AddressID' => $request->AddressID,
             'CartID' => $cart->CartID,
-            'OrderStatusID' => $request->OrderStatusID,
             'OrderCode' => $codeOrder,
         ];
 
@@ -60,7 +59,7 @@ class OrderController extends Controller
         $paymentData = [
             'OrderID' => $orderID,
             'PaymentMethodID' => $request->PaymentMethodID,
-            'PaymentStatusID' => $request->PaymentStatusID,
+            'PaymentStatusID' => ($request->PaymentMethodID == 1) ? 1 : 2,
         ];
 
         (new Payments())->createPayment($paymentData);
