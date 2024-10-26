@@ -48,6 +48,7 @@ class ProductsRequest extends FormRequest
         return [
             'CategoryID.required' => 'Danh mục không được bỏ trống',
             'ProductName.required' => 'Tên sản phẩm không được bỏ trống',
+            'ProductName.unique' => 'Tên sản phẩm đã tồn tại',
             'MainImageURL.required' => 'URL hình ảnh chính không được bỏ trống',
             'MainImageURL.image' => 'URL hình ảnh chính phải là một tệp hình ảnh',
             'ImagePath.required' => 'URL hình ảnh không được bỏ trống',
@@ -57,7 +58,6 @@ class ProductsRequest extends FormRequest
             'SalePrice.lte' => 'Giá khuyến mãi phải nhỏ hơn hoặc bằng giá gốc',
         ];
     }
-
     /**
      * Get custom attributes for validator errors.
      *
