@@ -16,7 +16,7 @@ class ProductVariantController extends Controller
     {
         $this->repoProductVariant = new ProductVariant();
     }
-
+//
     public function index(Request $request)
     {
         $variants = $this->repoProductVariant->getAll($request->ProductID);
