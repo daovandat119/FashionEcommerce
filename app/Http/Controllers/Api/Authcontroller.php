@@ -24,7 +24,7 @@ class Authcontroller extends Controller
 
         if (!$user || !Hash::check($request->Password, $user->Password)) {
             throw ValidationException::withMessages([
-                'Email' => ['The provided credentials are incorrect.'],
+                'Email' => ['Tài khoản hoặc mật khẩu không chính xác.'],
             ]);
         }
 

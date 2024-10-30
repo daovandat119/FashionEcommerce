@@ -30,7 +30,7 @@ class ColorsController extends Controller
 
         return response()->json(['message' => 'Màu sắc đã được thêm thành công!', 'data' => $color], 201);
     }
-
+//
 
     public function edit($id)
     {

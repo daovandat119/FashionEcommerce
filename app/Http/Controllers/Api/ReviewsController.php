@@ -15,7 +15,7 @@ class ReviewsController extends Controller
     {
         $this->reviewRepository = new Reviews();
     }
-
+//
     public function index($id)
     {
         $reviews = $this->reviewRepository->getReviews($id);
