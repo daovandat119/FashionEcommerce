@@ -13,7 +13,10 @@ class Products extends Model
     use HasFactory;
 
     protected $table = 'products';
+
     protected $primaryKey = 'ProductID';
+
+    public $timestamps = true;
 
     public function listProducts($search, $offset, $limit, $category_id = null)
     {

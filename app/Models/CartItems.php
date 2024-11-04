@@ -11,7 +11,11 @@ class CartItems extends Model
     use HasFactory;
 
     protected $table = 'cart_items';
+
     protected $primaryKey = 'CartItemID';
+
+    public $timestamps = true;
+
     protected $fillable = [
         'CartID',
         'ProductID',
@@ -19,7 +23,7 @@ class CartItems extends Model
         'Price',
     ];
 
-    public function getCartItem($userId)
+    public function getCartItemByUserId($userId)
     {
         $query = DB::table('cart_items as ci')
             ->join('carts as c', 'ci.CartID', '=', 'c.CartID')
@@ -29,6 +33,7 @@ class CartItems extends Model
             ->join('sizes as s', 'pv.SizeID', '=', 's.SizeID')
             ->where('c.UserID', $userId)
             ->select(
+                'ci.CartItemID',
                 'p.MainImageURL',
                 'p.ProductName as product_name',
                 'col.ColorName as color',
@@ -41,6 +46,15 @@ class CartItems extends Model
         $cartItems = $query->get();
 
         return $cartItems;
+    }
+
+    public function getCartItem($cartID)
+    {
+        $getCartItemByCartID = DB::table($this->table)
+            ->where('CartID', $cartID)
+            ->get();
+
+        return $getCartItemByCartID;
     }
 
     public function updateCartItem($cartItemID, $data)
@@ -83,4 +97,13 @@ class CartItems extends Model
 
         return $deleteCartItem;
     }
+
+    public function deleteCartItemByCartID($cartID)
+    {
+        $deleteCartItemByCartID = DB::table($this->table)
+            ->where('CartID', $cartID)
+            ->delete();
+    }
+
+
 }

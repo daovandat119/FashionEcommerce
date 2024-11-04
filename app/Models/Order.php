@@ -11,7 +11,10 @@ class Order extends Model
     use HasFactory;
 
     protected $table = 'orders';
+
     protected $primaryKey = 'OrderID';
+
+    public $timestamps = true;
 
     public function createOrder($data)
     {
@@ -40,8 +43,8 @@ class Order extends Model
                 os.StatusName AS OrderStatus,
                 pm.MethodName AS PaymentMethod,
                 ps.StatusName AS PaymentStatus,
-                SUM(oi.Quantity) AS TotalQuantity,
-                SUM(oi.Quantity * pv.Price) AS TotalPrice,
+                COALESCE(SUM(oi.Quantity), 0) AS TotalQuantity,
+                COALESCE(pay.Amount, 0) AS TotalAmount,
                 o.OrderCode,
                 ua.AddressID
             ')
@@ -52,7 +55,8 @@ class Order extends Model
                 'pm.MethodName',
                 'ps.StatusName',
                 'o.OrderCode',
-                'ua.AddressID'
+                'ua.AddressID',
+                'pay.Amount'
             )
             ->get();
     }

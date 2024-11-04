@@ -11,6 +11,10 @@ class Reviews extends Model
 
     protected $table = 'reviews';
 
+    protected $primaryKey = 'ReviewID';
+
+    public $timestamps = true;
+
     protected $fillable = [
         'UserId',
         'ProductId',

@@ -11,7 +11,11 @@ class ProductVariant extends Model
     use HasFactory;
 
     protected $table = 'product_variants';
+
     protected $primaryKey = 'VariantID';
+
+    public $timestamps = true;
+
     protected $fillable = [
         'ProductID',
         'SizeID',
@@ -97,4 +101,13 @@ class ProductVariant extends Model
             ->where('VariantID', $id)
             ->update(['Status' => $status]);
     }
+
+    public function updateQuantity($variantID, $quantity)
+    {
+        return DB::table($this->table)
+            ->where('VariantID', $variantID)
+            ->update(['Quantity' => $quantity]);
+    }
+
+
 }

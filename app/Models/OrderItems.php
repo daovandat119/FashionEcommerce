@@ -11,11 +11,14 @@ class OrderItems extends Model
     use HasFactory;
 
     protected $table = 'order_items';
+
     protected $primaryKey = 'OrderItemID';
+
+    public $timestamps = true;
 
     public function createOrderItem($dataOrderItem)
     {
-        DB::table('order_items')->insert([
+        return DB::table($this->table)->insert([
             'OrderID' => $dataOrderItem['OrderID'],
             'ProductID' => $dataOrderItem['ProductID'],
             'VariantID' => $dataOrderItem['VariantID'],

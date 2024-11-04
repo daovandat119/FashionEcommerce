@@ -12,6 +12,10 @@ class Cart extends Model
 
     protected $table = 'carts';
 
+    protected $primaryKey = 'CartID';
+
+    public $timestamps = true;
+
     public function getCartByUserID($id)
     {
         $cart = DB::table($this->table)->where('UserID', $id)->first();
@@ -22,7 +26,7 @@ class Cart extends Model
     {
         $cartId = DB::table($this->table)->insertGetId(['UserID' => $userId]);
 
-        return $cartId; 
+        return $cartId;
     }
 
 

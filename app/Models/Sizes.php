@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Sizes extends Model
 {
@@ -12,36 +11,36 @@ class Sizes extends Model
 
     protected $table = 'sizes';
 
+    protected $primaryKey = 'SizeID';
+
+    public $timestamps = true;
+
     public function listSizes()
     {
-        return DB::table($this->table)->get();
+        return Sizes::get();
     }
 
     public function addSize($data)
     {
-        return DB::table($this->table)->insert([
+        return Sizes::create([
             'SizeName' => $data['SizeName'],
         ]);
     }
 
     public function getDetail($id)
     {
-        return DB::table($this->table)->where('SizeID', $id)->first();
+        return Sizes::where('SizeID', $id)->first();
     }
 
     public function updateSize($id, $dataUpdate)
     {
-        return DB::table($this->table)
-            ->where('SizeID', $id)
-            ->update([
+        return Sizes::where('SizeID', $id)->update([
                 'SizeName' => $dataUpdate['SizeName'],
             ]);
     }
 
     public function deleteSize($id)
     {
-        return DB::table($this->table)
-            ->where('SizeID', $id)
-            ->delete();
+        return Sizes::where('SizeID', $id)->delete();
     }
 }

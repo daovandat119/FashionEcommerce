@@ -16,7 +16,7 @@ class ProductVariantController extends Controller
     {
         $this->repoProductVariant = new ProductVariant();
     }
-//
+
     public function index(Request $request)
     {
         $variants = $this->repoProductVariant->getAll($request->ProductID);
@@ -72,10 +72,15 @@ class ProductVariantController extends Controller
         $variant = $this->repoProductVariant->getVariantByID($request->ProductID, $request->SizeID, $request->ColorID);
 
         if (!$variant) {
-            return response()->json(['message' => 'Variant not found'], 404);
+            return response()->json(['message' => 'Success', 'data' => [
+                'Quantity' => 0,
+            ]], 200);
         }
 
-        return response()->json(['message' => 'Success', 'data' => $variant], 200);
+        return response()->json(['message' => 'Success', 'data' => [
+            'Quantity' => $variant->Quantity,
+            'Price' => $variant->Price,
+        ]], 200);
     }
 
     public function showAdmin(Request $request)
@@ -105,7 +110,6 @@ class ProductVariantController extends Controller
             'Price' => $request->Price,
         ];
 
-
         $variant = $this->repoProductVariant->updateVariant($data);
 
         return response()->json(['message' => 'Cập nhật thành công!', 'data' => $data], 200);
@@ -118,9 +122,5 @@ class ProductVariantController extends Controller
         return response()->json(['message' => 'Xóa thành công!', 'data' => $variant], 200);
     }
 
-    // public function updateStatus(Request $request, $id)
-    // {
-    //     $this->repoProductVariant->updateStatus($id, $request->input('Status'));
-    // }
 
 }
