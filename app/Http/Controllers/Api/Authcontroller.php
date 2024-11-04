@@ -35,7 +35,9 @@ class Authcontroller extends Controller
 
         return response()->json([
             'message' => 'Đăng nhập thành công',
+            
             'token' => $token,
+           
 
         ], 200);
     }
@@ -168,5 +170,37 @@ class Authcontroller extends Controller
             'Email' => $user->Email,
 
         ]], 200);
+    }
+
+    public function loginAdmin(AuthRequest $request)
+    {
+        
+        $user = User::where('Email', $request->Email)->first();
+
+   
+        if (!$user || !Hash::check($request->Password, $user->Password)) {
+            throw ValidationException::withMessages([
+                'Email' => ['Tài khoản hoặc mật khẩu không chính xác.'],
+            ]);
+        }
+
+      
+        if (!$user->IsActive) {
+            return response()->json(['message' => 'Tài khoản chưa được xác minh. Vui lòng kiểm tra email để xác minh tài khoản.'], 403);
+        }
+
+        
+        if ($user->RoleID !== 1) {
+            return response()->json(['message' => 'Bạn không có quyền truy cập admin.'], 403);
+        }
+
+       
+        $token = $user->createToken('admin_auth_token', ['admin'])->plainTextToken;
+
+        return response()->json([
+            'message' => 'Đăng nhập admin thành công',
+            'token' => $token,
+            'isAdmin' => true,
+        ], 200);
     }
 }
