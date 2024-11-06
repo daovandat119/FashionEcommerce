@@ -51,7 +51,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(fun
     Route::delete('/', [ProductsController::class, 'delete']);
     Route::post('/status/{id}', [ProductsController::class, 'updateStatus']);
 });
-
+//
 Route::get('/categories', [CategoriesController::class, 'index']);
 
 Route::get('categories', [CategoriesController::class, 'index']);
