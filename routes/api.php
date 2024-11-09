@@ -27,8 +27,9 @@ use Illuminate\Support\Facades\Mail;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 Route::get('/email/verify/{id}', [AuthController::class, 'verify'])
-    ->name('verification.verify');
+->name('verification.verify');
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
@@ -55,7 +56,7 @@ Route::get('/categories', [CategoriesController::class, 'index']);
 
 Route::get('categories', [CategoriesController::class, 'index']);
 
-Route::middleware(['auth:sanctum, auth.admin'])->prefix('categories')->group(function () {
+Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('categories')->group(function () {
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
     Route::put('/{id}', [CategoriesController::class, 'update']);

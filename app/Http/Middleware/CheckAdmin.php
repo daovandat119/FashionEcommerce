@@ -19,17 +19,14 @@ class CheckAdmin
             $user = Auth::user();
 
             if ($user->role && $user->role->RoleName === 'Admin') {
+                \Log::info('Admin access granted to user ID: ' . $user->UserID);
                 return $next($request);
             }
         }
-
+        \Log::warning('Access denied for non-admin user');
         abort(403, 'Không đủ quyền');
 
     }
 
-    protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'auth.admin' => \App\Http\Middleware\CheckAdmin::class,
-    ];
-
+ 
 }
