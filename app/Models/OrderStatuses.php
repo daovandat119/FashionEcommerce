@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class OrderStatuses extends Model
 {
     use HasFactory;
+
+    protected $table = 'order_statuses';
+
+    protected $primaryKey = 'OrderStatusID';
+
+    public $timestamps = true;
 }

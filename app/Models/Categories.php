@@ -4,25 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 class Categories extends Model
 {
     use HasFactory;
 
     protected $table = 'categories';
-    public $timestamps = false;
+
+    protected $primaryKey = 'CategoryID';
+
+    public $timestamps = true;
+
+    protected $fillable = [
+        'CategoryName',
+        'Status',
+    ];
 
     public function countCategories()
     {
-        return DB::table($this->table)->count();
+        return Categories::count();
     }
 
     public function listCategories($search, $offset, $limit)
     {
 
-        return DB::table($this->table)
-        ->where('CategoryName', 'like', "%{$search}%")
+        return Categories::where('CategoryName', 'like', "%{$search}%")
         ->skip($offset)
         ->take($limit)
         ->get();
@@ -30,31 +36,27 @@ class Categories extends Model
 
     public function addCategory($data)
     {
-        return DB::table($this->table)->insert($data);
+        return Categories::create($data);
     }
 
     public function getDetail($id)
     {
-        return DB::table($this->table)->where('CategoryID', $id)->first();
+        return Categories::where('CategoryID', $id)->first();
     }
 
     public function updateCategory($id, $dataUpdate)
     {
-        return DB::table($this->table)
-            ->where('CategoryID', $id)
-            ->update($dataUpdate);
+        return Categories::where('CategoryID', $id)->update($dataUpdate);
     }
 
     public function getCategoryByName($categoryName)
-        {
-            return DB::table($this->table)
-        ->where('CategoryName', $categoryName)
-            ->first();
+    {
+        return Categories::where('CategoryName', $categoryName)->first();
     }
 
     public function deleteCategory($id)
     {
-        return DB::table($this->table)->where('CategoryID', $id)->delete();
+        return Categories::where('CategoryID', $id)->delete();
     }
 
     public function deleteCategoryAndRelatedData($categoryId)
@@ -62,23 +64,19 @@ class Categories extends Model
         DB::beginTransaction();
 
         try {
-            DB::table('product_variants')
-                ->join('products', 'product_variants.ProductID', '=', 'products.ProductID')
+            ProductVariant::where('ProductID', 'products.ProductID')
                 ->where('products.CategoryID', $categoryId)
                 ->delete();
 
 
-            DB::table('product_images')
-                ->join('products', 'product_images.ProductID', '=', 'products.ProductID')
+            ProductImage::where('ProductID', 'products.ProductID')
                 ->where('products.CategoryID', $categoryId)
                 ->delete();
 
-            DB::table('products')
-                ->where('CategoryID', $categoryId)
+            Product::where('CategoryID', $categoryId)
                 ->delete();
 
-            DB::table($this->table)
-                ->where('CategoryID', $categoryId)
+            Categories::where('CategoryID', $categoryId)
                 ->delete();
 
             DB::commit();
@@ -99,19 +97,16 @@ class Categories extends Model
 
         try {
             // Update status of product variants
-            DB::table('product_variants')
-                ->join('products', 'product_variants.ProductID', '=', 'products.ProductID')
+            ProductVariant::where('ProductID', 'products.ProductID')
                 ->where('products.CategoryID', $categoryId)
                 ->update(['product_variants.Status' => $status]);
 
             // Update status of products
-            DB::table('products')
-                ->where('CategoryID', $categoryId)
+            Product::where('CategoryID', $categoryId)
                 ->update(['Status' => $status]);
 
             // Update status of the category
-            DB::table($this->table)
-                ->where('CategoryID', $categoryId)
+            Categories::where('CategoryID', $categoryId)
                 ->update(['Status' => $status]);
 
             DB::commit();

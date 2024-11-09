@@ -11,7 +11,10 @@ class Payments extends Model
     use HasFactory;
 
     protected $table = 'payments';
+
     protected $primaryKey = 'PaymentID';
+
+    public $timestamps = true;
 
     public function createPayment($data)
     {
@@ -19,6 +22,8 @@ class Payments extends Model
             'OrderID' => $data['OrderID'],
             'PaymentMethodID' => $data['PaymentMethodID'],
             'PaymentStatusID' => $data['PaymentStatusID'],
+            'Amount' => $data['Amount'],
+            'TransactionID' => $data['TransactionID'],
         ]);
     }
 

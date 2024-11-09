@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('OrderID')->constrained('orders', 'OrderID');
             $table->foreignId('PaymentMethodID')->constrained('payment_methods', 'PaymentMethodID');
             $table->foreignId('PaymentStatusID')->constrained('payment_statuses', 'PaymentStatusID');
+            $table->decimal('Amount', 10, 2);
+            $table->string('TransactionID')->nullable();
             $table->timestamps();
         });
     }

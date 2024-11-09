@@ -9,6 +9,10 @@ use App\Models\OrderItems;
 use Illuminate\Support\Str;
 use App\Models\Payments;
 use App\Http\Requests\OrderRequest;
+use App\Http\Controllers\Api\PaymentController;
+use App\Models\CartItems;
+use App\Models\ProductVariant;
+
 class OrderController extends Controller
 {
     protected $order;
@@ -29,12 +33,9 @@ class OrderController extends Controller
 
     public function store(OrderRequest $request)
     {
-        //
         $userId = auth()->id();
-
         $cart = (new Cart())->getCartByUserID($userId);
-
-        $codeOrder = Str::random(10);
+        $codeOrder = (string) Str::uuid();
 
         $dataOrder = [
             'UserID' => $userId,
@@ -44,29 +45,52 @@ class OrderController extends Controller
         ];
 
         $orderID = $this->order->createOrder($dataOrder);
+        $cartItems = (new CartItems())->getCartItem($cart->CartID);
 
-        foreach ($request->products as $product) {
-            $orderItemData = [
-                'OrderID' => $orderID,
-                'ProductID' => $product['ProductID'],
-                'VariantID' => $product['VariantID'],
-                'Quantity' => $product['Quantity'],
-            ];
+        foreach ($cartItems as $cartItem) {
 
-            (new OrderItems())->createOrderItem($orderItemData);
+            $this->createOrderItem($orderID, $cartItem);
         }
 
+        if ($request->PaymentMethodID == 1) {
+            $this->processPayment($cartItems, $orderID, $request, $cart);
+            return response()->json(['message' => 'Order created successfully, waiting for delivery.'], 200);
+        } else {
+            return (new PaymentController())->createPayment($orderID, $request->TotalAmount, $request);
+        }
+    }
+
+    private function createOrderItem($orderID, $cartItem)
+    {
+        $orderItemData = [
+            'OrderID' => $orderID,
+            'ProductID' => $cartItem->ProductID,
+            'VariantID' => $cartItem->VariantID,
+            'Quantity' => $cartItem->Quantity,
+        ];
+        (new OrderItems())->createOrderItem($orderItemData);
+    }
+
+    private function processPayment($cartItems, $orderID, $request, $cart)
+    {
         $paymentData = [
             'OrderID' => $orderID,
             'PaymentMethodID' => $request->PaymentMethodID,
-            'PaymentStatusID' => ($request->PaymentMethodID == 1) ? 1 : 2,
+            'PaymentStatusID' => 1,
+            'Amount' => $request->TotalAmount,
+            'TransactionID' => null,
         ];
 
         (new Payments())->createPayment($paymentData);
 
-        return response()->json(['message' => 'Success', 'data' => $orderItemData], 200);
+        (new CartItems())->deleteCartItemByCartID($cart->CartID);
+
+        foreach ($cartItems as $cartItem) {
+            $variant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);
+
+            (new ProductVariant())->updateQuantity($cartItem->VariantID, $variant->Quantity - $cartItem->Quantity);
+        }
     }
-//tao oder
 
     public function getOrderById($id)
     {

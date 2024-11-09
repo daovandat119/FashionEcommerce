@@ -5,48 +5,45 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Colors extends Model
 {
     use HasFactory;
 
     protected $table = 'colors';
-    protected $primaryKey = 'ColorID';  // Thêm dòng này
-    public $incrementing = false;  // Thêm dòng này nếu ColorID không phải là auto-increment
-    protected $keyType = 'string';
+
+    protected $primaryKey = 'ColorID';
+
+    public $timestamps = true;
+
     public function listColors()
     {
-        return DB::table($this->table)->get();
+        return Colors::get();
     }
 
     public function addColor($data)
     {
-        return DB::table($this->table)->insert([
+        return Colors::create([
             'ColorName' => $data['ColorName'],
         ]);
     }
 
     public function getDetail($id)
     {
-        return DB::table($this->table)->where('ColorID', $id)->first();
+        return Colors::where('ColorID', $id)->first();
     }
 
 
     public function updateColor($id, $dataUpdate)
     {
-        return DB::table($this->table)
-            ->where('ColorID', $id)
-            ->update([
+        return Colors::where('ColorID', $id)->update([
                 'ColorName' => $dataUpdate['ColorName'],
             ]);
     }
 
     public function deleteColor($id)
     {
-        return DB::table($this->table)
-            ->where('ColorID', $id)
-            ->delete();
+        return Colors::where('ColorID', $id)->delete();
     }
 
 }

@@ -10,8 +10,10 @@ class ProductImage extends Model
 {
     use HasFactory;
 
-
     protected $table = 'product_images';
+
+    protected $primaryKey = 'ProductImageID';
+
     public $timestamps = false;
 
     public function createProductImage($productId, $imagePath)
