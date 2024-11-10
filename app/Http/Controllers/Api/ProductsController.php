@@ -43,12 +43,11 @@ class ProductsController extends Controller
         return response()->json([
             'message' => 'Success',
             'data' => $listProducts,
-            ...($isAdmin ? [
-                'total' => $total,
-                'totalPage' => $totalPage,
-                'page' => $page,
-                'limit' => $limit
-            ] : [])
+            'total' => $total,
+            'totalPage' => $totalPage,
+            'page' => $page,
+            'limit' => $limit
+
         ], 200);
     }
 
