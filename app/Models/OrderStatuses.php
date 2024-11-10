@@ -14,4 +14,10 @@ class OrderStatuses extends Model
     protected $primaryKey = 'OrderStatusID';
 
     public $timestamps = true;
+
+    protected $fillable = [
+        'StatusName',
+        'created_at',
+        'updated_at',
+    ];
 }

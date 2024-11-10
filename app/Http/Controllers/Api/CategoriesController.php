@@ -18,15 +18,17 @@ class CategoriesController extends Controller
 
     public function index(Request $request)
     {
-        //
+        $isAdmin = $request->admin;
+
         $total = $this->repoCategories->countCategories();
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
 
         $categories = $this->repoCategories->listCategories(
-            $request->input('Search'),
-            ($page - 1) * $limit,
-            $limit
+            $isAdmin ? $request->input('Search') : null,
+            $isAdmin ? ($page - 1) * $limit : null,
+            $isAdmin ? $limit : null,
+            $isAdmin ? null : 'ACTIVE'
         );
 
         $totalPage = ceil($total / $limit);
@@ -34,10 +36,12 @@ class CategoriesController extends Controller
         return response()->json([
             'message' => 'Success',
             'data' => $categories,
-            'total' => $total,
-            'totalPage' => $totalPage,
-            'page' => $page,
-            'limit' => $limit
+            ...($isAdmin ? [
+                'total' => $total,
+                'totalPage' => $totalPage,
+                'page' => $page,
+                'limit' => $limit
+            ] : [])
         ], 200);
     }
     //
@@ -94,29 +98,31 @@ class CategoriesController extends Controller
         ], 200);
     }
 
-    public function delete(Request $request)
+    public function delete($id)
     {
-        $ids = $request->input('ids');
-        $idArray = explode(',', $ids);
-        $results = [];
+        // $ids = $request->input('ids');
+        // $idArray = explode(',', $ids);
+        // $results = [];
 
-        foreach ($idArray as $id) {
-            $id = trim($id);
-            $category = $this->repoCategories->getDetail($id);
+        // foreach ($idArray as $id) {
+        //     $id = trim($id);
+        //     $category = $this->repoCategories->getDetail($id);
 
-            if (!$category) {
-                $results[] = ['id' => $id, 'message' => 'Category not found'];
-                continue;
-            }
+        //     if (!$category) {
+        //         $results[] = ['id' => $id, 'message' => 'Category not found'];
+        //         continue;
+        //     }
 
-            $this->repoCategories->deleteCategoryAndRelatedData($id);
 
-            $results[] = ['id' => $id, 'message' => 'Deleted successfully'];
-        }
+
+        //     $results[] = ['id' => $id, 'message' => 'Deleted successfully'];
+        // }
+
+        $this->repoCategories->deleteCategoryAndRelatedData($id);
 
         return response()->json([
             'message' => 'Operation completed',
-            'results' => $results
+            'id' => $id
         ], 200);
     }
 
@@ -124,6 +130,7 @@ class CategoriesController extends Controller
     {
         $category = $this->repoCategories->getDetail($id);
 //
+
         if (!$category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
@@ -132,7 +139,7 @@ class CategoriesController extends Controller
 //
         return response()->json([
             'success' => true,
-            'message' => 'Trạng thái cập nhật thành công',
+            'message' => 'Category status updated successfully',
         ], 200);
     }
 }

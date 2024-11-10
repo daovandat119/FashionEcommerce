@@ -12,7 +12,8 @@ use App\Http\Requests\OrderRequest;
 use App\Http\Controllers\Api\PaymentController;
 use App\Models\CartItems;
 use App\Models\ProductVariant;
-
+use Illuminate\Support\Facades\Http;
+use App\Models\Addresses;
 class OrderController extends Controller
 {
     protected $order;
@@ -36,10 +37,11 @@ class OrderController extends Controller
         $userId = auth()->id();
         $cart = (new Cart())->getCartByUserID($userId);
         $codeOrder = (string) Str::uuid();
+        $address = (new Addresses())->getDistrictID($userId);
 
         $dataOrder = [
             'UserID' => $userId,
-            'AddressID' => $request->AddressID,
+            'AddressID' => $address->AddressID,
             'CartID' => $cart->CartID,
             'OrderCode' => $codeOrder,
         ];
@@ -48,13 +50,12 @@ class OrderController extends Controller
         $cartItems = (new CartItems())->getCartItem($cart->CartID);
 
         foreach ($cartItems as $cartItem) {
-
             $this->createOrderItem($orderID, $cartItem);
         }
 
         if ($request->PaymentMethodID == 1) {
             $this->processPayment($cartItems, $orderID, $request, $cart);
-            return response()->json(['message' => 'Order created successfully, waiting for delivery.'], 200);
+            return response()->json(['message' => 'Order created successfully, waiting for delivery.'], 201);
         } else {
             return (new PaymentController())->createPayment($orderID, $request->TotalAmount, $request);
         }

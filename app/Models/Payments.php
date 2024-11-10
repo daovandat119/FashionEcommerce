@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Payments extends Model
 {
@@ -16,9 +15,19 @@ class Payments extends Model
 
     public $timestamps = true;
 
+    protected $fillable = [
+        'OrderID',
+        'PaymentMethodID',
+        'PaymentStatusID',
+        'Amount',
+        'TransactionID',
+        'created_at',
+        'updated_at',
+    ];
+
     public function createPayment($data)
     {
-        return DB::table($this->table)->insert([
+        return Payments::create([
             'OrderID' => $data['OrderID'],
             'PaymentMethodID' => $data['PaymentMethodID'],
             'PaymentStatusID' => $data['PaymentStatusID'],
@@ -29,8 +38,6 @@ class Payments extends Model
 
     public function getPaymentByOrderID($orderID)
     {
-        return DB::table($this->table)
-            ->where('OrderID', $orderID)
-            ->first();
+        return Payments::where('OrderID', $orderID)->first();
     }
 }

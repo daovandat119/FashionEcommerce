@@ -15,7 +15,12 @@ class Wishlist extends Model
 
     public $timestamps = true;
 
-    protected $fillable = ['UserID', 'ProductID'];
+    protected $fillable = [
+        'UserID',
+        'ProductID',
+        'created_at',
+        'updated_at',
+    ];
 
     public function addToWishlist($data){
         return Wishlist::create([

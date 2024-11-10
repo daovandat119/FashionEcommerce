@@ -13,11 +13,11 @@ class RatingLevelsTableSeeder extends Seeder
     public function run()
     {
         DB::table('rating_levels')->insert([
-            ['LevelName' => '1 Star'],
-            ['LevelName' => '2 Stars'],
-            ['LevelName' => '3 Stars'],
-            ['LevelName' => '4 Stars'],
-            ['LevelName' => '5 Stars'],
+            ['LevelValue' => 1],
+            ['LevelValue' => 2],
+            ['LevelValue' => 3],
+            ['LevelValue' => 4],
+            ['LevelValue' => 5],
         ]);
     }
 }

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('Views')->default(0);
             $table->string('ShortDescription')->nullable();
             $table->string('Description')->nullable();
-            $table->string('Status');
+            $table->enum('Status', ['ACTIVE', 'INACTIVE'])->nullable();
             $table->timestamps();
         });
     }

@@ -14,8 +14,8 @@ class AddressesTableSeeder extends Seeder
     public function run()
     {
         DB::table('addresses')->insert([
-            ['UserID' => 1,'Username'=>'dat', 'Address' => '123 Main St, City A', 'PhoneNumber' => '1234567890', 'IsDefault' => 1],
-            ['UserID' => 2,'Username'=>'yến' ,'Address' => '456 Main St, City B', 'PhoneNumber' => '0987654321', 'IsDefault' => 0],
+            ['UserID' => 1,'Username'=>'dat', 'Address' => '123 Main St, City A', 'DistrictID' => '3440', 'WardCode' => '1', 'PhoneNumber' => '1234567890', 'IsDefault' => 1],
+            ['UserID' => 2,'Username'=>'yến' ,'Address' => '456 Main St, City B', 'DistrictID' => '3281', 'WardCode' => '260735', 'PhoneNumber' => '0987654321', 'IsDefault' => 1],
         ]);
     }
 

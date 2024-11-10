@@ -19,6 +19,8 @@ class AddressRequest extends FormRequest
             'UserName' => 'required|string|max:255',
             'Address' => 'required|string|max:255',
             'PhoneNumber' => 'required|string|max:15',
+            'DistrictID' => 'required',
+            'WardCode' => 'required',
         ];
     }
 
@@ -34,6 +36,10 @@ class AddressRequest extends FormRequest
             'PhoneNumber.required' => 'The phone number is required.',
             'PhoneNumber.string' => 'The phone number must be a string.',
             'PhoneNumber.max' => 'The phone number may not be greater than 15 characters.',
+            'DistrictID.required' => 'The district ID is required.',
+            'DistrictID.string' => 'The district ID must be a string.',
+            'WardCode.required' => 'The ward code is required.',
+            'WardCode.string' => 'The ward code must be a string.',
         ];
     }
 
@@ -43,6 +49,8 @@ class AddressRequest extends FormRequest
             'UserName' => 'user name',
             'Address' => 'address',
             'PhoneNumber' => 'phone number',
+            'DistrictID' => 'district ID',
+            'WardCode' => 'ward code',
         ];
     }
 

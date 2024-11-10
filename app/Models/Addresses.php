@@ -4,77 +4,104 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Addresses extends Model
 {
     use HasFactory;
 
     protected $table = 'addresses';
+
     protected $primaryKey = 'AddressID';
+
+    public $timestamps = true;
+
+    protected $fillable = [
+        'UserID',
+        'UserName',
+        'Address',
+        'PhoneNumber',
+        'DistrictID',
+        'WardCode',
+        'IsDefault',
+        'created_at',
+        'updated_at',
+    ];
 
     public function getAddress($id)
     {
-        return DB::table($this->table)->where('AddressID', $id)->first();
+        return Addresses::where('AddressID', $id)->first();
     }
-
 
     public function getAddressByUserID($id)
     {
-        return DB::table($this->table)->where('UserID', $id)->get();
+        return Addresses::where('UserID', $id)->get();
+    }
+
+    public function checkAddressByUserID($id)
+    {
+        return Addresses::where('UserID', $id)->first();
     }
 
     public function addAddress($data)
     {
-        return DB::table($this->table)->insert([
+        return Addresses::create([
             'UserID' => $data['UserID'],
             'UserName' => $data['UserName'],
             'Address' => $data['Address'],
             'PhoneNumber' => $data['PhoneNumber'],
+            'DistrictID' => $data['DistrictID'],
+            'WardCode' => $data['WardCode'],
             'IsDefault' => $data['IsDefault'],
         ]);
     }
 
     public function getAddressByID($id, $userId)
     {
-        return DB::table('addresses')
-            ->where('AddressID', $id)
+        return Addresses::where('AddressID', $id)
             ->where('UserID', $userId)
             ->first();
     }
 
     public function updateAddress($id, $userId, $data)
     {
-        return DB::table($this->table)
-        ->where('AddressID', $id)
+        return Addresses::where('AddressID', $id)
         ->where('UserID', $userId)
         ->update([
             'UserName' => $data['UserName'],
             'Address' => $data['Address'],
             'PhoneNumber' => $data['PhoneNumber'],
+            'DistrictID' => $data['DistrictID'],
+            'WardCode' => $data['WardCode'],
         ]);
     }
 
     public function setDefaultAddress($id, $userId)
     {
-        DB::table($this->table)
-            ->where('UserID', $userId)
+        Addresses::where('UserID', $userId)
             ->update(['IsDefault' => 0]);
 
-        return DB::table($this->table)
-            ->where('AddressID', $id)
+        return Addresses::where('AddressID', $id)
             ->where('UserID', $userId)
             ->update(['IsDefault' => 1]);
     }
 
-
-
     public function deleteAddress($id, $userId)
     {
-        return DB::table($this->table)
-        ->where('AddressID', $id)
+        return Addresses::where('AddressID', $id)
         ->where('UserID', $userId)
         ->delete();
     }
 
+    public function getDistrictID($id)
+    {
+        return Addresses::where('UserID', $id)
+        ->where('UserID', $id)
+        ->where('IsDefault', 1)
+        ->first();
+    }
+
+    public function checkAddressInUse($id, $userId)
+    {
+        return Addresses::where('AddressID', $id)->where('UserID', $userId)->where('IsDefault', 1)->first();
+    }
 }

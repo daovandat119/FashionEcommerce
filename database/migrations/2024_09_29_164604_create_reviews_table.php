@@ -9,13 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+  public function up()
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id('ReviewID');
             $table->foreignId('UserID')->constrained('users', 'UserID');
             $table->foreignId('ProductID')->constrained('products', 'ProductID');
             $table->foreignId('RatingLevelID')->constrained('rating_levels', 'RatingLevelID');
+            $table->foreignId('ParentReviewID')->nullable()->constrained('reviews', 'ReviewID');
             $table->text('ReviewContent');
             $table->timestamps();
         });

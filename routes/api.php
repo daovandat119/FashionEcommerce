@@ -4,7 +4,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckAdmin;
-
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CategoriesController;
@@ -18,11 +17,10 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ShippingController;
+use App\Http\Controllers\Api\CouponController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-
 
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 
@@ -33,8 +31,6 @@ Route::get('/email/verify/{id}', [AuthController::class, 'verify'])
 ->name('verification.verify');
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-
-
 
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
@@ -55,13 +51,11 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(fun
 //
 Route::get('/categories', [CategoriesController::class, 'index']);
 
-Route::get('categories', [CategoriesController::class, 'index']);
-
-Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('categories')->group(function () {
+Route::middleware(['auth:sanctum, auth.admin'])->prefix('categories')->group(function () {
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
     Route::put('/{id}', [CategoriesController::class, 'update']);
-    Route::delete('/', [CategoriesController::class, 'delete']);
+    Route::delete('/{id}', [CategoriesController::class, 'delete']);
     Route::post('/status/{id}', [CategoriesController::class, 'updateStatus']);
 });
 
@@ -81,9 +75,9 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(functi
     Route::delete('/{id}', [SizeController::class, 'delete']);
 });
 
+Route::post('/product-variants/productID', [ProductVariantController::class, 'index']);
 Route::post('/product-variants/getVariantByID', [ProductVariantController::class, 'show']);
 Route::middleware(['auth:sanctum'])->prefix('product-variants')->group(function () {
-    Route::post('/productID', [ProductVariantController::class, 'index']);
     Route::post('/', [ProductVariantController::class, 'store']);
     Route::get('/{VariantID}', [ProductVariantController::class, 'showAdmin']);
     Route::put('/', [ProductVariantController::class, 'update']);
@@ -101,6 +95,7 @@ Route::middleware('auth:sanctum')->prefix('/wishlist')->group(function () {
     Route::post('/', [WishlistController::class, 'create']);
     Route::get('/', [WishlistController::class, 'index']);
     Route::delete('/{id}', [WishlistController::class, 'destroy']);
+
 });
 
 Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
@@ -110,6 +105,9 @@ Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
 });
 
+Route::get('/provinces', [AddressController::class, 'getProvinces']);
+Route::post('/districts', [AddressController::class, 'getDistricts']);
+Route::post('/wards', [AddressController::class, 'getWards']);
 Route::middleware('auth:sanctum')->prefix('/address')->group(function () {
     Route::get('/', [AddressController::class, 'index']);
     Route::post('/', [AddressController::class, 'store']);
@@ -117,12 +115,33 @@ Route::middleware('auth:sanctum')->prefix('/address')->group(function () {
     Route::put('/{id}', [AddressController::class, 'update']);
     Route::delete('/{id}', [AddressController::class, 'delete']);
     Route::get('/setDefaultAddress/{id}', [AddressController::class, 'setDefaultAddress']);
+    Route::post('/shipping-fee', [AddressController::class, 'getShippingFee']);
+});
+
+
+Route::middleware(['auth:sanctum'])->prefix('coupons')->group(function () {
+    Route::post('/checkCoupon', [CouponController::class, 'index']);
+    Route::middleware('auth.admin')->group(function () {
+        Route::post('/', [CouponController::class, 'store']);
+        Route::put('/{id}', [CouponController::class, 'update']);
+        Route::delete('/', [CouponController::class, 'delete']);
+        Route::get('/details', [CouponController::class, 'getDetailsCoupon']);
+    });
 });
 
 Route::get('/reviews/{id}', [ReviewsController::class, 'index']);
 Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/', [ReviewsController::class, 'store']);
+    Route::post('/checkReview', [ReviewsController::class, 'checkReviewByUser']);
 });
 
 
-Route::post('/calculate-shipping', [ShippingController::class, 'calculateShipping']);
+
+
+
+
+
+
+
+
+

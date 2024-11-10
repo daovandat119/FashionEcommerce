@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rating_levels', function (Blueprint $table) {
             $table->id('RatingLevelID');
-            $table->string('LevelName');
+            $table->integer('LevelValue')->unique();
             $table->timestamps();
         });
     }

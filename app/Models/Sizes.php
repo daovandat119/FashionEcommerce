@@ -15,6 +15,12 @@ class Sizes extends Model
 
     public $timestamps = true;
 
+    protected $fillable = [
+        'SizeName',
+        'created_at',
+        'updated_at',
+    ];
+
     public function listSizes()
     {
         return Sizes::get();

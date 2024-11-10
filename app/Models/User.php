@@ -14,8 +14,8 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
-    protected $table = 'users'; 
-    protected $primaryKey = 'UserID'; 
+    protected $table = 'users';
+    protected $primaryKey = 'UserID';
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +31,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'IsActive',
         'CodeId',
         'CodeExpired',
+        'created_at',
+        'updated_at',
     ];
 
 
@@ -58,7 +60,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(Role::class, 'RoleID', 'RoleID');
     }
-  
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmail);
