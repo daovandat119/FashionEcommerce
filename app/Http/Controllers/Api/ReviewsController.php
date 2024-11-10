@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Reviews;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Events\ReviewsPosted;
 
 class ReviewsController extends Controller
 {
@@ -18,11 +19,28 @@ class ReviewsController extends Controller
 //
     public function index($id)
     {
-        $reviews = $this->reviewRepository->getReviews($id);
+        $reviews = $this->reviewRepository->getReviewsWithChildren($id);
 
         return response()->json([
             'message' => 'Success',
             'data' => $reviews,
+        ], 200);
+    }
+
+    public function checkReviewByUser(Request $request)
+    {
+        $userId = auth()->id();
+
+        $checkReview = $this->reviewRepository->checkReview($userId, $request->ProductID);
+
+        $checkOrder = (new Order())->checkOrder($userId, $request->ProductID);
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => [
+                'checkReview' => $checkReview,
+                'checkOrder' => $checkOrder,
+            ],
         ], 200);
     }
 //
@@ -31,6 +49,8 @@ class ReviewsController extends Controller
         $userId = auth()->id();
 
         $order = (new Order())->checkOrder($userId, $request->ProductID);
+
+        $checkReview = $this->reviewRepository->checkReview($userId, $request->ProductID);
 
         if (!$order) {
             return response()->json([
@@ -42,10 +62,13 @@ class ReviewsController extends Controller
             'UserID' => $userId,
             'ProductID' => $request->ProductID,
             'RatingLevelID' => $request->RatingLevelID,
-            'ReviewContent' => $request->ReviewContent,
+            'ReviewContent' => $checkReview ? null : $request->ReviewContent,
+            'ParentReviewID' => $request->ParentReviewID ?? null,
         ];
 
-        $this->reviewRepository->createReview($data);
+        $review = $this->reviewRepository->createReview($data);
+
+        event(new ReviewsPosted($review));
 
         return response()->json([
             'message' => 'Review created successfully',

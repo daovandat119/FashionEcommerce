@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class ProductImage extends Model
 {
@@ -16,9 +15,14 @@ class ProductImage extends Model
 
     public $timestamps = false;
 
+    protected $fillable = [
+        'ProductID',
+        'ImagePath',
+    ];
+
     public function createProductImage($productId, $imagePath)
     {
-        return DB::table($this->table)->insert([
+        return ProductImage::create([
             'ProductID' => $productId,
             'ImagePath' => $imagePath,
         ]);
@@ -26,7 +30,7 @@ class ProductImage extends Model
 
     public function updateProductImage($id, $imagePath)
     {
-        return DB::table($this->table)->where('ProductID', $id)->update([
+        return ProductImage::where('ProductID', $id)->update([
             'ProductID' => $id,
             'ImagePath' => $imagePath,
         ]);

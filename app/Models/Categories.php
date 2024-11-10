@@ -5,6 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\ProductVariant;
+use App\Models\Product;
+use App\Models\ProductImage;
+
 class Categories extends Model
 {
     use HasFactory;
@@ -18,6 +23,8 @@ class Categories extends Model
     protected $fillable = [
         'CategoryName',
         'Status',
+        'created_at',
+        'updated_at',
     ];
 
     public function countCategories()
@@ -25,13 +32,28 @@ class Categories extends Model
         return Categories::count();
     }
 
-    public function listCategories($search, $offset, $limit)
+    public function listCategories($search = null, $offset = null, $limit = null, $status = null)
     {
 
-        return Categories::where('CategoryName', 'like', "%{$search}%")
-        ->skip($offset)
-        ->take($limit)
-        ->get();
+        $categories = Categories::query();
+
+        if($search){
+            $categories = $categories->where('CategoryName', 'like', "%{$search}%");
+        }
+
+        if($offset){
+            $categories = $categories->skip($offset);
+        }
+
+        if($limit){
+            $categories = $categories->take($limit);
+        }
+
+        if($status){
+            $categories = $categories->where('Status', $status);
+        }
+
+        return $categories->get();
     }
 
     public function addCategory($data)
@@ -54,41 +76,38 @@ class Categories extends Model
         return Categories::where('CategoryName', $categoryName)->first();
     }
 
-    public function deleteCategory($id)
-    {
-        return Categories::where('CategoryID', $id)->delete();
-    }
-
     public function deleteCategoryAndRelatedData($categoryId)
     {
-        DB::beginTransaction();
+        // Delete product variants related to the category
+        DB::table('product_variants')
+            ->where('ProductID', function($query) use ($categoryId) {
+                $query->select('ProductID')
+                      ->from('products')
+                      ->where('CategoryID', $categoryId);
+            })
+            ->delete();
 
-        try {
-            ProductVariant::where('ProductID', 'products.ProductID')
-                ->where('products.CategoryID', $categoryId)
-                ->delete();
+        // Delete product images related to the category
+        DB::table('product_images')
+            ->where('ProductID', function($query) use ($categoryId) {
+                $query->select('ProductID')
+                      ->from('products')
+                      ->where('CategoryID', $categoryId);
+            })
+            ->delete();
 
+        // Delete products related to the category
+        DB::table('products')
+            ->where('CategoryID', $categoryId)
+            ->delete();
 
-            ProductImage::where('ProductID', 'products.ProductID')
-                ->where('products.CategoryID', $categoryId)
-                ->delete();
+        // Delete the category itself
+        Categories::where('CategoryID', $categoryId)
+            ->delete();
 
-            Product::where('CategoryID', $categoryId)
-                ->delete();
+        DB::commit();
 
-            Categories::where('CategoryID', $categoryId)
-                ->delete();
-
-            DB::commit();
-
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Error deleting category and related data: ' . $e->getMessage());
-
-            return false;
-        }
+        return true;
     }
 
     public function updateCategoryAndRelatedStatus($categoryId, $status)
@@ -96,16 +115,18 @@ class Categories extends Model
         DB::beginTransaction();
 
         try {
-            // Update status of product variants
-            ProductVariant::where('ProductID', 'products.ProductID')
-                ->where('products.CategoryID', $categoryId)
-                ->update(['product_variants.Status' => $status]);
+            DB::table('product_variants')
+                ->where('ProductID', function($query) use ($categoryId) {
+                    $query->select('ProductID')
+                          ->from('products')
+                          ->where('CategoryID', $categoryId);
+                })
+                ->update(['status' => $status]);
 
-            // Update status of products
-            Product::where('CategoryID', $categoryId)
-                ->update(['Status' => $status]);
+            DB::table('products')
+                ->where('CategoryID', $categoryId)
+                ->update(['status' => $status]);
 
-            // Update status of the category
             Categories::where('CategoryID', $categoryId)
                 ->update(['Status' => $status]);
 

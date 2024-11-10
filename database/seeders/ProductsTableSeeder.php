@@ -22,7 +22,7 @@ class ProductsTableSeeder extends Seeder
                 'MainImageURL' => 'https://example.com/images/smartphone.jpg',
                 'ShortDescription' => 'A high-quality smartphone with excellent performance.',
                 'Description' => 'This smartphone offers a high-resolution camera, long battery life, and powerful processing.',
-                'Status' => 'in_stock'
+                'Status' => 'ACTIVE'
             ],
             [
                 'CategoryID' => 2,
@@ -33,7 +33,7 @@ class ProductsTableSeeder extends Seeder
                 'MainImageURL' => 'https://example.com/images/tshirt.jpg',
                 'ShortDescription' => 'A comfortable cotton T-shirt.',
                 'Description' => 'This T-shirt is made from 100% cotton, providing comfort and durability for everyday wear.',
-                'Status' => 'out_of_stock'
+                'Status' => 'ACTIVE'
             ],
             [
                 'CategoryID' => 3,
@@ -44,7 +44,7 @@ class ProductsTableSeeder extends Seeder
                 'MainImageURL' => 'https://example.com/images/laptop.jpg',
                 'ShortDescription' => 'A powerful and lightweight laptop.',
                 'Description' => 'This laptop comes with a high-performance processor, ample storage, and a vibrant display.',
-                'Status' => 'in_stock'
+                'Status' => 'ACTIVE'
             ]
         ]);
     }

@@ -63,7 +63,7 @@ class CartItemsController extends Controller
 
             $newCartItems = $this->repoCartItems->createCartItem($data);
 
-            return response()->json(['message' => 'Success', 'data' => $newCartItems], 200);
+            return response()->json(['message' => 'Success', 'data' => $newCartItems], 201);
         } else {
             $newQuantity = $cartItem->Quantity + $request->quantity;
             if ($newQuantity > $productVariant->Quantity) {

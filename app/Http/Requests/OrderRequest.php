@@ -16,7 +16,6 @@ class OrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'AddressID' => 'required|exists:addresses,AddressID',
             'PaymentMethodID' => 'required|exists:payment_methods,PaymentMethodID',
             'TotalAmount' => 'required|numeric|min:0',
         ];
@@ -25,8 +24,6 @@ class OrderRequest extends FormRequest
     public function messages()
     {
         return [
-            'AddressID.required' => 'The address ID is required.',
-            'AddressID.exists' => 'The selected address ID is invalid.',
             'PaymentMethodID.required' => 'The payment method ID is required.',
             'PaymentMethodID.exists' => 'The selected payment method ID is invalid.',
             'TotalAmount.required' => 'The total amount is required.',

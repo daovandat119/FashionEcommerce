@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class CartItems extends Model
 {
@@ -19,14 +18,16 @@ class CartItems extends Model
     protected $fillable = [
         'CartID',
         'ProductID',
+        'VariantID',
         'Quantity',
         'Price',
+        'created_at',
+        'updated_at',
     ];
 
     public function getCartItemByUserId($userId)
     {
-        $query = DB::table('cart_items as ci')
-            ->join('carts as c', 'ci.CartID', '=', 'c.CartID')
+        $query = CartItems::join('carts as c', 'ci.CartID', '=', 'c.CartID')
             ->join('products as p', 'ci.ProductID', '=', 'p.ProductID')
             ->join('product_variants as pv', 'ci.VariantID', '=', 'pv.VariantID')
             ->join('colors as col', 'pv.ColorID', '=', 'col.ColorID')
@@ -50,18 +51,14 @@ class CartItems extends Model
 
     public function getCartItem($cartID)
     {
-        $getCartItemByCartID = DB::table($this->table)
-            ->where('CartID', $cartID)
-            ->get();
+        $getCartItemByCartID = CartItems::where('CartID', $cartID)->get();
 
         return $getCartItemByCartID;
     }
 
     public function updateCartItem($cartItemID, $data)
     {
-        $updateCartItem = DB::table($this->table)
-            ->where('CartItemID', $cartItemID)
-            ->update(['Quantity' => $data['quantity']]);
+        $updateCartItem = CartItems::where('CartItemID', $cartItemID)->update(['Quantity' => $data['quantity']]);
 
         return $updateCartItem;
     }
@@ -69,7 +66,7 @@ class CartItems extends Model
 
     public function createCartItem($data)
     {
-        $createCartItem = DB::table($this->table)->insert([
+        $createCartItem = CartItems::create([
             'CartID' => $data['CartID'],
             'ProductID' => $data['ProductID'],
             'VariantID' => $data['VariantID'],
@@ -80,8 +77,7 @@ class CartItems extends Model
 
     public function getCartItemByCartID($cartID, $productID, $variantID)
     {
-        $getCartItemByCartID = DB::table($this->table)
-            ->where('CartID', $cartID)
+        $getCartItemByCartID = CartItems::where('CartID', $cartID)
             ->where('ProductID', $productID)
             ->where('VariantID', $variantID)
             ->first();
@@ -91,18 +87,14 @@ class CartItems extends Model
 
     public function deleteCartItem($cartItemID)
     {
-        $deleteCartItem = DB::table($this->table)
-            ->where('CartItemID', $cartItemID)
-            ->delete();
+        $deleteCartItem = CartItems::where('CartItemID', $cartItemID)->delete();
 
         return $deleteCartItem;
     }
 
     public function deleteCartItemByCartID($cartID)
     {
-        $deleteCartItemByCartID = DB::table($this->table)
-            ->where('CartID', $cartID)
-            ->delete();
+        $deleteCartItemByCartID = CartItems::where('CartID', $cartID)->delete();
     }
 
 

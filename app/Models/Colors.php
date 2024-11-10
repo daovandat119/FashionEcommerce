@@ -16,6 +16,12 @@ class Colors extends Model
 
     public $timestamps = true;
 
+    protected $fillable = [
+        'ColorName',
+        'created_at',
+        'updated_at',
+    ];
+
     public function listColors()
     {
         return Colors::get();

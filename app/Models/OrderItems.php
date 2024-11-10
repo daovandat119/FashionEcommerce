@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB; // Add this line
 
 class OrderItems extends Model
 {
@@ -16,9 +15,16 @@ class OrderItems extends Model
 
     public $timestamps = true;
 
+    protected $fillable = [
+        'OrderID',
+        'ProductID',
+        'VariantID',
+        'Quantity',
+    ];
+
     public function createOrderItem($dataOrderItem)
     {
-        return DB::table($this->table)->insert([
+        return OrderItems::create([
             'OrderID' => $dataOrderItem['OrderID'],
             'ProductID' => $dataOrderItem['ProductID'],
             'VariantID' => $dataOrderItem['VariantID'],

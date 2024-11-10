@@ -22,7 +22,10 @@ class ProductsController extends Controller
 
     public function index(Request $request)
     {
-        $total = $this->repoProducts->countProducts();
+        $isAdmin = $request->admin;
+
+        $total = $this->repoProducts->countProducts($isAdmin ? null : 'ACTIVE');
+
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
         $categoryId = $request->input('CategoryID');
@@ -31,7 +34,8 @@ class ProductsController extends Controller
             $request->input('Search'),
             ($page - 1) * $limit,
             $limit,
-            $categoryId
+            $categoryId,
+            $isAdmin ? null : 'ACTIVE'
         );
 
         $totalPage = ceil($total / $limit);
@@ -39,10 +43,12 @@ class ProductsController extends Controller
         return response()->json([
             'message' => 'Success',
             'data' => $listProducts,
-            'total' => $total,
-            'totalPage' => $totalPage,
-            'page' => $page,
-            'limit' => $limit
+            ...($isAdmin ? [
+                'total' => $total,
+                'totalPage' => $totalPage,
+                'page' => $page,
+                'limit' => $limit
+            ] : [])
         ], 200);
     }
 

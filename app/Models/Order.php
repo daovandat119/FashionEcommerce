@@ -16,15 +16,27 @@ class Order extends Model
 
     public $timestamps = true;
 
+    protected $fillable = [
+        'UserID',
+        'AddressID',
+        'CartID',
+        'OrderStatusID',
+        'OrderCode',
+        'created_at',
+        'updated_at',
+    ];
+
     public function createOrder($data)
     {
-        return DB::table($this->table)->insertGetId([
+        $order = Order::create([
             'UserID' => $data['UserID'],
             'AddressID' => $data['AddressID'],
             'CartID' => $data['CartID'],
             'OrderStatusID' => 1,
             'OrderCode' => $data['OrderCode'],
         ]);
+
+        return $order->OrderID;
     }
 
     public function getOrder($userId)
@@ -44,7 +56,7 @@ class Order extends Model
                 pm.MethodName AS PaymentMethod,
                 ps.StatusName AS PaymentStatus,
                 COALESCE(SUM(oi.Quantity), 0) AS TotalQuantity,
-                COALESCE(pay.Amount, 0) AS TotalAmount,
+                COALESCE(SUM(oi.Quantity * pv.Price), 0) AS TotalAmount,
                 o.OrderCode,
                 ua.AddressID
             ')
@@ -55,8 +67,7 @@ class Order extends Model
                 'pm.MethodName',
                 'ps.StatusName',
                 'o.OrderCode',
-                'ua.AddressID',
-                'pay.Amount'
+                'ua.AddressID'
             )
             ->get();
     }
@@ -135,7 +146,7 @@ class Order extends Model
                 'c.ColorName',
                 's.SizeName'
             )
-            ->first();
+            ->exists();
     }
 
 }

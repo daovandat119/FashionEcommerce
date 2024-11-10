@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Cart extends Model
 {
@@ -16,15 +15,21 @@ class Cart extends Model
 
     public $timestamps = true;
 
+    protected $fillable = [
+        'UserID',
+        'created_at',
+        'updated_at',
+    ];
+
     public function getCartByUserID($id)
     {
-        $cart = DB::table($this->table)->where('UserID', $id)->first();
+        $cart = Cart::where('UserID', $id)->first();
         return $cart;
     }
 
     public function createCart($userId)
     {
-        $cartId = DB::table($this->table)->insertGetId(['UserID' => $userId]);
+        $cartId = Cart::create(['UserID' => $userId]);
 
         return $cartId;
     }
