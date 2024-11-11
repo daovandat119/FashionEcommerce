@@ -90,14 +90,13 @@ Route::middleware('auth:sanctum')->prefix('/cart-items')->group(function () {
     Route::get('/', [CartItemsController::class, 'index']);
     Route::post('/', [CartItemsController::class, 'store']);
     Route::patch('/{id}', [CartItemsController::class, 'update']);
-    Route::delete('/{id}', [CartItemsController::class, 'destroy']);
+    Route::delete('/', [CartItemsController::class, 'destroy']);
 });
 
 Route::middleware('auth:sanctum')->prefix('/wishlist')->group(function () {
     Route::post('/', [WishlistController::class, 'create']);
     Route::get('/', [WishlistController::class, 'index']);
     Route::delete('/{id}', [WishlistController::class, 'destroy']);
-
 });
 
 Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
@@ -120,7 +119,6 @@ Route::middleware('auth:sanctum')->prefix('/address')->group(function () {
     Route::post('/checkAddress', [AddressController::class, 'checkAddress']);
     Route::post('/shipping-fee', [AddressController::class, 'getShippingFee']);
 });
-
 
 Route::middleware(['auth:sanctum'])->prefix('coupons')->group(function () {
     Route::post('/checkCoupon', [CouponController::class, 'index']);

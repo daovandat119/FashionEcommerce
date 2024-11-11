@@ -82,7 +82,7 @@ class AddressController extends Controller
 
         $this->repoAddress->updateAddress($id, $userId, $data);
 
-        return response()->json(['message' => 'Success', 'data' => $data], 200);
+        return response()->json(['message' => 'Update address successfully'], 200);
     }
 
     public function setDefaultAddress($id)

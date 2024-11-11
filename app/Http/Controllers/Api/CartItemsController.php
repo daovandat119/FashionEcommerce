@@ -119,16 +119,13 @@ class CartItemsController extends Controller
 
     public function destroy(Request $request)
     {
-        $ids = $request->input('ids');
+        $userId = auth()->id();
 
-        $deleteCartItemsCount = 0;
+        $ids = explode(',', $request->input('ids'));
 
-        foreach ($ids as $id) {
-            $deleteCartItems = $this->repoCartItems->deleteCartItem($id);
-            $deleteCartItemsCount += $deleteCartItems;
-        }
+        $deletedCartItemsCount = $this->repoCartItems->deleteCartItem($ids, $userId);
 
-        return response()->json(['message' => 'Success', 'deleted_count' => $deleteCartItemsCount], 200);
+        return response()->json(['message' => 'Success', 'deleted_count' => $deletedCartItemsCount], 200);
     }
 
 }

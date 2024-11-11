@@ -11,6 +11,7 @@ use App\Http\Requests\ProductsRequest;
 use Cloudinary\Cloudinary;
 use Cloudinary\Api\Upload\UploadApi;
 
+
 class ProductsController extends Controller
 {
     protected $repoProducts;
@@ -109,7 +110,7 @@ class ProductsController extends Controller
         ], 200);
     }
 
-    public function update(Request $request, $id)
+    public function update(ProductsRequest $request, $id)
     {
 
         $product = $this->repoProducts->getDetail($id);

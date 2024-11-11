@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use App\Models\ProductImage;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
 
 class Products extends Model
@@ -155,9 +156,8 @@ class Products extends Model
         try {
             Products::where('ProductID', $id)->update(['Status' => $status]);
 
-            ProductVariants::join('products', 'product_variants.ProductID', '=', 'products.ProductID')
-                ->where('products.ProductID', $id)
-                ->update(['product_variants.Status' => $status]);
+            ProductVariant::where('ProductID', $id)
+                ->update(['Status' => $status]);
 
             DB::commit();
             return true;

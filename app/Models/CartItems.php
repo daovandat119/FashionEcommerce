@@ -86,11 +86,12 @@ class CartItems extends Model
         return $getCartItemByCartID;
     }
 
-    public function deleteCartItem($cartItemID)
+    public function deleteCartItem($cartItemID, $userId)
     {
-        $deleteCartItem = CartItems::where('CartItemID', $cartItemID)->delete();
+        return CartItems::whereIn('CartItemID', $cartItemID)
+            ->where('CartID', $userId)
+            ->delete();
 
-        return $deleteCartItem;
     }
 
     public function deleteCartItemByCartID($cartID)

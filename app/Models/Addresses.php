@@ -61,7 +61,6 @@ class Addresses extends Model
     {
         return Addresses::where('AddressID', $id)
             ->where('UserID', $userId)
-            ->where('Status', 'ACTIVE')
             ->first();
     }
 
