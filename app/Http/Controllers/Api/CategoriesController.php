@@ -30,7 +30,12 @@ class CategoriesController extends Controller
                 ($page - 1) * $limit,
                 $limit,
                 null
-            ] : [])
+            ] : [
+                null,
+                null,
+                null,
+                $status = 'ACTIVE'
+            ])
         );
 
         $totalPage = ceil($total / $limit);
