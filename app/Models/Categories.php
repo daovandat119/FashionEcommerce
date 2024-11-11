@@ -78,36 +78,42 @@ class Categories extends Model
 
     public function deleteCategoryAndRelatedData($categoryId)
     {
-        // Delete product variants related to the category
-        DB::table('product_variants')
-            ->where('ProductID', function($query) use ($categoryId) {
-                $query->select('ProductID')
-                      ->from('products')
-                      ->where('CategoryID', $categoryId);
-            })
-            ->delete();
+        DB::beginTransaction();
 
-        // Delete product images related to the category
-        DB::table('product_images')
-            ->where('ProductID', function($query) use ($categoryId) {
-                $query->select('ProductID')
-                      ->from('products')
-                      ->where('CategoryID', $categoryId);
-            })
-            ->delete();
+        try {
+            DB::table('product_variants')
+                ->where('ProductID', function($query) use ($categoryId) {
+                    $query->select('ProductID')
+                          ->from('products')
+                          ->where('CategoryID', $categoryId);
+                })
+                ->delete();
 
-        // Delete products related to the category
-        DB::table('products')
-            ->where('CategoryID', $categoryId)
-            ->delete();
+            DB::table('product_images')
+                ->where('ProductID', function($query) use ($categoryId) {
+                    $query->select('ProductID')
+                          ->from('products')
+                          ->where('CategoryID', $categoryId);
+                })
+                ->delete();
 
-        // Delete the category itself
-        Categories::where('CategoryID', $categoryId)
-            ->delete();
+            DB::table('products')
+                ->where('CategoryID', $categoryId)
+                ->delete();
 
-        DB::commit();
+            Categories::where('CategoryID', $categoryId)
+                ->delete();
 
-        return true;
+            DB::commit();
+
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error deleting category and related data: ' . $e->getMessage());
+
+            return false;
+        }
     }
 
     public function updateCategoryAndRelatedStatus($categoryId, $status)
@@ -115,6 +121,39 @@ class Categories extends Model
         DB::beginTransaction();
 
         try {
+
+            DB::table('reviews')
+                ->where('ProductID', function($query) use ($categoryId) {
+                    $query->select('ProductID')
+                          ->from('products')
+                          ->where('CategoryID', $categoryId);
+                })
+                ->delete();
+
+            DB::table('wishlists')
+                ->where('ProductID', function($query) use ($categoryId) {
+                    $query->select('ProductID')
+                          ->from('products')
+                          ->where('CategoryID', $categoryId);
+                })
+                ->delete();
+
+            DB::table('order_items')
+                ->where('ProductID', function($query) use ($categoryId) {
+                    $query->select('ProductID')
+                          ->from('products')
+                          ->where('CategoryID', $categoryId);
+                })
+                ->delete();
+
+            DB::table('cart_items')
+                ->where('ProductID', function($query) use ($categoryId) {
+                    $query->select('ProductID')
+                          ->from('products')
+                          ->where('CategoryID', $categoryId);
+                })
+                ->delete();
+
             DB::table('product_variants')
                 ->where('ProductID', function($query) use ($categoryId) {
                     $query->select('ProductID')

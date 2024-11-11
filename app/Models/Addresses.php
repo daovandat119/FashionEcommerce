@@ -23,23 +23,24 @@ class Addresses extends Model
         'DistrictID',
         'WardCode',
         'IsDefault',
+        'Status',
         'created_at',
         'updated_at',
     ];
 
     public function getAddress($id)
     {
-        return Addresses::where('AddressID', $id)->first();
+        return Addresses::where('AddressID', $id)->where('Status', 'ACTIVE')->first();
     }
 
     public function getAddressByUserID($id)
     {
-        return Addresses::where('UserID', $id)->get();
+        return Addresses::where('UserID', $id)->where('Status', 'ACTIVE')->get();
     }
 
     public function checkAddressByUserID($id)
     {
-        return Addresses::where('UserID', $id)->first();
+        return Addresses::where('UserID', $id)->where('Status', 'ACTIVE')->first();
     }
 
     public function addAddress($data)
@@ -52,6 +53,7 @@ class Addresses extends Model
             'DistrictID' => $data['DistrictID'],
             'WardCode' => $data['WardCode'],
             'IsDefault' => $data['IsDefault'],
+            'Status' => $data['Status'],
         ]);
     }
 
@@ -59,6 +61,7 @@ class Addresses extends Model
     {
         return Addresses::where('AddressID', $id)
             ->where('UserID', $userId)
+            ->where('Status', 'ACTIVE')
             ->first();
     }
 
@@ -66,6 +69,7 @@ class Addresses extends Model
     {
         return Addresses::where('AddressID', $id)
         ->where('UserID', $userId)
+        ->where('Status', 'ACTIVE')
         ->update([
             'UserName' => $data['UserName'],
             'Address' => $data['Address'],
@@ -78,18 +82,21 @@ class Addresses extends Model
     public function setDefaultAddress($id, $userId)
     {
         Addresses::where('UserID', $userId)
+            ->where('Status', 'ACTIVE')
             ->update(['IsDefault' => 0]);
 
         return Addresses::where('AddressID', $id)
             ->where('UserID', $userId)
+            ->where('Status', 'ACTIVE')
             ->update(['IsDefault' => 1]);
     }
 
     public function deleteAddress($id, $userId)
     {
         return Addresses::where('AddressID', $id)
-        ->where('UserID', $userId)
-        ->delete();
+            ->where('UserID', $userId)
+            ->where('Status', 'ACTIVE')
+            ->update(['Status' => 'INACTIVE']);
     }
 
     public function getDistrictID($id)
@@ -97,6 +104,7 @@ class Addresses extends Model
         return Addresses::where('UserID', $id)
         ->where('UserID', $id)
         ->where('IsDefault', 1)
+        ->where('Status', 'ACTIVE')
         ->first();
     }
 

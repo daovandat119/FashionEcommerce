@@ -25,7 +25,7 @@ class AddressController extends Controller
         return response()->json(['message' => 'Success', 'data' => $address], 200);
     }
 
-    public function store(AddressRequest $request)
+    public function store(Request $request)
     {
         $userId = auth()->id();
 
@@ -39,6 +39,7 @@ class AddressController extends Controller
             'DistrictID' => $request->input('DistrictID'),
             'WardCode' => $request->input('WardCode'),
             'IsDefault' => $address ? 0 : 1,
+            'Status' => 'ACTIVE',
         ];
 
         $this->repoAddress->addAddress($data);
@@ -117,7 +118,16 @@ class AddressController extends Controller
 
         $this->repoAddress->deleteAddress($id, $userId);
 
-        return response()->json(['message' => 'Success', 'data' => $address], 200);
+        return response()->json(['message' => 'Delete address successfully'], 200);
+    }
+
+    public function checkAddress(Request $request){
+
+        $userId = auth()->id();
+
+        $address = $this->repoAddress->checkAddressByUserID($userId);
+
+        return response()->json(['message' => 'Success', 'data' => $address ? "true" : "false"], 200);
     }
 
     public function getProvinces()

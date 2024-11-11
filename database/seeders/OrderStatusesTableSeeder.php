@@ -13,9 +13,10 @@ class OrderStatusesTableSeeder extends Seeder
     public function run()
     {
         DB::table('order_statuses')->insert([
-            ['StatusName' => 'Pending'],
-            ['StatusName' => 'Completed'],
-            ['StatusName' => 'Cancelled'],
+            ['StatusName' => 'Đang xử lý'],
+            ['StatusName' => 'Đang giao hàng'],
+            ['StatusName' => 'Đã giao hàng'],
+            ['StatusName' => 'Đã hủy'],
         ]);
     }
 }

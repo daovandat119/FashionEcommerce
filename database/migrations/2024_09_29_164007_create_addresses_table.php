@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('DistrictID', 20);
             $table->string('WardCode', 20);
             $table->boolean('IsDefault')->default(0);
+            $table->enum('Status', ['ACTIVE', 'INACTIVE'])->nullable();
             $table->timestamps();
         });
     }

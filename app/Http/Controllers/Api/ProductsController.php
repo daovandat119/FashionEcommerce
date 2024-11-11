@@ -22,9 +22,9 @@ class ProductsController extends Controller
 
     public function index(Request $request)
     {
-        $isAdmin = $request->admin;
+        $role = auth()->check() ? auth()->user()->role->RoleName : 'User';
 
-        $total = $this->repoProducts->countProducts($isAdmin ? null : 'ACTIVE');
+        $total = $this->repoProducts->countProducts($role == 'Admin' ? null : 'ACTIVE');
 
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
@@ -35,7 +35,7 @@ class ProductsController extends Controller
             ($page - 1) * $limit,
             $limit,
             $categoryId,
-            $isAdmin ? null : 'ACTIVE'
+            $role == 'Admin' ? null : 'ACTIVE'
         );
 
         $totalPage = ceil($total / $limit);
@@ -105,9 +105,7 @@ class ProductsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Product updated successfully',
-            'data' => [
-                'product' => $product,
-            ]
+            'data' => $product
         ], 200);
     }
 

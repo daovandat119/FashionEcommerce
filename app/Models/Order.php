@@ -39,7 +39,7 @@ class Order extends Model
         return $order->OrderID;
     }
 
-    public function getOrder($userId)
+    public function getOrder($userId = null)
     {
         return DB::table('orders as o')
             ->leftJoin('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
@@ -60,7 +60,9 @@ class Order extends Model
                 o.OrderCode,
                 ua.AddressID
             ')
-            ->where('o.UserID', $userId)
+            ->when($userId, function ($query, $userId) {
+                return $query->where('o.UserID', $userId);
+            })
             ->groupBy(
                 'o.OrderID',
                 'os.StatusName',
@@ -70,9 +72,11 @@ class Order extends Model
                 'ua.AddressID'
             )
             ->get();
+
+
     }
 
-    public function getOrderById($userId, $id)
+    public function getOrderById($id, $userId = null)
     {
         return DB::table('orders as o')
             ->leftJoin('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
@@ -92,7 +96,9 @@ class Order extends Model
                 s.SizeName AS VariantSize,
                 SUM(oi.Quantity * pv.Price) AS TotalPrice
             ')
-            ->where('o.UserID', $userId)
+            ->when($userId, function ($query, $userId) {
+                return $query->where('o.UserID', $userId);
+            })
             ->where('o.OrderID', $id)
             ->groupBy(
                 'o.OrderID',
@@ -107,10 +113,12 @@ class Order extends Model
     }
 
 
-    public function updateOrderStatus($userId, $id, $orderStatusID)
+    public function updateOrderStatus($id, $orderStatusID, $userId = null)
     {
         return DB::table('orders')
-            ->where('UserID', $userId)
+            ->when($userId, function ($query, $userId) {
+                return $query->where('UserID', $userId);
+            })
             ->where('OrderID', $id)
             ->update(['OrderStatusID' => $orderStatusID]);
     }

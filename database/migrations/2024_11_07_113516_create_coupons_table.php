@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('coupons', function (Blueprint $table) {
             $table->id('CouponID');
-            $table->string('Name'); // Tên của coupon
-            $table->string('Code')->unique(); // Mã coupon, phải là duy nhất
-            $table->integer('DiscountPercentage'); // Phần trăm giảm giá mà coupon cung cấp
-            $table->decimal('MinimumOrderValue', 10, 2)->nullable(); // Giá trị đơn hàng tối thiểu để áp dụng coupon, có thể null
-            $table->integer('UsageLimit')->nullable(); // Giới hạn số lần sử dụng coupon, có thể null
-            $table->integer('UsedCount')->default(0); // Số lần coupon đã được sử dụng, mặc định là 0
-            $table->timestamp('ExpiresAt')->nullable(); // Thời gian hết hạn của coupon, có thể null
-            $table->timestamps(); // Timestamps cho created_at và updated_at
+            $table->string('Name');
+            $table->string('Code')->unique();
+            $table->integer('DiscountPercentage');
+            $table->decimal('MinimumOrderValue', 10, 2)->nullable();
+            $table->integer('UsageLimit')->nullable();
+            $table->integer('UsedCount')->default(0);
+            $table->timestamp('ExpiresAt')->nullable();
+            $table->timestamps();
         });
     }
 

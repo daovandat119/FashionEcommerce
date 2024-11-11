@@ -27,7 +27,9 @@ class OrderController extends Controller
     {
         $userId = auth()->id();
 
-        $order = $this->order->getOrder($userId);
+        $role = auth()->user()->role->RoleName;
+
+        $order = $this->order->getOrder($role == 'Admin' ? null : $userId);
 
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
@@ -97,7 +99,9 @@ class OrderController extends Controller
     {
         $userId = auth()->id();
 
-        $order = $this->order->getOrderById($userId, $id);
+        $role = auth()->user()->role->RoleName;
+
+        $order = $this->order->getOrderById($id, $role == 'Admin' ? null : $userId);
 
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
@@ -106,7 +110,9 @@ class OrderController extends Controller
     {
         $userId = auth()->id();
 
-        $order = $this->order->updateOrderStatus($userId, $id, $request->OrderStatusID);
+        $role = auth()->user()->role->RoleName;
+
+        $order = $this->order->updateOrderStatus($id, $request->OrderStatusID, $role == 'Admin' ? null : $userId);
 
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }

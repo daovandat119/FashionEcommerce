@@ -13,9 +13,8 @@ class PaymentMethodsTableSeeder extends Seeder
     public function run()
     {
         DB::table('payment_methods')->insert([
-            ['MethodName' => 'Credit Card'],
-            ['MethodName' => 'PayPal'],
-            ['MethodName' => 'Bank Transfer'],
+            ['MethodName' => 'Thanh toán khi nhận hàng'],
+            ['MethodName' => 'VNPAY'],
         ]);
     }
 }

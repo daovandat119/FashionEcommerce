@@ -18,25 +18,27 @@ class CategoriesController extends Controller
 
     public function index(Request $request)
     {
-        $isAdmin = $request->admin;
+        $role = auth()->check() ? auth()->user()->role->RoleName : 'User';
 
         $total = $this->repoCategories->countCategories();
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
 
         $categories = $this->repoCategories->listCategories(
-            $isAdmin ? $request->input('Search') : null,
-            $isAdmin ? ($page - 1) * $limit : null,
-            $isAdmin ? $limit : null,
-            $isAdmin ? null : 'ACTIVE'
+            ...($role == 'Admin' ? [
+                $request->input('Search'),
+                ($page - 1) * $limit,
+                $limit,
+                null
+            ] : [])
         );
 
         $totalPage = ceil($total / $limit);
-        //
+
         return response()->json([
             'message' => 'Success',
             'data' => $categories,
-            ...($isAdmin ? [
+            ...($role == 'Admin' ? [
                 'total' => $total,
                 'totalPage' => $totalPage,
                 'page' => $page,

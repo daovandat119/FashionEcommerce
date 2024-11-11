@@ -43,15 +43,17 @@ Route::get('/products', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::get('/products/{id}', [ProductsController::class, 'edit']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(function () {
+    Route::post('/admin', [ProductsController::class, 'index']);
     Route::post('/', [ProductsController::class, 'store']);
     Route::post('/{id}', [ProductsController::class, 'update']);
     Route::delete('/', [ProductsController::class, 'delete']);
     Route::post('/status/{id}', [ProductsController::class, 'updateStatus']);
 });
 //
-Route::get('/categories', [CategoriesController::class, 'index']);
 
-Route::middleware(['auth:sanctum, auth.admin'])->prefix('categories')->group(function () {
+Route::get('/categories', [CategoriesController::class, 'index']);
+Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('categories')->group(function () {
+    Route::get('/admin', [CategoriesController::class, 'index']);
     Route::post('/', [CategoriesController::class, 'store']);
     Route::get('/{id}', [CategoriesController::class, 'edit']);
     Route::put('/{id}', [CategoriesController::class, 'update']);
@@ -115,6 +117,7 @@ Route::middleware('auth:sanctum')->prefix('/address')->group(function () {
     Route::put('/{id}', [AddressController::class, 'update']);
     Route::delete('/{id}', [AddressController::class, 'delete']);
     Route::get('/setDefaultAddress/{id}', [AddressController::class, 'setDefaultAddress']);
+    Route::post('/checkAddress', [AddressController::class, 'checkAddress']);
     Route::post('/shipping-fee', [AddressController::class, 'getShippingFee']);
 });
 
