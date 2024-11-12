@@ -103,31 +103,25 @@ class CategoriesController extends Controller
         ], 200);
     }
 
-    public function delete($id)
+    public function delete(Request $request)
     {
-        // $ids = $request->input('ids');
-        // $idArray = explode(',', $ids);
-        // $results = [];
+        $ids = explode(',', $request->ids);
 
-        // foreach ($idArray as $id) {
-        //     $id = trim($id);
-        //     $category = $this->repoCategories->getDetail($id);
+        foreach ($ids as $id) {
 
-        //     if (!$category) {
-        //         $results[] = ['id' => $id, 'message' => 'Category not found'];
-        //         continue;
-        //     }
+            $category = $this->repoCategories->getDetail($id);
 
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
+            }
 
+            $this->repoCategories->deleteCategoryAndRelatedData($id);
 
-        //     $results[] = ['id' => $id, 'message' => 'Deleted successfully'];
-        // }
-
-        $this->repoCategories->deleteCategoryAndRelatedData($id);
+        }
 
         return response()->json([
-            'message' => 'Operation completed',
-            'id' => $id
+            'success' => true,
+            'message' => 'Categories deleted successfully',
         ], 200);
     }
 

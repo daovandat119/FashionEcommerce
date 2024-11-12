@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CartItems;
+use App\Models\OrderItems;
 
 class ProductVariant extends Model
 {
@@ -84,9 +86,13 @@ class ProductVariant extends Model
     }
 
 
-    public function deleteVariant($id)
+    public function deleteVariant($ids)
     {
-        return ProductVariant::where('VariantID', $id)->delete();
+        CartItems::whereIn('VariantID', $ids)->delete();
+
+        OrderItems::whereIn('VariantID', $ids)->delete();
+
+        ProductVariant::whereIn('VariantID', $ids)->delete();
     }
 
     public function updateStatus($id, $status)

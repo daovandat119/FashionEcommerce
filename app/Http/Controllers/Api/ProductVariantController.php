@@ -69,7 +69,11 @@ class ProductVariantController extends Controller
 
     public function show(Request $request)
     {
-        $variant = $this->repoProductVariant->getVariantByID($request->ProductID, $request->SizeID, $request->ColorID);
+        $variant = $this->repoProductVariant->getVariantByID(
+            $request->ProductID,
+            $request->SizeID,
+            $request->ColorID
+        );
 
         if (!$variant) {
             return response()->json(['message' => 'Success', 'data' => [
@@ -115,11 +119,16 @@ class ProductVariantController extends Controller
         return response()->json(['message' => 'Cập nhật thành công!', 'data' => $data], 200);
     }
 
-    public function delete($id)
+    public function delete(Request $request)
     {
-        $variant = $this->repoProductVariant->deleteVariant($id);
+        $ids = explode(',', $request->ids);
 
-        return response()->json(['message' => 'Xóa thành công!', 'data' => $variant], 200);
+        $this->repoProductVariant->deleteVariant($ids);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Variants deleted successfully',
+        ], 200);
     }
 
 

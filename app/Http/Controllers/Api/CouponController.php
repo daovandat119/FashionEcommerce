@@ -71,12 +71,13 @@ class CouponController extends Controller
 
     public function delete(Request $request)
     {
-        $ids = explode(',', $request->CouponID);
+        $ids = explode(',', $request->ids);
 
         $coupon = $this->repoCoupon->deleteCoupon($ids);
 
         return response()->json([
-            'message' => 'Success',
+            'success' => true,
+            'message' => 'Coupons deleted successfully',
         ], 200);
     }
 
