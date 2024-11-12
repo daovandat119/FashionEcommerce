@@ -19,12 +19,8 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ShippingController;
 use App\Http\Controllers\Api\CouponController;
-<<<<<<< HEAD
-use App\Http\Controllers\Api\PaymentController;
-=======
-use App\Http\Controllers\Api\GoogleController;
->>>>>>> 6dc9afa2d7de3beee35dfb855abf6ac26ad5fa5e
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Api\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -112,7 +108,7 @@ Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'getOrderById']);
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
-}); 
+});
 
 Route::get('/provinces', [AddressController::class, 'getProvinces']);
 Route::post('/districts', [AddressController::class, 'getDistricts']);
@@ -144,10 +140,9 @@ Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/checkReview', [ReviewsController::class, 'checkReviewByUser']);
 });
 
-<<<<<<< HEAD
 Route::get('/pay/{totalAmount}/{userId}', [PaymentController::class, 'addPayment'])->name('pay');
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
-=======
+
 Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
     Route::get('/statistics/users', [StatisticsController::class, 'getUserStatistics']);
     Route::get('/statistics/users/{id}', [StatisticsController::class, 'getUserDetails']);
@@ -156,7 +151,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
 
 
 
->>>>>>> 6dc9afa2d7de3beee35dfb855abf6ac26ad5fa5e
+
 
 
 

@@ -1,14 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
-use App\Events\testingEvent;/*
-=======
 use App\Events\testingEvent;
 use App\Http\Controllers\Api\GoogleController;
 use App\Models\Reviews;
 /*
->>>>>>> 6dc9afa2d7de3beee35dfb855abf6ac26ad5fa5e
+=======
+
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------

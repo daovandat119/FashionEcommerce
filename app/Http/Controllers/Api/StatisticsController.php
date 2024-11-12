@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -18,29 +18,28 @@ class StatisticsController extends Controller
 
         return response()->json($statistics);
     }
-        // Thống kê chi tiết cho người dùng cụ thể
-        public function getUserDetails($id)
-        {
-            $userDetails = DB::table('users as u')
-                ->leftJoin('orders as o', 'u.UserID', '=', 'o.UserID')
-                ->select(
-                    'u.UserID',
-                    'u.Username',
-                    'u.Email',
-                    DB::raw('COUNT(o.OrderID) as TotalOrders')
-                )
-                ->where('u.UserID', $id)
-                ->groupBy('u.UserID', 'u.Username', 'u.Email')
-                ->first();
-        
-            if (!$userDetails) {
-                return response()->json(['message' => 'User not found'], 404);
-            }
-        
-            return response()->json($userDetails);
+
+    public function getUserDetails($id)
+    {
+        $userDetails = DB::table('users as u')
+            ->leftJoin('orders as o', 'u.UserID', '=', 'o.UserID')
+            ->select(
+                'u.UserID',
+                'u.Username',
+                'u.Email',
+                DB::raw('COUNT(o.OrderID) as TotalOrders')
+            )
+            ->where('u.UserID', $id)
+            ->groupBy('u.UserID', 'u.Username', 'u.Email')
+            ->first();
+
+        if (!$userDetails) {
+            return response()->json(['message' => 'User not found'], 404);
         }
 
-        // Thống kê tổng quan về sản phẩm
+        return response()->json($userDetails);
+    }
+
     public function getProductStatistics()
     {
         $productStats = DB::table('products')
@@ -54,6 +53,6 @@ class StatisticsController extends Controller
 
         return response()->json($productStats);
     }
-    
+
 
 }

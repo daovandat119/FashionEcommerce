@@ -16,7 +16,7 @@ use App\Models\ProductVariant;
 class PaymentController extends Controller
 {
 
-    public function addPayment($totalAmount,$userId, Request $request) {
+    public function addPayment($userId, $totalAmount, Request $request) {
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
         $vnp_Url = env('VNP_URL');
