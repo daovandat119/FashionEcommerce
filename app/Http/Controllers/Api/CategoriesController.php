@@ -31,9 +31,7 @@ class CategoriesController extends Controller
                 $limit,
                 null
             ] : [
-                null,
-                null,
-                null,
+
                 $status = 'ACTIVE'
             ])
         );
@@ -136,14 +134,13 @@ class CategoriesController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $category = $this->repoCategories->getDetail($id);
-//
 
         if (!$category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
 
         $this->repoCategories->updateCategoryAndRelatedStatus($id, $request->input('Status'));
-//
+
         return response()->json([
             'success' => true,
             'message' => 'Category status updated successfully',

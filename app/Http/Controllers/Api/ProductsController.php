@@ -169,6 +169,7 @@ class ProductsController extends Controller
         $ids = explode(',', $request->ids);
 
         foreach ($ids as $id) {
+
             $product = $this->repoProducts->getDetail($id);
 
             if (!$product) {

@@ -109,36 +109,30 @@ class Products extends Model
         ]);
     }
 
-    public function deleteProductAndRelatedData($id)
-    {
-        // Start a database transaction
-        DB::beginTransaction();
+    public function deleteProductAndRelatedData($productId){
 
-        try {
+        DB::transaction(function () use ($productId) {
 
-            ProductVariants::join('products', 'product_variants.ProductID', '=', 'products.ProductID')
-                ->where('products.ProductID', $id)
-                ->delete();
+            DB::statement('SET FOREIGN_KEY_CHECKS = 0');
 
-            ProductImage::join('products', 'product_images.ProductID', '=', 'products.ProductID')
-                ->where('products.ProductID', $id)
-                ->delete();
+            $productIds = DB::table('products')->where('ProductID', $productId)->pluck('ProductID');
 
-            Products::where('ProductID', $id)->delete();
+            DB::table('reviews')->whereIn('ProductID', $productIds)->delete();
+            DB::table('wishlist')->whereIn('ProductID', $productIds)->delete();
+            DB::table('cart_items')->whereIn('ProductID', $productIds)->delete();
 
-            DB::commit();
+            $variantIds = DB::table('product_variants')->whereIn('ProductID', $productIds)->pluck('VariantID');
+            DB::table('order_items')->whereIn('VariantID', $variantIds)->delete();
 
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
+            DB::table('product_variants')->whereIn('ProductID', $productIds)->delete();
 
-            Log::error('Error deleting product and related data: ' . $e->getMessage(), [
-                'ProductID' => $id,
-                'error' => $e
-            ]);
+            DB::table('product_images')->whereIn('ProductID', $productIds)->delete();
 
-            return false;
-        }
+            DB::table('products')->where('ProductID', $productId)->delete();
+
+            DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+        });
+
     }
 
 

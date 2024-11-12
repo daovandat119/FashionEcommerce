@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ProductVariant;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\Wishlist;
+use App\Models\Review;
+use App\Models\OrderItem;
+use App\Models\CartItem;
 
 class Categories extends Model
 {
@@ -78,42 +82,31 @@ class Categories extends Model
 
     public function deleteCategoryAndRelatedData($categoryId)
     {
-        DB::beginTransaction();
 
-        try {
-            DB::table('product_variants')
-                ->where('ProductID', function($query) use ($categoryId) {
-                    $query->select('ProductID')
-                          ->from('products')
-                          ->where('CategoryID', $categoryId);
-                })
-                ->delete();
+        DB::transaction(function () use ($categoryId) {
 
-            DB::table('product_images')
-                ->where('ProductID', function($query) use ($categoryId) {
-                    $query->select('ProductID')
-                          ->from('products')
-                          ->where('CategoryID', $categoryId);
-                })
-                ->delete();
+            DB::statement('SET FOREIGN_KEY_CHECKS = 0');
 
-            DB::table('products')
-                ->where('CategoryID', $categoryId)
-                ->delete();
+            $productIds = DB::table('products')->where('CategoryID', $categoryId)->pluck('ProductID');
 
-            Categories::where('CategoryID', $categoryId)
-                ->delete();
+            DB::table('reviews')->whereIn('ProductID', $productIds)->delete();
+            DB::table('wishlist')->whereIn('ProductID', $productIds)->delete();
+            DB::table('cart_items')->whereIn('ProductID', $productIds)->delete();
 
-            DB::commit();
+            $variantIds = DB::table('product_variants')->whereIn('ProductID', $productIds)->pluck('VariantID');
+            DB::table('order_items')->whereIn('VariantID', $variantIds)->delete();
 
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
+            DB::table('product_variants')->whereIn('ProductID', $productIds)->delete();
 
-            Log::error('Error deleting category and related data: ' . $e->getMessage());
+            DB::table('product_images')->whereIn('ProductID', $productIds)->delete();
 
-            return false;
-        }
+            DB::table('products')->where('CategoryID', $categoryId)->delete();
+
+            DB::table('categories')->where('CategoryID', $categoryId)->delete();
+
+            DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+        });
+
     }
 
     public function updateCategoryAndRelatedStatus($categoryId, $status)
@@ -122,49 +115,17 @@ class Categories extends Model
 
         try {
 
-            DB::table('reviews')
-                ->where('ProductID', function($query) use ($categoryId) {
-                    $query->select('ProductID')
-                          ->from('products')
-                          ->where('CategoryID', $categoryId);
-                })
-                ->delete();
-
-            DB::table('wishlists')
-                ->where('ProductID', function($query) use ($categoryId) {
-                    $query->select('ProductID')
-                          ->from('products')
-                          ->where('CategoryID', $categoryId);
-                })
-                ->delete();
-
-            DB::table('order_items')
-                ->where('ProductID', function($query) use ($categoryId) {
-                    $query->select('ProductID')
-                          ->from('products')
-                          ->where('CategoryID', $categoryId);
-                })
-                ->delete();
-
-            DB::table('cart_items')
-                ->where('ProductID', function($query) use ($categoryId) {
-                    $query->select('ProductID')
-                          ->from('products')
-                          ->where('CategoryID', $categoryId);
-                })
-                ->delete();
-
             DB::table('product_variants')
                 ->where('ProductID', function($query) use ($categoryId) {
                     $query->select('ProductID')
                           ->from('products')
                           ->where('CategoryID', $categoryId);
                 })
-                ->update(['status' => $status]);
+                ->update(['Status' => $status]);
 
             DB::table('products')
                 ->where('CategoryID', $categoryId)
-                ->update(['status' => $status]);
+                ->update(['Status' => $status]);
 
             Categories::where('CategoryID', $categoryId)
                 ->update(['Status' => $status]);
