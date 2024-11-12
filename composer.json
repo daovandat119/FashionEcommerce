@@ -11,13 +11,9 @@
         "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
-<<<<<<< HEAD
         "laravel/socialite": "*",
-        "laravel/tinker": "^2.8"
-=======
         "laravel/tinker": "^2.8",
         "pusher/pusher-php-server": "^7.2"
->>>>>>> 9df8be1ebe74de7f5595459b436b949b7c1b17b5
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.1",
