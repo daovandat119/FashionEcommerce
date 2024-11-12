@@ -5,6 +5,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\ColorsController;
@@ -137,6 +138,12 @@ Route::get('/reviews/{id}', [ReviewsController::class, 'index']);
 Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/', [ReviewsController::class, 'store']);
     Route::post('/checkReview', [ReviewsController::class, 'checkReviewByUser']);
+});
+
+Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
+    Route::get('/statistics/users', [StatisticsController::class, 'getUserStatistics']);
+    Route::get('/statistics/users/{id}', [StatisticsController::class, 'getUserDetails']);
+    Route::get('/statistics/products', [StatisticsController::class, 'getProductStatistics']);
 });
 
 
