@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('ReviewID');
             $table->foreignId('UserID')->constrained('users', 'UserID');
             $table->foreignId('ProductID')->constrained('products', 'ProductID');
-            $table->foreignId('RatingLevelID')->constrained('rating_levels', 'RatingLevelID');
+            $table->foreignId('RatingLevelID')->nullable()->constrained('rating_levels', 'RatingLevelID');
             $table->foreignId('ParentReviewID')->nullable()->constrained('reviews', 'ReviewID');
             $table->text('ReviewContent');
             $table->timestamps();

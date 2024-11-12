@@ -18,10 +18,13 @@ return new class extends Migration
             $table->foreignId('PaymentStatusID')->constrained('payment_statuses', 'PaymentStatusID');
             $table->decimal('Amount', 10, 2);
             $table->string('TransactionID')->nullable();
+            $table->string('BankCode')->nullable();
+            $table->string('CardType')->nullable();
+            $table->string('OrderInfo')->nullable();
+            $table->string('ResponseCode')->nullable();
             $table->timestamps();
         });
     }
-
 
     /**
      * Reverse the migrations.

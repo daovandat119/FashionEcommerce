@@ -21,8 +21,10 @@ class Payments extends Model
         'PaymentStatusID',
         'Amount',
         'TransactionID',
-        'created_at',
-        'updated_at',
+        'BankCode',
+        'CardType',
+        'OrderInfo',
+        'ResponseCode',
     ];
 
     public function createPayment($data)
@@ -33,6 +35,10 @@ class Payments extends Model
             'PaymentStatusID' => $data['PaymentStatusID'],
             'Amount' => $data['Amount'],
             'TransactionID' => $data['TransactionID'],
+            'BankCode' => $data['BankCode'],
+            'CardType' => $data['CardType'],
+            'OrderInfo' => $data['OrderInfo'],
+            'ResponseCode' => $data['ResponseCode'],
         ]);
     }
 

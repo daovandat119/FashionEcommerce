@@ -4,39 +4,36 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Models\Payments;
-
+use App\Models\Cart;
+use App\Models\CartItems;
+use App\Models\Addresses;
+use Illuminate\Support\Str;
+use App\Models\OrderItems;
+use App\Models\Order;
+use App\Models\ProductVariant;
 
 class PaymentController extends Controller
 {
-    protected $payment;
 
-    public function __construct()
-    {
-        $this->payment = new Payments();
-    }
-
-    public function createPayment($orderCode, $totalAmount, Request $request) {
+    public function addPayment($totalAmount,$userId, Request $request) {
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
         $vnp_Url = env('VNP_URL');
         $vnp_ReturnUrl = env('VNP_RETURN_URL');
 
-       $order = (object)[
-          "code" => 1000,
-          "total" => 100000,
-          "bankCode" => 'NCB',
-          "type" => "billpayment",
-          "info" => "Thanh toán đơn hàng"
-       ];
+        $data = [
+            'vnp_TxnRef' => time(),
+            'UserID' => $userId,
+        ];
+        $jsonData = json_encode($data);
+        $base64Data = base64_encode($jsonData);
 
-        $vnp_TxnRef = 10000;
-        $vnp_OrderInfo = "ok";
-        $vnp_OrderType = "BNC";
-        $vnp_Amount = 10000 * 100;
+        $vnp_TxnRef = $base64Data;
+        $vnp_OrderInfo = "Thanh toán cho đơn hàng";
+        $vnp_OrderType = "billpayment";
+        $vnp_Amount = $totalAmount * 100;
         $vnp_Locale = 'vn';
-        $vnp_BankCode = "NCB";
         $vnp_IpAddr = $request->ip();
 
         $inputData = array(
@@ -52,76 +49,111 @@ class PaymentController extends Controller
             "vnp_OrderType" => $vnp_OrderType,
             "vnp_ReturnUrl" => $vnp_ReturnUrl,
             "vnp_TxnRef" => $vnp_TxnRef,
-         );
-         if (isset($vnp_BankCode) && $vnp_BankCode != "") {
-            $inputData['vnp_BankCode'] = $vnp_BankCode;
-         }
+        );
 
-         if (isset($vnp_Bill_State) && $vnp_Bill_State != "") {
-             $inputData['vnp_Bill_State'] = $vnp_Bill_State;
-         }
+        if (isset($request->bankCode) && $request->bankCode != "") {
+            $inputData['vnp_BankCode'] = $request->bankCode;
+        }
 
-         ksort($inputData);
+        ksort($inputData);
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            $hashdata .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+        $hashdata = rtrim($hashdata, '&');
 
-         $query = "";
-         $i = 0;
-         $hashdata = "";
+        $vnp_Url = $vnp_Url . "?" . http_build_query($inputData);
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+            $vnp_Url .= '&vnp_SecureHash=' . $vnpSecureHash;
+        }
 
-         foreach ($inputData as $key => $value) {
-             if ($i == 1) {
-                 $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-             } else {
-                 $hashdata .= urlencode($key) . "=" . urlencode($value);
-                 $i = 1;
-             }
-             $query .= urlencode($key) . "=" . urlencode($value) . '&';
-         }
-
-         $vnp_Url = $vnp_Url . "?" . $query;
-
-         if (isset($vnp_HashSecret)) {
-             $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
-         }
-
-          return redirect($vnp_Url);
+        return redirect($vnp_Url);
     }
 
-    public function vnpayReturn(Request $request)
-       {
-           $vnp_SecureHash = $request->vnp_SecureHash;
-           $inputData = $request->all();
+    public function vnpayReturn(Request $request) {
+        $vnp_SecureHash = $request->vnp_SecureHash;
+        $inputData = $request->all();
+        unset($inputData['vnp_SecureHash']);
+        ksort($inputData);
+        $hashData = "";
+        foreach ($inputData as $key => $value) {
+            $hashData .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+        $hashData = rtrim($hashData, '&');
 
-           unset($inputData['vnp_SecureHash']);
-           ksort($inputData);
-           $hashData = "";
-           foreach ($inputData as $key => $value) {
-               $hashData .= urlencode($key) . "=" . urlencode($value) . '&';
-           }
-           $hashData = rtrim($hashData, '&');
+        $secureHash = hash_hmac('sha512', $hashData, env('VNP_HASH_SECRET'));
 
-           $secureHash = hash_hmac('sha512', $hashData, config('vnpay.vnp_HashSecret'));
+        if ($secureHash === $vnp_SecureHash) {
+            if ($request->vnp_ResponseCode == '00') {
+                $decodedData = base64_decode($request->vnp_TxnRef);
+                $data = json_decode($decodedData, true);
 
-           if ($secureHash === $vnp_SecureHash) {
-               if ($request->vnp_ResponseCode == '00') {
-                   $transactionID = $request->vnp_TransactionNo;
+                $cart = (new Cart())->getCartByUserID($data['UserID']);
 
-                   $paymentData = [
-                       'OrderID' => $orderCode,
-                       'PaymentMethodID' => 2,
-                       'PaymentStatusID' => 2,
-                       'Amount' => $totalAmount,
-                       'TransactionID' => $transactionID,
-                   ];
+                $codeOrder = (string) Str::uuid();
+                $address = (new Addresses())->getDistrictID($data['UserID']);
 
-                   (new Payments())->createPayment($paymentData);
+                $dataOrder = [
+                    'UserID' => $data['UserID'],
+                    'AddressID' => $address->AddressID,
+                    'CartID' => $cart->CartID,
+                    'OrderCode' => $codeOrder,
+                ];
 
-                   return 'Thanh toán thành công';
-               } else {
-                   return 'Thanh toán không thành công';
-               }
-           } else {
-               return 'Thanh toán không thành công';
-           }
-       }
+                $orderID = (new Order())->createOrder($dataOrder);
+
+                $cartItems = (new CartItems())->getCartItem($cart->CartID);
+
+                foreach ($cartItems as $cartItem) {
+                    $this->createOrderItem($orderID, $cartItem);
+                }
+
+                $paymentData = [
+                    'OrderID' => $orderID,
+                    'PaymentMethodID' => 2,
+                    'PaymentStatusID' => 2,
+                    'Amount' => $request->vnp_Amount / 100,
+                    'TransactionID' => $data['vnp_TxnRef'],
+                    'BankCode' => $request->vnp_BankCode,
+                    'CardType' => $request->vnp_CardType,
+                    'OrderInfo' => $request->vnp_OrderInfo,
+                    'ResponseCode' => $request->vnp_ResponseCode,
+                ];
+
+                $this->processPayment($paymentData, $cartItems, $cart);
+
+                return response()->json(['message' => 'Thanh toán thành công'], 200);
+            } else {
+                return response()->json(['message' => 'Thanh toán không thành công'], 400);
+            }
+        } else {
+            return response()->json(['message' => 'Mã bảo mật không hợp lệ'], 400);
+        }
+    }
+
+    private function createOrderItem($orderID, $cartItem)
+    {
+        $orderItemData = [
+            'OrderID' => $orderID,
+            'ProductID' => $cartItem->ProductID,
+            'VariantID' => $cartItem->VariantID,
+            'Quantity' => $cartItem->Quantity,
+        ];
+        (new OrderItems())->createOrderItem($orderItemData);
+    }
+
+    private function processPayment($paymentData, $cartItems, $cart)
+    {
+        (new Payments())->createPayment($paymentData);
+
+        (new CartItems())->deleteCartItemByCartID($cart->CartID);
+
+        foreach ($cartItems as $cartItem) {
+            $variant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);
+
+            (new ProductVariant())->updateQuantity($cartItem->VariantID, $variant->Quantity - $cartItem->Quantity);
+        }
+    }
+
 }
