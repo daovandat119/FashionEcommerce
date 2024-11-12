@@ -18,11 +18,14 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ShippingController;
 use App\Http\Controllers\Api\CouponController;
+use App\Http\Controllers\Api\GoogleController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
-Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
+Route::post('/admin/login', [GoogleController::class, 'loginAdmin']);
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
