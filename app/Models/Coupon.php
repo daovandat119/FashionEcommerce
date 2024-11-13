@@ -43,6 +43,11 @@ class Coupon extends Model
         return $coupons->get();
     }
 
+    public function getCouponByID($CouponID)
+    {
+        return Coupon::where('CouponID', $CouponID)->first();
+    }
+
     public function addCoupon($data)
     {
         return Coupon::create($data);

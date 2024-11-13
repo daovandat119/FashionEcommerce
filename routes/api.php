@@ -126,8 +126,9 @@ Route::middleware('auth:sanctum')->prefix('/address')->group(function () {
 
 Route::middleware(['auth:sanctum'])->prefix('coupons')->group(function () {
     Route::post('/checkCoupon', [CouponController::class, 'index']);
+    Route::post('/', [CouponController::class, 'store']);
     Route::middleware('auth.admin')->group(function () {
-        Route::post('/', [CouponController::class, 'store']);
+        Route::get('/{id}', [CouponController::class, 'show']);
         Route::put('/{id}', [CouponController::class, 'update']);
         Route::delete('/', [CouponController::class, 'delete']);
         Route::post('/details', [CouponController::class, 'getDetailsCoupon']);
