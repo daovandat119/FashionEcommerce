@@ -81,6 +81,16 @@ class CouponController extends Controller
         ], 200);
     }
 
+    public function show($id)
+    {
+        $coupon = $this->repoCoupon->getCouponById($id);
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $coupon,
+        ], 200);
+    }
+
     public function getDetailsCoupon(Request $request)
     {
         $coupon = $this->repoCoupon->getCouponByCode($request->Code);
@@ -90,5 +100,4 @@ class CouponController extends Controller
             'data' => $coupon,
         ], 200);
     }
-
 }

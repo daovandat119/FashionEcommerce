@@ -30,7 +30,7 @@ class Reviews extends Model
         $review = Reviews::create([
             'UserID' => $data['UserID'],
             'ProductID' => $data['ProductID'],
-            'RatingLevelID' => (int)$data['RatingLevelID'],
+            'RatingLevelID' => $data['RatingLevelID'],
             'ParentReviewID' => $data['ParentReviewID'],
             'ReviewContent' => $data['ReviewContent'],
         ]);

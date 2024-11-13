@@ -5,6 +5,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\GoogleController;
 use App\Http\Controllers\Api\ProductsController;
 use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\ColorsController;
@@ -19,16 +20,20 @@ use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ShippingController;
 use App\Http\Controllers\Api\CouponController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\StatisticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
-Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
+Route::post('/admin/login', [GoogleController::class, 'loginAdmin']);
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 Route::get('/email/verify/{id}', [AuthController::class, 'verify'])
-->name('verification.verify');
+    ->name('verification.verify');
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
@@ -122,13 +127,15 @@ Route::middleware('auth:sanctum')->prefix('/address')->group(function () {
 
 Route::middleware(['auth:sanctum'])->prefix('coupons')->group(function () {
     Route::post('/checkCoupon', [CouponController::class, 'index']);
+    Route::post('/details', [CouponController::class, 'getDetailsCoupon']);
     Route::middleware('auth.admin')->group(function () {
         Route::post('/', [CouponController::class, 'store']);
         Route::put('/{id}', [CouponController::class, 'update']);
         Route::delete('/', [CouponController::class, 'delete']);
-        Route::post('/details', [CouponController::class, 'getDetailsCoupon']);
+        Route::get('/{id}', [CouponController::class, 'show']);
     });
 });
+
 
 Route::get('/reviews/{id}', [ReviewsController::class, 'index']);
 Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
@@ -136,13 +143,11 @@ Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/checkReview', [ReviewsController::class, 'checkReviewByUser']);
 });
 
+Route::get('/pay/{totalAmount}/{userId}', [PaymentController::class, 'addPayment'])->name('pay');
+Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
 
-
-
-
-
-
-
-
-
-
+Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
+    Route::get('/statistics/users', [StatisticsController::class, 'getUserStatistics']);
+    Route::get('/statistics/users/{id}', [StatisticsController::class, 'getUserDetails']);
+    Route::get('/statistics/products', [StatisticsController::class, 'getProductStatistics']);
+});

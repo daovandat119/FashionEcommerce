@@ -61,8 +61,8 @@ class ReviewsController extends Controller
         $data = [
             'UserID' => $userId,
             'ProductID' => $request->ProductID,
-            'RatingLevelID' => $request->RatingLevelID,
-            'ReviewContent' => $checkReview ? null : $request->ReviewContent,
+            'RatingLevelID' => $checkReview ? null : $request->RatingLevelID,
+            'ReviewContent' => $request->ReviewContent,
             'ParentReviewID' => $request->ParentReviewID ?? null,
         ];
 

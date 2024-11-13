@@ -73,7 +73,6 @@ class Order extends Model
             )
             ->get();
 
-
     }
 
     public function getOrderById($id, $userId = null)

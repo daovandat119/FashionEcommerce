@@ -49,6 +49,7 @@ class OrderController extends Controller
         ];
 
         $orderID = $this->order->createOrder($dataOrder);
+
         $cartItems = (new CartItems())->getCartItem($cart->CartID);
 
         foreach ($cartItems as $cartItem) {
@@ -57,9 +58,10 @@ class OrderController extends Controller
 
         if ($request->PaymentMethodID == 1) {
             $this->processPayment($cartItems, $orderID, $request, $cart);
+
             return response()->json(['message' => 'Order created successfully, waiting for delivery.'], 201);
         } else {
-            return (new PaymentController())->createPayment($orderID, $request->TotalAmount, $request);
+            return (new PaymentController())->addPayment($userId, $request->TotalAmount, $request);
         }
     }
 
@@ -82,6 +84,10 @@ class OrderController extends Controller
             'PaymentStatusID' => 1,
             'Amount' => $request->TotalAmount,
             'TransactionID' => null,
+            'BankCode' => null,
+            'CardType' => null,
+            'OrderInfo' => null,
+            'ResponseCode' => null,
         ];
 
         (new Payments())->createPayment($paymentData);

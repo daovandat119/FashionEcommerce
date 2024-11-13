@@ -184,6 +184,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Cloudinary' => CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
