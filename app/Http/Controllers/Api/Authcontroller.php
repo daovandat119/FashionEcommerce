@@ -164,16 +164,14 @@ class AuthController extends Controller
             ], 400);
         }
 
-        $newPassword = Str::random(6);
-
-
+        $newPassword = Str::random(8);
         $user->Password = Hash::make($newPassword);
         $user->save();
 
         Mail::to($user->Email)->send(new NewPassword($user, $newPassword));
 
         return response()->json([
-            'message' => 'Mật khẩu mới đã được gửi đến email của bạn.',
+            'message' => 'Mật khẩu mới đã được gửi đến email của bạn. Vui lòng đổi mật khẩu !',
         ], 200);
     }
 
