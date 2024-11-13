@@ -150,4 +150,6 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
     Route::get('/statistics/users', [StatisticsController::class, 'getUserStatistics']);
     Route::get('/statistics/users/{id}', [StatisticsController::class, 'getUserDetails']);
     Route::get('/statistics/products', [StatisticsController::class, 'getProductStatistics']);
+    Route::get('/statistics/daily-registrations', [StatisticsController::class, 'getDailyUserRegistrations']);
+    Route::get('/statistics/orders', [StatisticsController::class, 'getOrderStatistics']);
 });
