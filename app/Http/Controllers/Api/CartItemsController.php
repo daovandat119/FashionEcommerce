@@ -24,6 +24,7 @@ class CartItemsController extends Controller
         $userId = auth()->id();
 
         $cartItems = $this->repoCartItems->getCartItem($userId);
+
         return response()->json(['message' => 'Success', 'data' => $cartItems], 200);
     }
 //

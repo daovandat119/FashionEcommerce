@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use App\Models\Cart;
 
 class CartItems extends Model
 {
@@ -50,15 +51,18 @@ class CartItems extends Model
         return $cartItems;
     }
 
-    public function getCartItem($cartID)
+    public function getCartItem($userId)
     {
-        $getCartItemByCartID = CartItems::where('CartID', $cartID)->get();
+        $cart = (new Cart())->getCartByUserID($userId);
+
+        $getCartItemByCartID = CartItems::where('CartID', $cart->CartID)->get();
 
         return $getCartItemByCartID;
     }
 
     public function updateCartItem($cartItemID, $data)
     {
+
         $updateCartItem = CartItems::where('CartItemID', $cartItemID)->update(['Quantity' => $data['quantity']]);
 
         return $updateCartItem;

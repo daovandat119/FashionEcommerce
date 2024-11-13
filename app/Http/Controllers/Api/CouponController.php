@@ -50,6 +50,16 @@ class CouponController extends Controller
         ], 201);
     }
 
+    public function show($id)
+    {
+        $coupon = $this->repoCoupon->getCouponByID($id);
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $coupon,
+        ], 200);
+    }
+
     public function update($id, Request $request)
     {
         $data = [
