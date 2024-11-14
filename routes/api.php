@@ -143,7 +143,7 @@ Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/checkReview', [ReviewsController::class, 'checkReviewByUser']);
 });
 
-Route::get('/pay/{totalAmount}/{userId}', [PaymentController::class, 'addPayment'])->name('pay');
+Route::post('/pay', [PaymentController::class, 'addPayment'])->name('pay');
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
 
 Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {

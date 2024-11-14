@@ -19,7 +19,7 @@ use App\Models\Reviews;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('payment');
 });
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
