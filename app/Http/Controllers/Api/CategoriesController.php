@@ -31,7 +31,9 @@ class CategoriesController extends Controller
                 $limit,
                 null
             ] : [
-
+                null,
+                null,
+                null,
                 $status = 'ACTIVE'
             ])
         );
