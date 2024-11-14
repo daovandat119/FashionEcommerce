@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -52,6 +54,31 @@ class StatisticsController extends Controller
             ->first();
 
         return response()->json($productStats);
+    }
+    // Thống kê theo dõi số lượng người dùng đk mỗi ngày 
+    public function getDailyUserRegistrations()
+    {
+        $registrations = DB::table('users')
+            ->select(
+                DB::raw('DATE(created_at) as Date'),
+                DB::raw('COUNT(*) as Registrations')
+            )
+            ->groupBy('Date')
+            ->orderByDesc('Date')
+            ->limit(30)
+            ->get();
+
+        return response()->json($registrations);
+    }
+        public function getOrderStatistics()
+    {
+        $orderStats = DB::table('orders')
+            ->select(
+                DB::raw('COUNT(OrderID) as TotalOrders') 
+            )
+            ->first();
+
+        return response()->json($orderStats);
     }
 
 

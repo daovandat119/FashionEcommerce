@@ -53,6 +53,11 @@ class Coupon extends Model
         return Coupon::create($data);
     }
 
+    public function getCouponById($id)
+    {
+        return Coupon::where('CouponID', $id)->first();
+    }
+
     public function getCouponByCode($code)
     {
         return Coupon::where('Code', $code)->first();
@@ -73,5 +78,4 @@ class Coupon extends Model
     {
         return Coupon::where('MinimumOrderValue', '<=', $MinimumOrderValue)->get();
     }
-
 }

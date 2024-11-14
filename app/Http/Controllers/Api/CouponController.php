@@ -100,5 +100,4 @@ class CouponController extends Controller
             'data' => $coupon,
         ], 200);
     }
-
 }

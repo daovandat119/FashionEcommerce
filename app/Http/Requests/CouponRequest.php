@@ -33,7 +33,6 @@ class CouponRequest extends FormRequest
             'UsageLimit' => 'required|numeric|min:0|max:1000',
             'ExpiresAt' => 'required|date',
         ];
-
     }
 
     public function messages(): array
@@ -53,7 +52,10 @@ class CouponRequest extends FormRequest
             'DiscountPercentage.numeric' => 'Phần trăm giảm giá không hợp lệ',
             'MinimumOrderValue.required' => 'Giá trị đơn hàng tối thiểu không được để trống',
             'MinimumOrderValue.numeric' => 'Giá trị đơn hàng tối thiểu không hợp lệ',
-            'MinimumOrderValue.min' => 'Giá trị đơn hàng tối thiểu không hợp lệ',
+            'UsageLimit.required' => 'Số lượng sử dụng không được để trống',
+            'UsageLimit.numeric' => 'Số lượng sử dụng không hợp lệ',
+            'UsageLimit.max' => 'Số lượng sử dụng không hợp lệ',
+            'ExpiresAt.required' => 'Ngày hết hạn không được để trống',
         ];
     }
 
@@ -65,6 +67,7 @@ class CouponRequest extends FormRequest
             'DiscountPercentage' => 'Phần trăm giảm giá',
             'MinimumOrderValue' => 'Giá trị đơn hàng tối thiểu',
             'UsageLimit' => 'Số lượng sử dụng',
+            'Name' => 'Tên',
         ];
     }
 
