@@ -152,7 +152,7 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
 
-        $user = User::where('Email', $request->Email)->first();
+        $user = User::where('Email', $request->Email)->first(); 
 
         if (!$user) {
             return response()->json(['message' => 'Email không tồn tại trong hệ thống.'], 404);
@@ -166,7 +166,9 @@ class AuthController extends Controller
 
         $newPassword = Str::random(8);
         $user->Password = Hash::make($newPassword);
+        $user->CodeExpired = now()->addDay();
         $user->save();
+
 
         Mail::to($user->Email)->send(new NewPassword($user, $newPassword));
 
@@ -184,9 +186,6 @@ class AuthController extends Controller
             'message' => 'Đăng xuất thành công',
         ], 200);
     }
-
-
-
 
 
 
