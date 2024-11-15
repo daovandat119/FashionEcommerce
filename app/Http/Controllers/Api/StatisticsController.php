@@ -80,6 +80,65 @@ class StatisticsController extends Controller
 
         return response()->json($orderStats);
     }
+    //Lấy danh sách sản phẩm bán chạy:
+public function getTopSellingProducts()
+{
+    $topProducts = DB::table('products')
+        ->join('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+        ->select('products.ProductID', 'products.ProductName', DB::raw('SUM(order_items.quantity) as total_sold'))
+        ->groupBy('products.ProductID', 'products.ProductName')
+        ->orderByDesc('total_sold')
+        ->limit(10)
+        ->get();
 
+    return response()->json($topProducts);
+}
+// Lấy tổng doanh thu theo ngày
+public function getTotalRevenueByDate()
+{
+    $revenue = DB::table('orders')
+        ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+        ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+        ->select(
+            DB::raw('DATE(orders.created_at) as order_date'),
+            DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+        )
+        ->where('orders.OrderStatusID', '=', 1) // Giả sử trạng thái "1" là hoàn tất
+        ->groupBy(DB::raw('DATE(orders.created_at)'))
+        ->orderByDesc('order_date')
+        ->get();
+    return response()->json($revenue);
+}
 
+// Lấy số lượng sản phẩm đã bán theo ngày
+    public function getTotalProductsSoldByDate()
+    {
+        $productsSold = DB::table('orders')
+            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+            ->select(
+                DB::raw('DATE(orders.created_at) as order_date'),
+                DB::raw('SUM(order_items.Quantity) as total_products_sold')
+            )
+            ->where('orders.OrderStatusID', '=', 1)
+            ->groupBy(DB::raw('DATE(orders.created_at)'))
+            ->orderByDesc('order_date')
+            ->get();
+        return response()->json($productsSold);
+    }
+    // Tình trạng hàng tồn kho
+    public function getInventoryStatus()
+    {
+        $inventory = DB::table('products')
+            ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->select(
+                'products.ProductID',
+                'products.ProductName',
+                DB::raw('SUM(order_items.Quantity) as total_sold'), 
+                DB::raw('COUNT(order_items.OrderID) as total_orders') 
+            )
+            ->groupBy('products.ProductID', 'products.ProductName')
+            ->orderBy('total_sold', 'desc') 
+            ->get();
+        return response()->json($inventory);
+    }
 }
