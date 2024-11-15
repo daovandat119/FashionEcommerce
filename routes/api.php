@@ -147,13 +147,28 @@ Route::post('/pay', [PaymentController::class, 'addPayment'])->name('pay');
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
 
 Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
+    // Thống kê người dùng
     Route::get('/statistics/users', [StatisticsController::class, 'getUserStatistics']);
     Route::get('/statistics/users/{id}', [StatisticsController::class, 'getUserDetails']);
+
+    // Thống kê sản phẩm
     Route::get('/statistics/products', [StatisticsController::class, 'getProductStatistics']);
-    Route::get('/statistics/daily-registrations', [StatisticsController::class, 'getDailyUserRegistrations']);
+    Route::get('/statistics/stock-by-category', [StatisticsController::class, 'getStockByCategory']);
+    Route::get('/statistics/least-viewed-products', [StatisticsController::class, 'getLeastViewedProducts']);
+
+    // Thống kê đơn hàng
     Route::get('/statistics/orders', [StatisticsController::class, 'getOrderStatistics']);
     Route::get('/statistics/top-selling-products', [StatisticsController::class, 'getTopSellingProducts']);
     Route::get('/statistics/products-sold-by-date', [StatisticsController::class, 'getTotalProductsSoldByDate']);
+
+    // Thống kê doanh thu
     Route::get('/statistics/revenue-by-date', [StatisticsController::class, 'getTotalRevenueByDate']);
+    Route::get('/statistics/monthly-revenue', [StatisticsController::class, 'getMonthlyRevenue']);
+    Route::get('/statistics/yearly-revenue', [StatisticsController::class, 'getYearlyRevenue']);
+
+    // Thống kê đăng ký người dùng theo ngày
+    Route::get('/statistics/daily-registrations', [StatisticsController::class, 'getDailyUserRegistrations']);
+
+    // Thống kê hàng tồn kho
     Route::get('/statistics/inventory-status', [StatisticsController::class, 'getInventoryStatus']);
 });

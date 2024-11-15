@@ -70,47 +70,47 @@ class StatisticsController extends Controller
 
         return response()->json($registrations);
     }
-        public function getOrderStatistics()
+    public function getOrderStatistics()
     {
         $orderStats = DB::table('orders')
             ->select(
-                DB::raw('COUNT(OrderID) as TotalOrders') 
+                DB::raw('COUNT(OrderID) as TotalOrders')
             )
             ->first();
 
         return response()->json($orderStats);
     }
     //Lấy danh sách sản phẩm bán chạy:
-public function getTopSellingProducts()
-{
-    $topProducts = DB::table('products')
-        ->join('order_items', 'products.ProductID', '=', 'order_items.ProductID')
-        ->select('products.ProductID', 'products.ProductName', DB::raw('SUM(order_items.quantity) as total_sold'))
-        ->groupBy('products.ProductID', 'products.ProductName')
-        ->orderByDesc('total_sold')
-        ->limit(10)
-        ->get();
+    public function getTopSellingProducts()
+    {
+        $topProducts = DB::table('products')
+            ->join('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->select('products.ProductID', 'products.ProductName', DB::raw('SUM(order_items.quantity) as total_sold'))
+            ->groupBy('products.ProductID', 'products.ProductName')
+            ->orderByDesc('total_sold')
+            ->limit(10)
+            ->get();
 
-    return response()->json($topProducts);
-}
-// Lấy tổng doanh thu theo ngày
-public function getTotalRevenueByDate()
-{
-    $revenue = DB::table('orders')
-        ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
-        ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
-        ->select(
-            DB::raw('DATE(orders.created_at) as order_date'),
-            DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
-        )
-        ->where('orders.OrderStatusID', '=', 1) // Giả sử trạng thái "1" là hoàn tất
-        ->groupBy(DB::raw('DATE(orders.created_at)'))
-        ->orderByDesc('order_date')
-        ->get();
-    return response()->json($revenue);
-}
+        return response()->json($topProducts);
+    }
+    // Lấy tổng doanh thu theo ngày
+    public function getTotalRevenueByDate()
+    {
+        $revenue = DB::table('orders')
+            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+            ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+            ->select(
+                DB::raw('DATE(orders.created_at) as order_date'),
+                DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+            )
+            ->where('orders.OrderStatusID', '=', 1) // Giả sử trạng thái "1" là hoàn tất
+            ->groupBy(DB::raw('DATE(orders.created_at)'))
+            ->orderByDesc('order_date')
+            ->get();
+        return response()->json($revenue);
+    }
 
-// Lấy số lượng sản phẩm đã bán theo ngày
+    // Lấy số lượng sản phẩm đã bán theo ngày
     public function getTotalProductsSoldByDate()
     {
         $productsSold = DB::table('orders')
@@ -133,12 +133,74 @@ public function getTotalRevenueByDate()
             ->select(
                 'products.ProductID',
                 'products.ProductName',
-                DB::raw('SUM(order_items.Quantity) as total_sold'), 
-                DB::raw('COUNT(order_items.OrderID) as total_orders') 
+                DB::raw('SUM(order_items.Quantity) as total_sold'),
+                DB::raw('COUNT(order_items.OrderID) as total_orders')
             )
             ->groupBy('products.ProductID', 'products.ProductName')
-            ->orderBy('total_sold', 'desc') 
+            ->orderBy('total_sold', 'desc')
             ->get();
         return response()->json($inventory);
+    }
+
+    //Thống kê doanh thu theo tháng
+    public function getMonthlyRevenue()
+    {
+        $monthlyRevenue = DB::table('orders')
+            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+            ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+            ->select(
+                DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m") as month'),
+                DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+            )
+            ->where('orders.OrderStatusID', '=', 2)
+            ->groupBy('month')
+            ->orderByDesc('month')
+            ->get();
+
+        return response()->json($monthlyRevenue);
+    }
+    // Thống kê doanh thu theo năm
+    public function getYearlyRevenue()
+    {
+        $yearlyRevenue = DB::table('orders')
+            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+            ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+            ->select(
+                DB::raw('DATE_FORMAT(orders.created_at, "%Y") as year'), // Lấy năm
+                DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue') // Tổng doanh thu
+            )
+            ->where('orders.OrderStatusID', '=', 2) // Giả sử trạng thái "2" là đã hoàn tất
+            ->groupBy('year')
+            ->orderByDesc('year')
+            ->get();
+
+        return response()->json($yearlyRevenue);
+    }
+
+    //Thống kê số lượng sản phẩm tồn kho theo danh mục
+    public function getStockByCategory()
+    {
+        $stockByCategory = DB::table('products')
+            ->join('categories', 'products.CategoryID', '=', 'categories.CategoryID')
+            ->select(
+                'categories.CategoryName',
+                DB::raw('SUM(products.StockQuantity) as total_stock')
+            )
+            ->groupBy('categories.CategoryID', 'categories.CategoryName')
+            ->orderByDesc('total_stock')
+            ->get();
+
+        return response()->json($stockByCategory);
+    }
+    //Thống kê các sản phẩm ít người xem
+    public function getLeastViewedProducts()
+    {
+        $leastViewedProducts = DB::table('products')
+            ->select('ProductID', 'ProductName', 'Views')
+            ->orderBy('Views', 'asc')
+            ->limit(10)
+            ->get();
+
+        return response()->json($leastViewedProducts);
     }
 }
