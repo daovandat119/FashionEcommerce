@@ -69,6 +69,13 @@ class OrderController extends Controller
 
     }
 
+    public function getOrderDetails($orderID)
+    {
+        $orderDetails = $this->order->getOrderDetails($orderID);
+
+        return response()->json(['message' => 'Success', 'data' => $orderDetails], 200);
+    }
+
     private function createOrderItem($orderID, $cartItem)
     {
         $orderItemData = [
