@@ -106,7 +106,7 @@ Route::middleware('auth:sanctum')->prefix('/wishlist')->group(function () {
 
 Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
     Route::post('/', [OrderController::class, 'store'])->name('order.store');
-    Route::get('/', [OrderController::class, 'index']);
+    Route::post('/views', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'getOrderById']);
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
 });
@@ -135,7 +135,6 @@ Route::middleware(['auth:sanctum'])->prefix('coupons')->group(function () {
         Route::get('/{id}', [CouponController::class, 'show']);
     });
 });
-
 
 Route::get('/reviews/{id}', [ReviewsController::class, 'index']);
 Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {

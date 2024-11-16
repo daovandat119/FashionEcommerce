@@ -23,13 +23,19 @@ class OrderController extends Controller
         $this->order = new Order();
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $userId = auth()->id();
 
         $role = auth()->user()->role->RoleName;
 
-        $order = $this->order->getOrder($role == 'Admin' ? null : $userId);
+        $order = $this->order->getOrder(
+            $role == 'Admin' ? null : $userId,
+            $request->OrderCode,
+            $request->OrderStatusID,
+            $request->PaymentMethodID,
+            $request->PaymentStatusID
+        );
 
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
@@ -47,8 +53,6 @@ class OrderController extends Controller
             'CartID' => $cart->CartID,
             'OrderCode' => $codeOrder,
         ];
-
-
 
         $orderID = $this->order->createOrder($dataOrder);
 

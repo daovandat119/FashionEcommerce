@@ -39,7 +39,7 @@ class Order extends Model
         return $order->OrderID;
     }
 
-    public function getOrder($userId = null)
+    public function getOrder($userId = null, $OrderCode = null, $OrderStatusID = null, $PaymentMethodID = null, $PaymentStatusID = null)
     {
         return DB::table('orders as o')
             ->leftJoin('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
@@ -58,10 +58,23 @@ class Order extends Model
                 COALESCE(SUM(oi.Quantity), 0) AS TotalQuantity,
                 COALESCE(SUM(oi.Quantity * pv.Price), 0) AS TotalAmount,
                 o.OrderCode,
-                ua.AddressID
+                ua.AddressID,
+                o.created_at AS OrderDate
             ')
             ->when($userId, function ($query, $userId) {
                 return $query->where('o.UserID', $userId);
+            })
+            ->when($OrderCode, function ($query, $OrderCode) {
+                return $query->where('o.OrderCode', $OrderCode);
+            })
+            ->when($OrderStatusID, function ($query, $OrderStatusID) {
+                return $query->where('os.OrderStatusID', $OrderStatusID);
+            })
+            ->when($PaymentMethodID, function ($query, $PaymentMethodID) {
+                return $query->where('pm.PaymentMethodID', $PaymentMethodID);
+            })
+            ->when($PaymentStatusID, function ($query, $PaymentStatusID) {
+                return $query->where('ps.PaymentStatusID', $PaymentStatusID);
             })
             ->groupBy(
                 'o.OrderID',
@@ -69,10 +82,10 @@ class Order extends Model
                 'pm.MethodName',
                 'ps.StatusName',
                 'o.OrderCode',
-                'ua.AddressID'
+                'ua.AddressID',
+                'o.created_at'
             )
             ->get();
-
     }
 
     public function getOrderById($id, $userId = null)
