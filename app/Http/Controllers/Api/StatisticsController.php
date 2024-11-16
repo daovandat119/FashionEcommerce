@@ -203,4 +203,34 @@ class StatisticsController extends Controller
 
         return response()->json($leastViewedProducts);
     }
+
+    //Thống kê số lượng đơn hàng theo trạng thái
+        public function getOrderStatisticsByStatus()
+    {
+        $orderStats = DB::table('orders')
+            ->select(
+                'OrderStatusID',
+                DB::raw('COUNT(*) as TotalOrders')
+            )
+            ->groupBy('OrderStatusID')
+            ->get();
+
+        return response()->json($orderStats);
+    }
+        //Thống kê thời gian hoàn thành đơn hàng trung bình
+    public function getAverageOrderCompletionTime()
+    {
+        $averageTime = DB::table('orders')
+            ->select(
+                DB::raw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as AverageCompletionTime')
+            )
+            ->where('OrderStatusID', '=', 2) // Giả sử trạng thái "2" là hoàn tất
+            ->first();
+
+        return response()->json([
+            'AverageCompletionTimeInMinutes' => $averageTime->AverageCompletionTime
+        ]);
+    }
+
+    
 }
