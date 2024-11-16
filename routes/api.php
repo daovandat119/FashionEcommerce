@@ -171,4 +171,9 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
 
     // Thống kê hàng tồn kho
     Route::get('/statistics/inventory-status', [StatisticsController::class, 'getInventoryStatus']);
+
+    //Thống kê số lượng đơn hàng theo trạng thái
+    Route::get('/orders/status-statistics', [StatisticsController::class, 'getOrderStatisticsByStatus']);
+    Route::get('/orders/average-completion-time', [StatisticsController::class, 'getAverageOrderCompletionTime']);
+
 });
