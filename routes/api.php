@@ -65,17 +65,17 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('categories')->group(f
     Route::delete('/', [CategoriesController::class, 'delete']);
     Route::post('/status/{id}', [CategoriesController::class, 'updateStatus']);
 });
-
+Route::get('/colors', [ColorsController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('colors')->group(function () {
-    Route::get('/', [ColorsController::class, 'index']);
+
     Route::post('/', [ColorsController::class, 'store']);
     Route::get('/{id}', [ColorsController::class, 'edit']);
     Route::put('/{id}', [ColorsController::class, 'update']);
     Route::delete('/{id}', [ColorsController::class, 'delete']);
 });
-
+Route::get('/sizes', [SizeController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(function () {
-    Route::get('/', [SizeController::class, 'index']);
+
     Route::post('/', [SizeController::class, 'store']);
     Route::get('/{id}', [SizeController::class, 'edit']);
     Route::put('/{id}', [SizeController::class, 'update']);
@@ -105,7 +105,7 @@ Route::middleware('auth:sanctum')->prefix('/wishlist')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
-    Route::post('/', [OrderController::class, 'store']);
+    Route::post('/', [OrderController::class, 'store'])->name('order.store');
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'getOrderById']);
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);

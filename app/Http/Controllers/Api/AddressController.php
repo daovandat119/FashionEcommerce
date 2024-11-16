@@ -36,7 +36,8 @@ class AddressController extends Controller
             'UserName' => $request->input('UserName'),
             'Address' => $request->input('Address'),
             'PhoneNumber' => $request->input('PhoneNumber'),
-            'DistrictID' => $request->input('DistrictID'),
+            'ProvinceID' => (int)$request->input('ProvinceID'),
+            'DistrictID' => (int) $request->input('DistrictID'),
             'WardCode' => $request->input('WardCode'),
             'IsDefault' => $address ? 0 : 1,
             'Status' => 'ACTIVE',
@@ -75,6 +76,7 @@ class AddressController extends Controller
             'UserName' => $request->input('UserName'),
             'Address' => $request->input('Address'),
             'PhoneNumber' => $request->input('PhoneNumber'),
+            'ProvinceID' => $request->input('ProvinceID'),
             'DistrictID' => $request->input('DistrictID'),
             'WardCode' => $request->input('WardCode'),
             'IsDefault' => $request->input('IsDefault'),
@@ -157,7 +159,7 @@ class AddressController extends Controller
         $response = Http::withHeaders([
             'token' => env('GHN_TOKEN'),
         ])->post('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', [
-            'province_id' => $request->input('province_id'),
+            'province_id' =>(int)$request->input('province_id'),
         ]);
 
         if ($response->successful()) {
@@ -179,7 +181,7 @@ class AddressController extends Controller
         $response = Http::withHeaders([
             'token' => env('GHN_TOKEN'),
         ])->get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', [
-            'district_id' => $request->input('district_id'),
+            'district_id' => (int) $request->input('district_id'),
         ]);
 
         if ($response->successful()) {
@@ -187,6 +189,7 @@ class AddressController extends Controller
                 return [
                     'DistrictID' => $ward['DistrictID'],
                     'WardCode' => $ward['WardCode'],
+                    'WardName' => $ward['WardName'],
                 ];
 
             }, $response->json()['data']);

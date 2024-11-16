@@ -52,8 +52,10 @@ class Reviews extends Model
     public function getReviewsWithChildren($productId)
     {
         $reviews = Reviews::with('children')
+            ->join('users', 'reviews.UserID', '=', 'users.UserID')
             ->where('ProductID', $productId)
             ->whereNull('ParentReviewID')
+            ->select('reviews.*', 'users.Username') 
             ->get();
 
         return $reviews;

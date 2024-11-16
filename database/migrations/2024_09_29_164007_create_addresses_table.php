@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('Username',255);
             $table->string('Address');
             $table->string('PhoneNumber', 20);
+            $table->string('ProvinceID', 20);
             $table->string('DistrictID', 20);
             $table->string('WardCode', 20);
             $table->boolean('IsDefault')->default(0);

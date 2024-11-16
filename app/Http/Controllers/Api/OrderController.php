@@ -48,6 +48,8 @@ class OrderController extends Controller
             'OrderCode' => $codeOrder,
         ];
 
+
+
         $orderID = $this->order->createOrder($dataOrder);
 
         $cartItems = (new CartItems())->getCartItem($cart->CartID);
@@ -58,7 +60,8 @@ class OrderController extends Controller
 
         $this->processPayment($cartItems, $orderID, $request, $cart);
 
-        return response()->json(['message' => 'Order created successfully, waiting for delivery.'], 201);
+        return response()->json(['status' => 'success', 'message' => 'Order created successfully, waiting for delivery.'], 201);
+
 
     }
 

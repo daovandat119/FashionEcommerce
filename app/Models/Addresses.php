@@ -22,6 +22,7 @@ class Addresses extends Model
         'PhoneNumber',
         'DistrictID',
         'WardCode',
+        'ProvinceID',
         'IsDefault',
         'Status',
         'created_at',
@@ -50,6 +51,7 @@ class Addresses extends Model
             'UserName' => $data['UserName'],
             'Address' => $data['Address'],
             'PhoneNumber' => $data['PhoneNumber'],
+            'ProvinceID' => $data['ProvinceID'],
             'DistrictID' => $data['DistrictID'],
             'WardCode' => $data['WardCode'],
             'IsDefault' => $data['IsDefault'],
@@ -73,6 +75,7 @@ class Addresses extends Model
             'UserName' => $data['UserName'],
             'Address' => $data['Address'],
             'PhoneNumber' => $data['PhoneNumber'],
+            'ProvinceID' => $data['ProvinceID'],
             'DistrictID' => $data['DistrictID'],
             'WardCode' => $data['WardCode'],
         ]);

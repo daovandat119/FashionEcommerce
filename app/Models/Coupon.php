@@ -53,16 +53,6 @@ class Coupon extends Model
         return Coupon::create($data);
     }
 
-    public function getCouponById($id)
-    {
-        return Coupon::where('CouponID', $id)->first();
-    }
-
-    public function getCouponByCode($code)
-    {
-        return Coupon::where('Code', $code)->first();
-    }
-
     public function updateCoupon($CouponID, $data)
     {
         $updatedCoupon = Coupon::where('CouponID', $CouponID)->update($data);

@@ -29,23 +29,23 @@ class AuthController extends Controller
         }
 
         if (!$user->IsActive) {
-            return response()->json(['message' => 'Tài khoản chưa được xác minh. Vui lòng kiểm tra email để xác minh tài khoản.'], 403);
+            return response()->json([
+                'message' => 'Tài khoản chưa được xác minh. Vui lòng kiểm tra email để xác minh tài khoản.',
+                'UserID' => $user->UserID // Thêm UserID vào phản hồi khi tài khoản chưa xác minh
+            ], 403);
         }
-
-
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Đăng nhập thành công',
-
+            'user' => [
+                'UserID' => $user->UserID
+            ],
             'token' => $token,
-
-
         ], 200);
     }
-    
-   
+
 
     public function loginAdmin(AuthRequest $request)
     {
@@ -98,6 +98,9 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Đăng ký thành công, vui lòng kiểm tra email để xác minh tài khoản.',
+            "user" => [
+                'UserID' => $user->UserID
+            ]
         ], 201);
     }
 

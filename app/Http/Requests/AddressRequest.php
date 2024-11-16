@@ -20,6 +20,7 @@ class AddressRequest extends FormRequest
             'Address' => 'required|string|max:255',
             'PhoneNumber' => 'required|string|max:15',
             'DistrictID' => 'required',
+            'ProvinceID' => 'required',
             'WardCode' => 'required',
         ];
     }
@@ -40,6 +41,8 @@ class AddressRequest extends FormRequest
             'DistrictID.string' => 'The district ID must be a string.',
             'WardCode.required' => 'The ward code is required.',
             'WardCode.string' => 'The ward code must be a string.',
+            'ProvinceID.required' => 'The province ID is required.',
+            'ProvinceID.string' => 'The province ID must be a string.',
         ];
     }
 
@@ -51,6 +54,7 @@ class AddressRequest extends FormRequest
             'PhoneNumber' => 'phone number',
             'DistrictID' => 'district ID',
             'WardCode' => 'ward code',
+            'ProvinceID' => 'province ID',
         ];
     }
 

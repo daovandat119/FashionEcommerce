@@ -29,35 +29,24 @@ class CartItems extends Model
 
     public function getCartItemByUserId($userId)
     {
-        $query = CartItems::join('carts as c', 'ci.CartID', '=', 'c.CartID')
-            ->join('products as p', 'ci.ProductID', '=', 'p.ProductID')
-            ->join('product_variants as pv', 'ci.VariantID', '=', 'pv.VariantID')
+        $query = CartItems::join('carts as c', 'cart_items.CartID', '=', 'c.CartID')
+            ->join('products as p', 'cart_items.ProductID', '=', 'p.ProductID')
+            ->join('product_variants as pv', 'cart_items.VariantID', '=', 'pv.VariantID')
             ->join('colors as col', 'pv.ColorID', '=', 'col.ColorID')
             ->join('sizes as s', 'pv.SizeID', '=', 's.SizeID')
             ->where('c.UserID', $userId)
-            ->select(
-                'ci.CartItemID',
-                'p.MainImageURL',
-                'p.ProductName as product_name',
-                'col.ColorName as color',
-                's.SizeName as size',
-                'ci.Quantity',
-                'pv.Price',
-                DB::raw('(ci.Quantity * pv.Price) as total_price')
-            );
+            ->select('cart_items.*', 's.SizeID', 'col.ColorID', 'p.ProductID', 'col.ColorName as ColorName', 's.SizeName as SizeName', 'p.ProductName as ProductName', 'p.MainImageURL as ImageUrl', 'pv.Price as Price');
 
         $cartItems = $query->get();
 
         return $cartItems;
     }
 
-    public function getCartItem($userId)
+    public function getCartItem($cartID)
     {
-        $cart = (new Cart())->getCartByUserID($userId);
+        $cartItems = CartItems::where('CartID', $cartID)->get();
 
-        $getCartItemByCartID = CartItems::where('CartID', $cart->CartID)->get();
-
-        return $getCartItemByCartID;
+        return $cartItems;
     }
 
     public function updateCartItem($cartItemID, $data)

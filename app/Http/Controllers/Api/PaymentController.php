@@ -16,7 +16,7 @@ use App\Models\ProductVariant;
 class PaymentController extends Controller
 {
 
-    public function addPayment(Request $request) {
+    public function addPayment($userId, $request) {
 
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
@@ -25,7 +25,7 @@ class PaymentController extends Controller
 
         $data = [
             'vnp_TxnRef' => time(),
-            'UserID' => $request->userId,
+            'UserID' => $userId,
         ];
 
         $jsonData = json_encode($data);
@@ -34,7 +34,7 @@ class PaymentController extends Controller
         $vnp_TxnRef = $base64Data;
         $vnp_OrderInfo = "Thanh toán cho đơn hàng";
         $vnp_OrderType = "billpayment";
-        $vnp_Amount = $request->totalAmount * 100;
+        $vnp_Amount = $request->TotalAmount * 100;
         $vnp_Locale = 'vn';
         $vnp_IpAddr = $request->ip();
 
