@@ -50,7 +50,7 @@ class Wishlist extends Model
     public function getWishlistByUserID($userID){
         return Wishlist::join('products', 'wishlist.ProductID', '=', 'products.ProductID')
             ->where('UserID', $userID)
-            ->select('wishlist.WishlistID', 'products.ProductName', 'products.MainImageURL', 'products.Price')
+            ->select('wishlist.WishlistID', 'wishlist.ProductID', 'products.ProductName', 'products.MainImageURL', 'products.Price')
             ->get();
     }
 

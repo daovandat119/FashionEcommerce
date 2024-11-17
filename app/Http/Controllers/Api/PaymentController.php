@@ -16,7 +16,7 @@ use App\Models\ProductVariant;
 class PaymentController extends Controller
 {
 
-    public function addPayment($userId, $request) {
+    public function addPayment($userId, Request $request) {
 
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
@@ -30,7 +30,6 @@ class PaymentController extends Controller
 
         $jsonData = json_encode($data);
         $base64Data = base64_encode($jsonData);
-
         $vnp_TxnRef = $base64Data;
         $vnp_OrderInfo = "Thanh toán cho đơn hàng";
         $vnp_OrderType = "billpayment";
@@ -70,7 +69,7 @@ class PaymentController extends Controller
             $vnp_Url .= '&vnp_SecureHash=' . $vnpSecureHash;
         }
 
-        return redirect($vnp_Url);
+        return response()->json(['vnpay_url' => $vnp_Url]);
     }
 
     public function vnpayReturn(Request $request) {
@@ -89,8 +88,7 @@ class PaymentController extends Controller
 
         if ($secureHash === $vnp_SecureHash) {
             if ($request->vnp_ResponseCode == '00') {
-                $decodedData = base64_decode($request->vnp_TxnRef);
-                $data = json_decode($decodedData, true);
+                $data = json_decode(base64_decode($request->vnp_TxnRef), true);
 
                 $cart = (new Cart())->getCartByUserID($data['UserID']);
 

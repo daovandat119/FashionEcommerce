@@ -62,9 +62,15 @@ class OrderController extends Controller
             $this->createOrderItem($orderID, $cartItem);
         }
 
-        $this->processPayment($cartItems, $orderID, $request, $cart);
+        if ($request->PaymentMethodID == 1) {
 
-        return response()->json(['status' => 'success', 'message' => 'Order created successfully, waiting for delivery.'], 201);
+            $this->processPayment($cartItems, $orderID, $request, $cart);
+
+            return response()->json(['status' => 'success', 'message' => 'Order created successfully, waiting for delivery.'], 201);
+        } else {
+            
+            return (new PaymentController())->addPayment($userId, $request);
+        }
 
 
     }
