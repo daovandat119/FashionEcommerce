@@ -1,236 +1,301 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-
 class StatisticsController extends Controller
 {
-    public function getUserStatistics()
+    public function getProductStatistics(Request $request)
     {
-        $statistics = DB::table('users')
-            ->select(
-                DB::raw('COUNT(*) as TotalUsers'),
-                DB::raw('SUM(CASE WHEN IsActive = 1 THEN 1 ELSE 0 END) as ActiveUsers'),
-                DB::raw('SUM(CASE WHEN IsActive = 0 THEN 1 ELSE 0 END) as InactiveUsers')
-            )
-            ->first();
+        // Lấy các tham số bộ lọc từ yêu cầu
+        $status = $request->input('status');  
+        $startDate = $request->input('start_date');  
+        $endDate = $request->input('end_date'); 
+    
+        // Thống kê tổng số sản phẩm, tổng lượt xem và trạng thái sản phẩm
+        $productStats = DB::table('products')
+            ->selectRaw('
+                COUNT(*) as TotalProducts, 
+                SUM(Views) as TotalViews, 
+                SUM(CASE WHEN Status = "active" THEN 1 ELSE 0 END) as ActiveProducts, 
+                SUM(CASE WHEN Status = "inactive" THEN 1 ELSE 0 END) as InactiveProducts,
+                SUM(CASE WHEN order_items.ProductID IS NOT NULL THEN order_items.Quantity ELSE 0 END) as TotalSold
+            ')
+            ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID');
+    
+        // Áp dụng bộ lọc nếu có
+        if ($status) {
+            $productStats->where('products.Status', $status);
+        }
+        if ($startDate) {
+            $productStats->where('order_items.CreatedAt', '>=', $startDate);
+        }
+        if ($endDate) {
+            $productStats->where('order_items.CreatedAt', '<=', $endDate);
+        }
+    
+        $productStats = $productStats->first();
+    
+        // Top 10 sản phẩm bán chạy nhất
+        $topProducts = DB::table('products')
+            ->join('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->select('products.ProductID', 'products.ProductName', DB::raw('SUM(order_items.Quantity) as total_sold'))
+            ->groupBy('products.ProductID', 'products.ProductName')
+            ->orderByDesc('total_sold')
+            ->limit(10);
+    
+        // Áp dụng bộ lọc cho top sản phẩm
+        if ($startDate) {
+            $topProducts->where('order_items.CreatedAt', '>=', $startDate);
+        }
+        if ($endDate) {
+            $topProducts->where('order_items.CreatedAt', '<=', $endDate);
+        }
+    
+        $topProducts = $topProducts->get();
+    
+        // Doanh thu sản phẩm theo ngày
+        $revenueByProduct = DB::table('orders')
+            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+            ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+            ->selectRaw('
+                products.ProductID, 
+                products.ProductName, 
+                SUM(order_items.Quantity * products.Price) as TotalRevenue
+            ')
+            ->where('orders.OrderStatusID', '=', 1);  // Chỉ tính doanh thu cho các đơn hàng đã hoàn thành
+    
+        // Áp dụng bộ lọc cho doanh thu sản phẩm
+        if ($startDate) {
+            $revenueByProduct->where('orders.CreatedAt', '>=', $startDate);
+        }
+        if ($endDate) {
+            $revenueByProduct->where('orders.CreatedAt', '<=', $endDate);
+        }
+    
+        $revenueByProduct = $revenueByProduct
+            ->groupBy('products.ProductID', 'products.ProductName')
+            ->orderByDesc('TotalRevenue')
+            ->get();
+    
+        // Trạng thái tồn kho (tên sản phẩm, tổng số lượng bán ra, đơn giá, tổng thành tiền)
+        $inventoryStatus = DB::table('products')
+            ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->selectRaw('
+                products.ProductID, 
+                products.ProductName, 
+                products.Price as UnitPrice, 
+                SUM(order_items.Quantity) as TotalSold, 
+                (SUM(order_items.Quantity) * products.Price) as TotalRevenue
+            ')
+            ->groupBy('products.ProductID', 'products.ProductName', 'products.Price')
+            ->orderByDesc('TotalSold');
+    
+        // Áp dụng bộ lọc cho trạng thái tồn kho
+        if ($status) {
+            $inventoryStatus->where('products.Status', $status);
+        }
+        if ($startDate) {
+            $inventoryStatus->where('order_items.CreatedAt', '>=', $startDate);
+        }
+        if ($endDate) {
+            $inventoryStatus->where('order_items.CreatedAt', '<=', $endDate);
+        }
+    
+        $inventoryStatus = $inventoryStatus->get();
+    
+        // Thống kê chi tiết sản phẩm (tên sản phẩm, số lượng bán ra, đơn giá, tổng doanh thu)
+        $productDetails = DB::table('products')
+            ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->select('products.ProductID', 'products.ProductName', 'products.Price as UnitPrice', 
+                     DB::raw('SUM(order_items.Quantity) as TotalSold'), 
+                     DB::raw('(SUM(order_items.Quantity) * products.Price) as TotalRevenue'))
+            ->groupBy('products.ProductID', 'products.ProductName', 'products.Price');
+    
+        // Áp dụng bộ lọc cho chi tiết sản phẩm
+        if ($status) {
+            $productDetails->where('products.Status', $status);
+        }
+        if ($startDate) {
+            $productDetails->where('order_items.CreatedAt', '>=', $startDate);
+        }
+        if ($endDate) {
+            $productDetails->where('order_items.CreatedAt', '<=', $endDate);
+        }
+    
+        $productDetails = $productDetails->get();
+    
+        // Trả về tất cả thống kê liên quan đến sản phẩm
+        return response()->json([
+            'product_statistics' => $productStats,
+            'top_selling_products' => $topProducts,
+            'revenue_by_product' => $revenueByProduct,
+            'inventory_status' => $inventoryStatus,
+            'product_details' => $productDetails,
+        ]);
+    }
+    public function getOrderStatistics()
+    {
+        $statistics = [
+            'totalOrders' => DB::table('orders')
+                ->select(DB::raw('COUNT(*) as TotalOrders'))
+                ->first(),
+
+            'orderStatus' => DB::table('orders')
+                ->select(
+                    'OrderStatusID',
+                    DB::raw('COUNT(*) as TotalOrders')
+                )
+                ->groupBy('OrderStatusID')
+                ->get(),
+
+            'topSellingProducts' => DB::table('products')
+                ->join('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+                ->select('products.ProductID', 'products.ProductName', DB::raw('SUM(order_items.quantity) as total_sold'))
+                ->groupBy('products.ProductID', 'products.ProductName')
+                ->orderByDesc('total_sold')
+                ->limit(10)
+                ->get(),
+
+            'totalRevenueByDate' => DB::table('orders')
+                ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+                ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+                ->select(
+                    DB::raw('DATE(orders.created_at) as order_date'),
+                    DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+                )
+                ->where('orders.OrderStatusID', '=', 1) // Giả sử trạng thái "1" là hoàn tất
+                ->groupBy(DB::raw('DATE(orders.created_at)'))
+                ->orderByDesc('order_date')
+                ->get(),
+
+            'totalProductsSoldByDate' => DB::table('orders')
+                ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+                ->select(
+                    DB::raw('DATE(orders.created_at) as order_date'),
+                    DB::raw('SUM(order_items.Quantity) as total_products_sold')
+                )
+                ->where('orders.OrderStatusID', '=', 1)
+                ->groupBy(DB::raw('DATE(orders.created_at)'))
+                ->orderByDesc('order_date')
+                ->get(),
+
+            'monthlyRevenue' => DB::table('orders')
+                ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+                ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+                ->select(
+                    DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m") as month'),
+                    DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+                )
+                ->where('orders.OrderStatusID', '=', 2)
+                ->groupBy('month')
+                ->orderByDesc('month')
+                ->get(),
+
+            'yearlyRevenue' => DB::table('orders')
+                ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+                ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+                ->select(
+                    DB::raw('DATE_FORMAT(orders.created_at, "%Y") as year'),
+                    DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+                )
+                ->where('orders.OrderStatusID', '=', 2)
+                ->groupBy('year')
+                ->orderByDesc('year')
+                ->get(),
+
+            'orderCompletionTime' => DB::table('orders')
+                ->select(
+                    DB::raw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as AverageCompletionTime')
+                )
+                ->where('OrderStatusID', '=', 2)
+                ->first(),
+        ];
 
         return response()->json($statistics);
     }
 
-    public function getUserDetails($id)
+    // Thống kê người dùng
+    public function getUserStatistics()
     {
-        $userDetails = DB::table('users as u')
-            ->leftJoin('orders as o', 'u.UserID', '=', 'o.UserID')
-            ->select(
-                'u.UserID',
-                'u.Username',
-                'u.Email',
-                DB::raw('COUNT(o.OrderID) as TotalOrders')
-            )
-            ->where('u.UserID', $id)
-            ->groupBy('u.UserID', 'u.Username', 'u.Email')
-            ->first();
+        $statistics = [
+            // Tổng số người dùng
+            'totalUsers' => DB::table('users')
+                ->select(DB::raw('COUNT(*) as TotalUsers'))
+                ->first(),
 
-        if (!$userDetails) {
-            return response()->json(['message' => 'User not found'], 404);
+            // Thống kê người dùng theo trạng thái kích hoạt
+            'userStatus' => DB::table('users')
+                ->select('IsActive', DB::raw('COUNT(*) as TotalUsers'))
+                ->groupBy('IsActive')
+                ->get(),
+
+            // Thống kê người dùng theo vai trò
+            'userRole' => DB::table('users')
+                ->join('roles', 'users.RoleID', '=', 'roles.RoleID')
+                ->select('roles.RoleName', DB::raw('COUNT(*) as TotalUsers'))
+                ->groupBy('roles.RoleName')
+                ->get(),
+
+            // Người dùng đăng ký theo tháng
+            'monthlyRegistrations' => DB::table('users')
+                ->select(
+                    DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
+                    DB::raw('COUNT(*) as TotalRegistrations')
+                )
+                ->groupBy('month')
+                ->orderByDesc('month')
+                ->get(),
+        ];
+        return response()->json($statistics);
+    }
+
+    public function getRevenueByTimeframe(Request $request)
+    {
+        // Lấy tham số "timeframe" từ request, mặc định là "month"
+        $timeframe = $request->input('timeframe', 'month');
+        
+        // Kiểm tra tham số "timeframe" để quyết định loại thống kê
+        if ($timeframe == 'month') {
+            // Thống kê doanh thu theo tháng
+            $revenue = DB::table('orders')
+                ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+                ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+                ->select(
+                    DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m") as month'),
+                    DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+                )
+                ->where('orders.OrderStatusID', '=', 2) // Giả sử trạng thái "2" là đã hoàn tất
+                ->groupBy('month')
+                ->orderByDesc('month')
+                ->get();
+        } elseif ($timeframe == 'year') {
+            // Thống kê doanh thu theo năm
+            $revenue = DB::table('orders')
+                ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
+                ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
+                ->select(
+                    DB::raw('DATE_FORMAT(orders.created_at, "%Y") as year'),
+                    DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
+                )
+                ->where('orders.OrderStatusID', '=', 2) // Giả sử trạng thái "2" là đã hoàn tất
+                ->groupBy('year')
+                ->orderByDesc('year')
+                ->get();
+        } else {
+            // Trả về lỗi nếu tham số không hợp lệ
+            return response()->json(['error' => 'Invalid timeframe parameter'], 400);
         }
-
-        return response()->json($userDetails);
-    }
-
-    public function getProductStatistics()
-    {
-        $productStats = DB::table('products')
-            ->select(
-                DB::raw('COUNT(*) as TotalProducts'),
-                DB::raw('SUM(Views) as TotalViews'),
-                DB::raw('SUM(CASE WHEN Status = "active" THEN 1 ELSE 0 END) as ActiveProducts'),
-                DB::raw('SUM(CASE WHEN Status = "inactive" THEN 1 ELSE 0 END) as InactiveProducts')
-            )
-            ->first();
-
-        return response()->json($productStats);
-    }
-    // Thống kê theo dõi số lượng người dùng đk mỗi ngày 
-    public function getDailyUserRegistrations()
-    {
-        $registrations = DB::table('users')
-            ->select(
-                DB::raw('DATE(created_at) as Date'),
-                DB::raw('COUNT(*) as Registrations')
-            )
-            ->groupBy('Date')
-            ->orderByDesc('Date')
-            ->limit(30)
-            ->get();
-
-        return response()->json($registrations);
-    }
-    public function getOrderStatistics()
-    {
-        $orderStats = DB::table('orders')
-            ->select(
-                DB::raw('COUNT(OrderID) as TotalOrders')
-            )
-            ->first();
-
-        return response()->json($orderStats);
-    }
-    //Lấy danh sách sản phẩm bán chạy:
-    public function getTopSellingProducts()
-    {
-        $topProducts = DB::table('products')
-            ->join('order_items', 'products.ProductID', '=', 'order_items.ProductID')
-            ->select('products.ProductID', 'products.ProductName', DB::raw('SUM(order_items.quantity) as total_sold'))
-            ->groupBy('products.ProductID', 'products.ProductName')
-            ->orderByDesc('total_sold')
-            ->limit(10)
-            ->get();
-
-        return response()->json($topProducts);
-    }
-    // Lấy tổng doanh thu theo ngày
-    public function getTotalRevenueByDate()
-    {
-        $revenue = DB::table('orders')
-            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
-            ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
-            ->select(
-                DB::raw('DATE(orders.created_at) as order_date'),
-                DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
-            )
-            ->where('orders.OrderStatusID', '=', 1) // Giả sử trạng thái "1" là hoàn tất
-            ->groupBy(DB::raw('DATE(orders.created_at)'))
-            ->orderByDesc('order_date')
-            ->get();
+    
+        // Trả về kết quả dưới dạng JSON
         return response()->json($revenue);
     }
-
-    // Lấy số lượng sản phẩm đã bán theo ngày
-    public function getTotalProductsSoldByDate()
-    {
-        $productsSold = DB::table('orders')
-            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
-            ->select(
-                DB::raw('DATE(orders.created_at) as order_date'),
-                DB::raw('SUM(order_items.Quantity) as total_products_sold')
-            )
-            ->where('orders.OrderStatusID', '=', 1)
-            ->groupBy(DB::raw('DATE(orders.created_at)'))
-            ->orderByDesc('order_date')
-            ->get();
-        return response()->json($productsSold);
-    }
-    // Tình trạng hàng tồn kho
-    public function getInventoryStatus()
-    {
-        $inventory = DB::table('products')
-            ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
-            ->select(
-                'products.ProductID',
-                'products.ProductName',
-                DB::raw('SUM(order_items.Quantity) as total_sold'),
-                DB::raw('COUNT(order_items.OrderID) as total_orders')
-            )
-            ->groupBy('products.ProductID', 'products.ProductName')
-            ->orderBy('total_sold', 'desc')
-            ->get();
-        return response()->json($inventory);
-    }
-
-    //Thống kê doanh thu theo tháng
-    public function getMonthlyRevenue()
-    {
-        $monthlyRevenue = DB::table('orders')
-            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
-            ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
-            ->select(
-                DB::raw('DATE_FORMAT(orders.created_at, "%Y-%m") as month'),
-                DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue')
-            )
-            ->where('orders.OrderStatusID', '=', 2)
-            ->groupBy('month')
-            ->orderByDesc('month')
-            ->get();
-
-        return response()->json($monthlyRevenue);
-    }
-    // Thống kê doanh thu theo năm
-    public function getYearlyRevenue()
-    {
-        $yearlyRevenue = DB::table('orders')
-            ->join('order_items', 'orders.OrderID', '=', 'order_items.OrderID')
-            ->join('products', 'order_items.ProductID', '=', 'products.ProductID')
-            ->select(
-                DB::raw('DATE_FORMAT(orders.created_at, "%Y") as year'), // Lấy năm
-                DB::raw('SUM(order_items.Quantity * products.Price) as total_revenue') // Tổng doanh thu
-            )
-            ->where('orders.OrderStatusID', '=', 2) // Giả sử trạng thái "2" là đã hoàn tất
-            ->groupBy('year')
-            ->orderByDesc('year')
-            ->get();
-
-        return response()->json($yearlyRevenue);
-    }
-
-    //Thống kê số lượng sản phẩm tồn kho theo danh mục
-    public function getStockByCategory()
-    {
-        $stockByCategory = DB::table('products')
-            ->join('categories', 'products.CategoryID', '=', 'categories.CategoryID')
-            ->select(
-                'categories.CategoryName',
-                DB::raw('SUM(products.StockQuantity) as total_stock')
-            )
-            ->groupBy('categories.CategoryID', 'categories.CategoryName')
-            ->orderByDesc('total_stock')
-            ->get();
-
-        return response()->json($stockByCategory);
-    }
-    //Thống kê các sản phẩm ít người xem
-    public function getLeastViewedProducts()
-    {
-        $leastViewedProducts = DB::table('products')
-            ->select('ProductID', 'ProductName', 'Views')
-            ->orderBy('Views', 'asc')
-            ->limit(10)
-            ->get();
-
-        return response()->json($leastViewedProducts);
-    }
-
-    //Thống kê số lượng đơn hàng theo trạng thái
-        public function getOrderStatisticsByStatus()
-    {
-        $orderStats = DB::table('orders')
-            ->select(
-                'OrderStatusID',
-                DB::raw('COUNT(*) as TotalOrders')
-            )
-            ->groupBy('OrderStatusID')
-            ->get();
-
-        return response()->json($orderStats);
-    }
-        //Thống kê thời gian hoàn thành đơn hàng trung bình
-    public function getAverageOrderCompletionTime()
-    {
-        $averageTime = DB::table('orders')
-            ->select(
-                DB::raw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as AverageCompletionTime')
-            )
-            ->where('OrderStatusID', '=', 2) // Giả sử trạng thái "2" là hoàn tất
-            ->first();
-
-        return response()->json([
-            'AverageCompletionTimeInMinutes' => $averageTime->AverageCompletionTime
-        ]);
-    }
-
     
+
+
+
+
 }
+
+
