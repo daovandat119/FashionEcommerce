@@ -64,11 +64,11 @@ class OrderController extends Controller
 
         if ($request->PaymentMethodID == 1) {
 
-            $this->processPayment($cartItems, $orderID, $request, $cart);
+            $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
 
-            return response()->json(['status' => 'success', 'message' => 'Order created successfully, waiting for delivery.'], 201);
+            return response()->json(['status' => 'success', 'data' => $payment, 'message' => 'Order created successfully, waiting for delivery.'], 201);
         } else {
-            
+
             return (new PaymentController())->addPayment($userId, $request);
         }
 
@@ -107,7 +107,7 @@ class OrderController extends Controller
             'ResponseCode' => null,
         ];
 
-        (new Payments())->createPayment($paymentData);
+        $payment = (new Payments())->createPayment($paymentData);
 
         (new CartItems())->deleteCartItemByCartID($cart->CartID);
 
@@ -116,6 +116,8 @@ class OrderController extends Controller
 
             (new ProductVariant())->updateQuantity($cartItem->VariantID, $variant->Quantity - $cartItem->Quantity);
         }
+
+        return $payment;
     }
 
     public function getOrderById($id)

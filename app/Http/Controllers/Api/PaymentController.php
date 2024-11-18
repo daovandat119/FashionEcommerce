@@ -124,7 +124,7 @@ class PaymentController extends Controller
 
                 $this->processPayment($paymentData, $cartItems, $cart);
 
-                return response()->json(['message' => 'Thanh toán thành công'], 200);
+                return redirect()->to("http://localhost:5173/shop_order_complete/$orderID");
             } else {
                 return response()->json(['message' => 'Thanh toán không thành công'], 400);
             }
