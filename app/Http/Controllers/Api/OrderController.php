@@ -40,29 +40,31 @@ class OrderController extends Controller
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
 
+
     public function store(OrderRequest $request)
     {
         $userId = auth()->id();
-        $cart = (new Cart())->getCartByUserID($userId);
-        $codeOrder = (string) Str::uuid();
-        $address = (new Addresses())->getDistrictID($userId);
-
-        $dataOrder = [
-            'UserID' => $userId,
-            'AddressID' => $address->AddressID,
-            'CartID' => $cart->CartID,
-            'OrderCode' => $codeOrder,
-        ];
-
-        $orderID = $this->order->createOrder($dataOrder);
-
-        $cartItems = (new CartItems())->getCartItem($cart->CartID);
-
-        foreach ($cartItems as $cartItem) {
-            $this->createOrderItem($orderID, $cartItem);
-        }
 
         if ($request->PaymentMethodID == 1) {
+            $cart = (new Cart())->getCartByUserID($userId);
+            $codeOrder = (string) Str::uuid();
+            $address = (new Addresses())->getDistrictID($userId);
+
+            $dataOrder = [
+                'UserID' => $userId,
+                'AddressID' => $address->AddressID,
+                'CartID' => $cart->CartID,
+                'OrderCode' => $codeOrder,
+            ];
+
+            $orderID = $this->order->createOrder($dataOrder);
+
+            $cartItems = (new CartItems())->getCartItem($cart->CartID);
+
+            foreach ($cartItems as $cartItem) {
+                $this->createOrderItem($orderID, $cartItem);
+            }
+
 
             $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
 
@@ -71,7 +73,6 @@ class OrderController extends Controller
 
             return (new PaymentController())->addPayment($userId, $request);
         }
-
 
     }
 

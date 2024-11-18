@@ -110,7 +110,7 @@ class ProductsController extends Controller
         ], 200);
     }
 
-    public function update(ProductsRequest $request, $id)
+    public function update(Request $request, $id)
     {
 
         $product = $this->repoProducts->getDetail($id);
@@ -155,7 +155,7 @@ class ProductsController extends Controller
                 'message' => 'Product update successfully',
             ], 201);
         } else {
-            (new ProductImage())->updateProductImage($id, $request->image_path);
+            (new ProductImage())->updateProductImage($id, $request->image_paths);
             return response()->json([
                 'success' => true,
                 'message' => 'Product update successfully',
