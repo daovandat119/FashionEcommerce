@@ -56,7 +56,7 @@ class Order extends Model
                 pm.MethodName AS PaymentMethod,
                 ps.StatusName AS PaymentStatus,
                 COALESCE(SUM(oi.Quantity), 0) AS TotalQuantity,
-                COALESCE(SUM(oi.Quantity * pv.Price), 0) AS TotalAmount,
+                pay.Amount AS TotalAmount,
                 o.OrderCode,
                 ua.AddressID,
                 o.created_at AS OrderDate
@@ -83,7 +83,8 @@ class Order extends Model
                 'ps.StatusName',
                 'o.OrderCode',
                 'ua.AddressID',
-                'o.created_at'
+                'o.created_at',
+                'pay.Amount'
             )
             ->get();
     }
