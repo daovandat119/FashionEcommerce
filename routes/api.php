@@ -106,7 +106,7 @@ Route::middleware('auth:sanctum')->prefix('/wishlist')->group(function () {
 
 Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
     Route::post('/', [OrderController::class, 'store'])->name('order.store');
-    Route::get('/', [OrderController::class, 'index']);
+    Route::post('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'getOrderById']);
     Route::get('/details/{id}', [OrderController::class, 'getOrderDetails']);
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
