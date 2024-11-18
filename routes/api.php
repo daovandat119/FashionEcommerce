@@ -108,6 +108,7 @@ Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
     Route::post('/', [OrderController::class, 'store'])->name('order.store');
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'getOrderById']);
+    Route::get('/details/{id}', [OrderController::class, 'getOrderDetails']);
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
 });
 
@@ -151,5 +152,4 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
     Route::get('/order-statistics', [StatisticsController::class, 'getOrderStatistics']);
     Route::get('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
     Route::get('/revenue', [StatisticsController::class, 'getRevenueByTimeframe']);
-
 });
