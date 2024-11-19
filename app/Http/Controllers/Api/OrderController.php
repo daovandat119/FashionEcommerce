@@ -10,10 +10,13 @@ use Illuminate\Support\Str;
 use App\Models\Payments;
 use App\Http\Requests\OrderRequest;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\CouponController;
 use App\Models\CartItems;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Http;
 use App\Models\Addresses;
+use App\Models\Coupon;
+
 class OrderController extends Controller
 {
     protected $order;
@@ -43,6 +46,7 @@ class OrderController extends Controller
 
     public function store(OrderRequest $request)
     {
+
         $userId = auth()->id();
 
         $checkOrderStatus = $this->order->countCanceledOrders($userId);
@@ -55,6 +59,8 @@ class OrderController extends Controller
             $cart = (new Cart())->getCartByUserID($userId);
             $codeOrder = (string) Str::uuid();
             $address = (new Addresses())->getDistrictID($userId);
+
+            (new CouponController())->updateDiscount($request->CouponID);
 
             $dataOrder = [
                 'UserID' => $userId,

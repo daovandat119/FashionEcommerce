@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('CartID')->constrained('carts', 'CartID');
             $table->foreignId('OrderStatusID')->constrained('order_statuses', 'OrderStatusID');
             $table->string('OrderCode');
+            $table->text('CancellationReason')->nullable();
             $table->timestamps();
         });
     }
