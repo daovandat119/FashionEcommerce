@@ -33,17 +33,18 @@ class Products extends Model
         'updated_at',
     ];
 
-    public function listProducts($search, $offset, $limit, $category_id = null, $status = null)
+    public function listProducts($search, $offset, $limit, $category_id = null, $status = null, $color_id = null, $size_id = null)
     {
         $query = Products::select("{$this->table}.*",
                 'categories.CategoryName as category_name',
                 DB::raw('GROUP_CONCAT(product_images.ImagePath) as image_paths'),
-                DB::raw('IF(Price > 0, CEIL(((Price - SalePrice) / Price) * 100), 0) as discount_percentage'),
+                DB::raw('IF(products.Price > 0, CEIL(((products.Price - products.SalePrice) / products.Price) * 100), 0) as discount_percentage'),
                 DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating')
             )
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
             ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
             ->leftJoin('reviews', 'products.ProductID', '=', 'reviews.ProductID')
+            ->leftJoin('product_variants', 'products.ProductID', '=', 'product_variants.ProductID')
             ->where('products.ProductName', 'like', "%{$search}%")
             ->groupBy("{$this->table}.ProductID", 'categories.CategoryName')
             ->skip($offset)
@@ -51,6 +52,14 @@ class Products extends Model
 
         if ($category_id) {
             $query->where("categories.CategoryID", "=", $category_id);
+        }
+
+        if ($color_id) {
+            $query->where("product_variants.ColorID", $color_id);
+        }
+
+        if ($size_id) {
+            $query->where("product_variants.SizeID", $size_id);
         }
 
         if($status){

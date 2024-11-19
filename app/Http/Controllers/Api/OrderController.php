@@ -45,6 +45,12 @@ class OrderController extends Controller
     {
         $userId = auth()->id();
 
+        $checkOrderStatus = $this->order->countCanceledOrders($userId);
+
+        if ($checkOrderStatus > 3 && $request->PaymentMethodID != 2) {
+            return response()->json(['message' => 'Bạn đã hủy quá 3 lần.Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
+        }
+
         if ($request->PaymentMethodID == 1) {
             $cart = (new Cart())->getCartByUserID($userId);
             $codeOrder = (string) Str::uuid();
@@ -64,7 +70,6 @@ class OrderController extends Controller
             foreach ($cartItems as $cartItem) {
                 $this->createOrderItem($orderID, $cartItem);
             }
-
 
             $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
 

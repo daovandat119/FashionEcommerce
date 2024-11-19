@@ -212,4 +212,13 @@ class Order extends Model
             ->exists();
     }
 
+    public function countCanceledOrders($userId)
+    {
+        return DB::table('orders')
+            ->where('UserID', $userId)
+            ->where('OrderStatusID', 4)
+            ->where('created_at', '>=', now()->subMonth())
+            ->count();
+    }
+
 }

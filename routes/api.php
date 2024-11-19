@@ -75,7 +75,6 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('colors')->group(funct
 });
 Route::get('/sizes', [SizeController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(function () {
-
     Route::post('/', [SizeController::class, 'store']);
     Route::get('/{id}', [SizeController::class, 'edit']);
     Route::put('/{id}', [SizeController::class, 'update']);
