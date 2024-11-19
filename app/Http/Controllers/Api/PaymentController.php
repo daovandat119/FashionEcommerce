@@ -95,9 +95,10 @@ class PaymentController extends Controller
                 $cart = (new Cart())->getCartByUserID($data['UserID']);
 
                 $codeOrder = (string) Str::uuid();
+
                 $address = (new Addresses())->getDistrictID($data['UserID']);
 
-                (new CouponController())->updateDiscountPercentage($data['CouponID']);
+                (new CouponController())->updateDiscount($request->CouponID);
 
                 $dataOrder = [
                     'UserID' => $data['UserID'],

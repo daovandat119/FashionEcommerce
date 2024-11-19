@@ -15,6 +15,9 @@ use App\Models\CartItems;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Http;
 use App\Models\Addresses;
+use App\Mail\OrderPlacedMail;
+use Mail;
+
 class OrderController extends Controller
 {
     protected $order;
@@ -55,7 +58,9 @@ class OrderController extends Controller
 
         if ($request->PaymentMethodID == 1) {
             $cart = (new Cart())->getCartByUserID($userId);
+
             $codeOrder = (string) Str::uuid();
+
             $address = (new Addresses())->getDistrictID($userId);
 
             (new CouponController())->updateDiscount($request->CouponID);
@@ -81,7 +86,7 @@ class OrderController extends Controller
                 'UserName' => auth()->user()->name,
                 'TotalAmount' => $request->TotalAmount,
             ];
-            
+
             Mail::to(auth()->user()->email)->send(new OrderPlacedMail($orderDetails));
 
             return response()->json(['status' => 'success', 'data' => $payment, 'message' => 'Order created successfully, waiting for delivery.'], 201);
