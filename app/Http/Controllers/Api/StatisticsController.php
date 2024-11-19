@@ -94,20 +94,36 @@ class StatisticsController extends Controller
                                            SELECT 11 AS Month UNION ALL
                                            SELECT 12 AS Month) AS months'))
             ->leftJoin('payments as p', DB::raw('MONTH(p.created_at)'), '=', 'months.Month')
-            ->whereYear('p.created_at', 2024) // Ensure data exists for this year
-            ->where('p.PaymentStatusID', 1) // Check if this status is correct
+            ->whereYear('p.created_at', 2024)
+            ->orWhereNull('p.PaymentID')
             ->select(
                 'months.Month',
-                DB::raw('IFNULL(COUNT(p.PaymentID), 0) AS TotalTransactions'), // Total transactions per month
-                DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue') // Total revenue per month
+                DB::raw('IFNULL(COUNT(p.PaymentID), 0) AS TotalTransactions'),
+                DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue')
             )
-            ->groupBy('months.Month') // Group by month
-            ->orderBy('months.Month') // Order by month
+            ->groupBy('months.Month')
+            ->orderBy('months.Month')
             ->get();
 
         return response()->json(['data' => $statistics]);
     }
 
+
+    public function getOrderStatusStatistics() {
+        $statistics = DB::table('order_statuses as os')
+            ->select(
+                'os.StatusName', // Tên trạng thái đơn hàng
+                DB::raw('IFNULL(COUNT(o.OrderID), 0) AS TotalOrders'), // Tổng số đơn hàng trong trạng thái (nếu không có thì là 0)
+                DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue') // Tổng doanh thu (nếu không có thì là 0)
+            )
+            ->leftJoin('orders as o', 'o.OrderStatusID', '=', 'os.OrderStatusID') // Liên kết với bảng đơn hàng
+            ->leftJoin('payments as p', 'o.OrderID', '=', 'p.OrderID') // Liên kết với bảng thanh toán
+            ->groupBy('os.StatusName') // Nhóm theo trạng thái đơn hàng
+            ->orderBy('TotalOrders', 'DESC') // Sắp xếp theo tổng số đơn hàng
+            ->get();
+
+        return response()->json(['data' => $statistics]);
+    }
 
 }
 

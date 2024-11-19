@@ -147,10 +147,9 @@ Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
 Route::post('/pay', [PaymentController::class, 'addPayment'])->name('pay');
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
 
-Route::middleware(['auth:sanctum', 'auth.admin'])->group(function () {
-    Route::get('/statistics/products', [StatisticsController::class, 'getProductStatistics']);
-    Route::get('/order-statistics', [StatisticsController::class, 'getOrderStatistics']);
-    Route::get('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
-    Route::get('/revenue', [StatisticsController::class, 'getRevenueByTimeframe']);
-
+Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(function () {
+    Route::post('/products', [StatisticsController::class, 'getProductStatistics']);
+    Route::get('/product-variants/{id}', [StatisticsController::class, 'getProductVariantsStatistics']);
+    Route::get('/orders', [StatisticsController::class, 'getOrderStatistics']);
+    Route::get('/order-statuses', [StatisticsController::class, 'getOrderStatusStatistics']);
 });
