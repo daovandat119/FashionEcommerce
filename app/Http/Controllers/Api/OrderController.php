@@ -15,8 +15,6 @@ use App\Models\CartItems;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Http;
 use App\Models\Addresses;
-use App\Models\Coupon;
-
 class OrderController extends Controller
 {
     protected $order;
@@ -78,6 +76,13 @@ class OrderController extends Controller
             }
 
             $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
+
+            $orderDetails = [
+                'UserName' => auth()->user()->name,
+                'TotalAmount' => $request->TotalAmount,
+            ];
+            
+            Mail::to(auth()->user()->email)->send(new OrderPlacedMail($orderDetails));
 
             return response()->json(['status' => 'success', 'data' => $payment, 'message' => 'Order created successfully, waiting for delivery.'], 201);
         } else {
