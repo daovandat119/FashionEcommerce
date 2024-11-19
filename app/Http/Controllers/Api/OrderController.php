@@ -75,11 +75,11 @@ class OrderController extends Controller
             }
 
             $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
-            // $orderDetails = [
-            //     'UserName' => auth()->user()->name,
-            //     'TotalAmount' => $request->TotalAmount,
-            // ];
-            // Mail::to(auth()->user()->email)->send(new OrderPlacedMail($orderDetails));
+            $orderDetails = [
+                'UserName' => auth()->user()->name,
+                'TotalAmount' => $request->TotalAmount,
+            ];
+            Mail::to(auth()->user()->email)->send(new OrderPlacedMail($orderDetails));
 
             return response()->json(['status' => 'success', 'data' => $payment, 'message' => 'Order created successfully, waiting for delivery.'], 201);
         } else {
