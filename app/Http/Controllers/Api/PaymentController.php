@@ -98,7 +98,7 @@ class PaymentController extends Controller
 
                 $address = (new Addresses())->getDistrictID($data['UserID']);
 
-                (new CouponController())->updateDiscount($request->CouponID);
+                (new CouponController())->updateDiscount($data['CouponID']);
 
                 $dataOrder = [
                     'UserID' => $data['UserID'],
