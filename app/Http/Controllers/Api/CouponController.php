@@ -105,6 +105,6 @@ class CouponController extends Controller
     {
         $discountPercentage = $this->repoCoupon->getCouponByID($id);
 
-        return $this->repoCoupon->updateDiscountPercentage($id, $discountPercentage->DiscountPercentage);
+        return $this->repoCoupon->updateDiscountPercentage($id, $discountPercentage->UsageLimit);
     }
 }
