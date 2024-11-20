@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Models\Order;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -82,19 +83,25 @@ class OrderController extends Controller
 
             $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
 
+            $user = auth()->user();
             $orderDetails = [
-                'UserName' => auth()->user()->name,
+                'UserName' => $user->name,
                 'TotalAmount' => $request->TotalAmount,
             ];
 
-            // Mail::to(auth()->user()->email)->send(new OrderPlacedMail($orderDetails));
+
+            if (!empty($user->Email) && filter_var($user->Email, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($user->Email)->send(new OrderPlacedMail($orderDetails));
+            } else {
+                return response()->json(['message' => 'Invalid email address'], 400);
+            }
+
 
             return response()->json(['status' => 'success', 'data' => $payment, 'message' => 'Order created successfully, waiting for delivery.'], 201);
         } else {
 
             return (new PaymentController())->addPayment($userId, $request);
         }
-
     }
 
     public function getOrderDetails($orderID)
@@ -163,6 +170,5 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
-
 
 }
