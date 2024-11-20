@@ -27,6 +27,7 @@ class OrdersTableSeeder extends Seeder
                 'CartID' => 1,
                 'OrderStatusID' => 2,
                 'OrderCode' => '1234567890',
+                'CancellationReason' => null
             ],
         ]);
     }

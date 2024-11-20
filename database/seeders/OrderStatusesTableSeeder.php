@@ -17,6 +17,7 @@ class OrderStatusesTableSeeder extends Seeder
             ['StatusName' => 'Đang giao hàng'],
             ['StatusName' => 'Đã giao hàng'],
             ['StatusName' => 'Đã hủy'],
+            ['StatusName' => 'Đã hoàn thành'],
         ]);
     }
 }

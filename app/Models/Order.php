@@ -168,14 +168,18 @@ class Order extends Model
     }
 
 
-    public function updateOrderStatus($id, $orderStatusID, $userId = null)
+    public function updateOrderStatus($id, $orderStatusID, $cancellationReason = null, $userId = null)
     {
         return DB::table('orders')
             ->when($userId, function ($query, $userId) {
                 return $query->where('UserID', $userId);
             })
             ->where('OrderID', $id)
-            ->update(['OrderStatusID' => $orderStatusID]);
+            ->update([
+                'OrderStatusID' => $orderStatusID,
+                'CancellationReason' => $cancellationReason
+            ]);
+
     }
 
     public function checkOrder($userId, $productId)
@@ -221,4 +225,8 @@ class Order extends Model
             ->count();
     }
 
+    public function cancelOrder($id, $cancellationReason = null)
+    {
+        return DB::table('orders')->where('OrderID', $id)->update(['OrderStatusID' => 4, 'CancellationReason' => $cancellationReason]);
+    }
 }

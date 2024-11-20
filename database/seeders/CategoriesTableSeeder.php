@@ -13,9 +13,9 @@ class CategoriesTableSeeder extends Seeder
     public function run()
     {
         DB::table('categories')->insert([
-            ['CategoryName' => 'Electronics', 'Status' => 'ACTIVE'],
-            ['CategoryName' => 'Clothing', 'Status' => 'ACTIVE'],
-            ['CategoryName' => 'Books', 'Status' => 'ACTIVE'],
+            ['CategoryName' => 'Điện tử', 'Status' => 'ACTIVE'],
+            ['CategoryName' => 'Quần áo', 'Status' => 'ACTIVE'],
+            ['CategoryName' => 'Sách', 'Status' => 'ACTIVE'],
         ]);
     }
 }

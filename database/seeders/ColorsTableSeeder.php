@@ -15,7 +15,7 @@ class ColorsTableSeeder extends Seeder
         DB::table('colors')->insert([
             ['ColorName' => 'Red'],
             ['ColorName' => 'Blue'],
-            ['ColorName' => 'Green'],
+            ['ColorName' => 'Yellow'],
         ]);
     }
 }

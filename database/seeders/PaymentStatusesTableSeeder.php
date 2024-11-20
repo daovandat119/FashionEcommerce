@@ -13,8 +13,8 @@ class PaymentStatusesTableSeeder extends Seeder
     public function run()
     {
         DB::table('payment_statuses')->insert([
-            ['StatusName' => 'Đã thanh toán'],
             ['StatusName' => 'Chưa thanh toán'],
+            ['StatusName' => 'Đã thanh toán'],
         ]);
     }
 }

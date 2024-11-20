@@ -159,9 +159,10 @@ class OrderController extends Controller
 
         $role = auth()->user()->role->RoleName;
 
-        $order = $this->order->updateOrderStatus($id, $request->OrderStatusID, $role == 'Admin' ? null : $userId);
+        $order = $this->order->updateOrderStatus($id, $request->OrderStatusID, $request->CancellationReason, $role == 'Admin' ? null : $userId);
 
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
+
 
 }
