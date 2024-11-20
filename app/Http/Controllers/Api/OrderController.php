@@ -64,7 +64,9 @@ class OrderController extends Controller
 
             $address = (new Addresses())->getDistrictID($userId);
 
-            (new CouponController())->updateDiscount($request->CouponID);
+            if ($request->CouponID) {
+                (new CouponController())->updateDiscount($request->CouponID);
+            }
 
             $dataOrder = [
                 'UserID' => $userId,

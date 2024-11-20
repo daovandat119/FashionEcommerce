@@ -131,7 +131,7 @@ class PaymentController extends Controller
 
                 return redirect()->to("http://localhost:5173/shop_order_complete/$orderID");
             } else {
-                return redirect()->to("http://localhost:5173");
+                return redirect()->to("http://localhost:5173/shop_checkout");
             }
         } else {
             return response()->json(['message' => 'Mã bảo mật không hợp lệ'], 400);
