@@ -30,14 +30,14 @@ class OrderPlacedMail extends Mailable
             subject: 'Order Placed Mail',
         );
     }
-    public function build()
-    {
-        return $this->subject('Order Confirmation')
-                    ->view('emails.order-placed')
-                    ->with([
-                        'order' => $this->order,
-                    ]);
-    }
+    // public function build()
+    // {
+    //     return $this->subject('Order Confirmation')
+    //                 ->view('emails.order-placed')
+    //                 ->with([
+    //                     'order' => $this->order,
+    //                 ]);
+    // }
 
     /**
      * Get the message content definition.
@@ -45,7 +45,10 @@ class OrderPlacedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.order-placed',
+            with: [
+                'order' => $this->order,
+            ],
         );
     }
 
