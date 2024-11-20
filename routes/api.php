@@ -151,4 +151,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(f
     Route::get('/product-variants/{id}', [StatisticsController::class, 'getProductVariantsStatistics']);
     Route::get('/orders', [StatisticsController::class, 'getOrderStatistics']);
     Route::get('/order-statuses', [StatisticsController::class, 'getOrderStatusStatistics']);
+
+    // Thống kê danh mục
+    Route::get('/revenue-by-category', [StatisticsController::class, 'getRevenueByCategory']); // Thêm route mới
 });
