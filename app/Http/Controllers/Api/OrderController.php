@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Models\Payments;
 use App\Http\Requests\OrderRequest;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\CouponController;
 use App\Models\CartItems;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Http;
@@ -47,6 +48,7 @@ class OrderController extends Controller
 
     public function store(OrderRequest $request)
     {
+
         $userId = auth()->id();
 
         $checkOrderStatus = $this->order->countCanceledOrders($userId);
@@ -57,8 +59,12 @@ class OrderController extends Controller
 
         if ($request->PaymentMethodID == 1) {
             $cart = (new Cart())->getCartByUserID($userId);
+
             $codeOrder = (string) Str::uuid();
+
             $address = (new Addresses())->getDistrictID($userId);
+
+            (new CouponController())->updateDiscount($request->CouponID);
 
             $dataOrder = [
                 'UserID' => $userId,
@@ -83,7 +89,7 @@ class OrderController extends Controller
                 'TotalAmount' => $request->TotalAmount,
             ];
 
-            // Kiểm tra xem email có hợp lệ trước khi gửi
+            
             if (!empty($user->Email) && filter_var($user->Email, FILTER_VALIDATE_EMAIL)) {
                 Mail::to($user->Email)->send(new OrderPlacedMail($orderDetails));
             } else {

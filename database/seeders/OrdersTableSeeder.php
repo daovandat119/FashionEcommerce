@@ -18,14 +18,15 @@ class OrdersTableSeeder extends Seeder
                 'AddressID' => 1,
                 'CartID' => 1,
                 'OrderStatusID' => 1,
-                'OrderCode' => '1234567890'
+                'OrderCode' => '1234567890',
+                'CancellationReason' => 'Khách hàng hủy đơn'
             ],
             [
                 'UserID' => 2,
                 'AddressID' => 1,
                 'CartID' => 1,
                 'OrderStatusID' => 2,
-                'OrderCode' => '1234567890'
+                'OrderCode' => '1234567890',
             ],
         ]);
     }

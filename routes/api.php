@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Mail;
 Route::post('/admin/login', [GoogleController::class, 'loginAdmin']);
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
-
+//
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);

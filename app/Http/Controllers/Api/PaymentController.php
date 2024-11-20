@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use App\Models\OrderItems;
 use App\Models\Order;
 use App\Models\ProductVariant;
+use App\Http\Controllers\Api\CouponController;
 
 class PaymentController extends Controller
 {
@@ -26,6 +27,7 @@ class PaymentController extends Controller
         $data = [
             'vnp_TxnRef' => time(),
             'UserID' => $userId,
+            'CouponID' => $request->CouponID,
         ];
 
         $jsonData = json_encode($data);
@@ -93,7 +95,10 @@ class PaymentController extends Controller
                 $cart = (new Cart())->getCartByUserID($data['UserID']);
 
                 $codeOrder = (string) Str::uuid();
+
                 $address = (new Addresses())->getDistrictID($data['UserID']);
+
+                (new CouponController())->updateDiscount($data['CouponID']);
 
                 $dataOrder = [
                     'UserID' => $data['UserID'],

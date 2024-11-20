@@ -19,8 +19,8 @@ return new class extends Migration
             $table->decimal('Price', 10, 2);
             $table->decimal('SalePrice', 10, 2);
             $table->integer('Views')->default(0);
-            $table->string('ShortDescription')->nullable();
-            $table->string('Description')->nullable();
+            $table->text('ShortDescription')->nullable();
+            $table->text('Description')->nullable();
             $table->enum('Status', ['ACTIVE', 'INACTIVE'])->nullable();
             $table->timestamps();
         });

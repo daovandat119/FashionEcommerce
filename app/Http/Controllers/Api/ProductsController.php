@@ -114,7 +114,6 @@ class ProductsController extends Controller
 
     public function update(Request $request, $id)
     {
-
         $product = $this->repoProducts->getDetail($id);
 
         if (!$product) {
@@ -134,7 +133,7 @@ class ProductsController extends Controller
             $uploadedFileUrl = (new UploadApi())->upload($request->file('MainImageURL')->getRealPath())['secure_url'];
             $data['MainImageURL'] = $uploadedFileUrl;
         } else {
-            $data['MainImageURL'] = $request->MainImageURL;
+            $data['MainImageURL'] = $product->MainImageURL;
         }
 
         $this->repoProducts->updateProduct($id, $data);
@@ -157,7 +156,7 @@ class ProductsController extends Controller
                 'message' => 'Product update successfully',
             ], 201);
         } else {
-            (new ProductImage())->updateProductImage($id, $request->image_paths);
+            (new ProductImage())->updateProductImage($id, $product->image_paths);
             return response()->json([
                 'success' => true,
                 'message' => 'Product update successfully',

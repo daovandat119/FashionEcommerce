@@ -100,4 +100,11 @@ class CouponController extends Controller
             'data' => $coupon,
         ], 200);
     }
+
+    public function updateDiscount($id)
+    {
+        $discountPercentage = $this->repoCoupon->getCouponByID($id);
+
+        return $this->repoCoupon->updateDiscountPercentage($id, $discountPercentage->UsageLimit);
+    }
 }

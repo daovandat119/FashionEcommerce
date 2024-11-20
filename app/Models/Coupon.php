@@ -30,17 +30,29 @@ class Coupon extends Model
 
     public function listAllCoupons($role, $MinimumOrderValue)
     {
+        if ($role->RoleName != 'Admin') {
         $coupons = Coupon::query();
 
-        if ($role->RoleName != 'Admin') {
+
             $coupons->where('ExpiresAt', '>', Carbon::now());
-        }
 
-        if ($MinimumOrderValue) {
-            $coupons->where('MinimumOrderValue', '<=', $MinimumOrderValue);
-        }
 
-        return $coupons->get();
+        $coupons->where(function($query) use ($MinimumOrderValue) {
+            $query->where('MinimumOrderValue', '<=', $MinimumOrderValue)
+                  ->orWhere('MinimumOrderValue', '>', $MinimumOrderValue);
+        });
+
+        return $coupons->get()->map(function($coupon) use ($MinimumOrderValue) {
+            if ($coupon->MinimumOrderValue > $MinimumOrderValue) {
+                $coupon->usable = false;
+            } else {
+                $coupon->usable = true;
+            }
+            return $coupon;
+            });
+        }else {
+            return Coupon::all();
+        }
     }
 
     public function getCouponByID($CouponID)
@@ -67,5 +79,10 @@ class Coupon extends Model
     public function checkCouponExists($MinimumOrderValue)
     {
         return Coupon::where('MinimumOrderValue', '<=', $MinimumOrderValue)->get();
+    }
+
+    public function updateDiscountPercentage($id, $UsageLimit)
+    {
+        return Coupon::where('CouponID', $id)->update(['UsageLimit' => $UsageLimit - 1]);
     }
 }
