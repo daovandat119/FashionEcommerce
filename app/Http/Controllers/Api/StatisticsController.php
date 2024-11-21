@@ -125,6 +125,53 @@ class StatisticsController extends Controller
         return response()->json(['data' => $statistics]);
     }
 
+
+
+    //thống kê tổng doanh thu theo từng danh mục sản phẩm,
+    public function getRevenueByCategory(Request $request)
+{
+    $query = DB::table('categories as c')
+        ->select(
+            'c.CategoryName as Category',
+            DB::raw('ROUND(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 2) as TotalRevenue')
+        )
+        ->join('products as p', 'c.CategoryID', '=', 'p.CategoryID')
+        ->join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
+        ->join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
+        ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
+        ->groupBy('c.CategoryName')
+        ->orderByDesc('TotalRevenue');
+
+    // Lọc theo trạng thái đơn hàng (mặc định là trạng thái hợp lệ)
+    if ($request->OrderStatusID) {
+        $query->where('o.OrderStatusID', $request->OrderStatusID);
+    } else {
+        $query->whereIn('o.OrderStatusID', [1, 2, 3]);
+    }
+
+    // Lọc theo khung thời gian
+    if ($request->timeFrame) {
+        switch ($request->timeFrame) {
+            case '1_month':
+                $query->where('o.created_at', '>=', now()->subMonth());
+                break;
+            case '6_months':
+                $query->where('o.created_at', '>=', now()->subMonths(6));
+                break;
+            case '1_year':
+                $query->where('o.created_at', '>=', now()->subYear());
+                break;
+        }
+    } elseif ($request->startDate && $request->endDate) {
+        $query->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
+    }
+
+    // Lấy dữ liệu thống kê
+    $statistics = $query->get();
+
+    return response()->json(['data' => $statistics]);
+}
+
 }
 
 
