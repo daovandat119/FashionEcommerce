@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\CouponController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\StatisticsController;
+use App\Http\Controllers\Api\OrderReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -109,6 +110,7 @@ Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
     Route::get('/{id}', [OrderController::class, 'getOrderById']);
     Route::get('/details/{id}', [OrderController::class, 'getOrderDetails']);
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
+    Route::post('/review', [OrderReviewController::class, 'createOrderReview']);
 });
 
 Route::get('/provinces', [AddressController::class, 'getProvinces']);
