@@ -44,7 +44,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(functi
     Route::post('/restore/{id}', [UserController::class, 'restore']);
 });
 
-Route::get('/products', [ProductsController::class, 'index']);
+Route::post('/products/index', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::get('/products/{id}', [ProductsController::class, 'edit']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(function () {
