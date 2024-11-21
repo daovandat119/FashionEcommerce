@@ -89,11 +89,12 @@ class OrderController extends Controller
             $orderDetails = [
                 'UserName' => $user->name,
                 'TotalAmount' => $request->TotalAmount,
+                'OrderCode' => $codeOrder,
             ];
 
 
             if (!empty($user->Email) && filter_var($user->Email, FILTER_VALIDATE_EMAIL)) {
-                // Mail::to($user->Email)->send(new OrderPlacedMail($orderDetails));
+                Mail::to($user->Email)->send(new OrderPlacedMail($orderDetails));
             } else {
                 return response()->json(['message' => 'Invalid email address'], 400);
             }

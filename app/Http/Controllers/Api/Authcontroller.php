@@ -40,7 +40,9 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Đăng nhập thành công',
             'user' => [
-                'UserID' => $user->UserID
+                'UserID' => $user->UserID,
+                'RoleID' => $user->RoleID,
+                
             ],
             'token' => $token,
         ], 200);
