@@ -39,12 +39,14 @@ class Products extends Model
                 'categories.CategoryName as category_name',
                 DB::raw('GROUP_CONCAT(product_images.ImagePath) as image_paths'),
                 DB::raw('IF(products.Price > 0, CEIL(((products.Price - products.SalePrice) / products.Price) * 100), 0) as discount_percentage'),
-                DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating')
+                DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating'),
+                DB::raw('COALESCE(SUM(order_items.Quantity), 0) as total_sold')
             )
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
             ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
             ->leftJoin('reviews', 'products.ProductID', '=', 'reviews.ProductID')
             ->leftJoin('product_variants', 'products.ProductID', '=', 'product_variants.ProductID')
+            ->leftJoin('order_items', 'product_variants.VariantID', '=', 'order_items.VariantID')
             ->where('products.ProductName', 'like', "%{$search}%")
             ->groupBy("{$this->table}.ProductID", 'categories.CategoryName')
             ->skip($offset)
@@ -94,7 +96,7 @@ class Products extends Model
             DB::raw('GROUP_CONCAT(product_images.ImagePath) as image_paths'),
             DB::raw('IF(Price > 0, CEIL(((Price - SalePrice) / Price) * 100), 0) as discount_percentage'),
             DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating'),
-            DB::raw('COALESCE(SUM(DISTINCT order_items.Quantity), 0) as total_sold')
+            DB::raw('COALESCE(SUM(order_items.Quantity), 0) as total_sold')
         )
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
             ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
