@@ -163,4 +163,5 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(f
 
     // Thống kê danh mục
     Route::get('/revenue-by-category', [StatisticsController::class, 'getRevenueByCategory']); // Thêm route mới
+    Route::get('/top-selling-products', [StatisticsController::class, 'getTopSellingProducts']);
 });

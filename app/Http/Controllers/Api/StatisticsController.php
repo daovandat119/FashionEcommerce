@@ -171,7 +171,29 @@ class StatisticsController extends Controller
 
     return response()->json(['data' => $statistics]);
 }
+//
+public function getTopSellingProducts(Request $request)
+{
+    $query = DB::table('products as p')
+        ->select(
+            'p.ProductName',
+            DB::raw('SUM(oi.Quantity) as TotalSold')
+        )
+        ->join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
+        ->join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
+        ->whereIn('o.OrderStatusID', [1, 2, 3]) // Trạng thái đơn hàng hợp lệ
+        ->groupBy('p.ProductName')
+        ->orderByDesc('TotalSold')
+        ->limit(10); // Lấy 10 sản phẩm bán chạy nhất
 
+    if ($request->startDate && $request->endDate) {
+        $query->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
+    }
+
+    $statistics = $query->get();
+
+    return response()->json(['data' => $statistics]);
+}
 }
 
 
