@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             ReviewsTableSeeder::class,
             WithlistTableSeeder::class,
             CouponSeeder::class,
+            OrderReviewsTableSeeder::class,
         ]);
     }
 }

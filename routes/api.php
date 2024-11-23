@@ -22,6 +22,8 @@ use App\Http\Controllers\Api\CouponController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\StatisticsController;
+use App\Http\Controllers\Api\OrderReviewController;
+use App\Http\Controllers\Api\CustomerDetailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -44,6 +46,12 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(functi
     Route::post('/restore/{id}', [UserController::class, 'restore']);
 });
 
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('account', [CustomerDetailController::class, 'show']);
+    Route::post('change-password', [CustomerDetailController::class, 'changePassword']);
+    Route::post('update-profile', [CustomerDetailController::class, 'updateProfile']);
+});
 Route::post('/products/index', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::get('/products/{id}', [ProductsController::class, 'edit']);
@@ -109,6 +117,7 @@ Route::middleware('auth:sanctum')->prefix('/order')->group(function () {
     Route::get('/{id}', [OrderController::class, 'getOrderById']);
     Route::get('/details/{id}', [OrderController::class, 'getOrderDetails']);
     Route::post('/status/{id}', [OrderController::class, 'updateOrderStatus']);
+    Route::post('/review', [OrderReviewController::class, 'createOrderReview']);
 });
 
 Route::get('/provinces', [AddressController::class, 'getProvinces']);

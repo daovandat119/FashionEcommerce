@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class OrderReviewsTableSeeder extends Seeder
 {
@@ -12,11 +13,13 @@ class OrderReviewsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        OrderReview::create([
-            'OrderID' => 1,
-            'UserID' => 1,
-            'RatingLevelID' => 1,
-            'Review' => 'Good',
+        DB::table('order_reviews')->insert([
+            [
+                'OrderID' => 1,
+                'UserID' => 1,
+                'RatingLevelID' => 1,
+                'Review' => 'Good',
+            ],
         ]);
     }
 }

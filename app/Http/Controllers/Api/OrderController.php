@@ -27,6 +27,7 @@ class OrderController extends Controller
     {
         $this->order = new Order();
     }
+    //
 
     public function index(Request $request)
     {
@@ -45,7 +46,7 @@ class OrderController extends Controller
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
 
-
+//
     public function store(OrderRequest $request)
     {
 
