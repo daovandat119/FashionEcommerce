@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id('ReviewID');
-            $table->foreignId('UserID')->constrained('users', 'UserID');
-            $table->foreignId('ProductID')->constrained('products', 'ProductID');
+            $table->foreignId('UserID')->constrained('users', 'UserID')->onDelete('cascade');
+            $table->foreignId('ProductID')->constrained('products', 'ProductID')->onDelete('cascade');
             $table->foreignId('RatingLevelID')->nullable()->constrained('rating_levels', 'RatingLevelID');
             $table->foreignId('ParentReviewID')->nullable()->constrained('reviews', 'ReviewID');
             $table->text('ReviewContent');

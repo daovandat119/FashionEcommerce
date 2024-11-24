@@ -28,7 +28,6 @@ class StatisticsController extends Controller
         } else {
             $query->whereIn('o.OrderStatusID', [1, 2, 3]);
         }
-
         if ($request->timeFrame) {
             $date = now();
             switch ($request->timeFrame) {
@@ -42,10 +41,9 @@ class StatisticsController extends Controller
                     $query->where('o.created_at', '>=', now()->subYear());
                     break;
             }
-        } elseif ($request->startDate && $request->endDate) {
+        } else if ($request->startDate && $request->endDate) {
             $query->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
         }
-
         $statistics = $query->get();
 
         return response()->json(['data' => $statistics]);
@@ -57,8 +55,8 @@ class StatisticsController extends Controller
         $query = DB::table('products as p')
             ->select(
                 'p.ProductName',
-                DB::raw('COALESCE(s.SizeName, "N/A") AS Size'),  // Tên kích thước (nếu có)
-                DB::raw('COALESCE(c.ColorName, "N/A") AS Color'),  // Tên màu sắc (nếu có)
+                DB::raw('COALESCE(s.SizeName, "N/A") AS Size'),
+                DB::raw('COALESCE(c.ColorName, "N/A") AS Color'),
                 DB::raw('COALESCE(v.Quantity, 0) AS StockQuantity'),
                 DB::raw('SUM(oi.Quantity) AS TotalSold'),
                 DB::raw('ROUND(AVG(COALESCE(v.Price, p.Price)), 2) AS Price'),
@@ -80,8 +78,9 @@ class StatisticsController extends Controller
         return response()->json(['data' => $query->get()]);
     }
 
-    public function getOrderStatistics() {
-        $statistics = DB::table(DB::raw('(SELECT 1 AS Month UNION ALL
+    public function getOrderStatistics(Request $request) {
+        //
+        $queryStatistics = DB::table(DB::raw('(SELECT 1 AS Month UNION ALL
                                            SELECT 2 AS Month UNION ALL
                                            SELECT 3 AS Month UNION ALL
                                            SELECT 4 AS Month UNION ALL
@@ -101,76 +100,117 @@ class StatisticsController extends Controller
                 DB::raw('IFNULL(COUNT(p.PaymentID), 0) AS TotalTransactions'),
                 DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue')
             )
+            ->whereYear('p.created_at', 2024)
             ->groupBy('months.Month')
-            ->orderBy('months.Month')
-            ->get();
+            ->orderBy('months.Month');
+        if ($request->timeFrame) {
+            $date = now();
+            switch ($request->timeFrame) {
+                case '1_month':
+                    $queryStatistics->where('o.created_at', '>=', now()->subMonth());
+                    break;
+                case '6_months':
+                    $queryStatistics->where('o.created_at', '>=', now()->subMonths(6));
+                    break;
+                case '1_year':
+                    $queryStatistics->where('o.created_at', '>=', now()->subYear());
+                    break;
+            }
+        } else if ($request->startDate && $request->endDate) {
+            $queryStatistics->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
+        }
+        $statistics = $queryStatistics->get();
 
-        return response()->json(['data' => $statistics]);
+        //
+        $queryStatisticsOrder = DB::table('orders as o')
+        ->select(
+            'o.OrderID',
+            'o.OrderCode',
+            'os.StatusName as OrderStatusName',
+            'o.created_at',
+            'p.Amount',
+            'pm.MethodName as PaymentMethodName',
+            'ps.StatusName as PaymentStatusName',
+            'oi.Quantity'
+        )
+        ->join('payments as p', 'o.OrderID', '=', 'p.OrderID')
+        ->join('order_statuses as os', 'o.OrderStatusID', '=', 'os.OrderStatusID')
+        ->join('payment_methods as pm', 'p.PaymentMethodID', '=', 'pm.PaymentMethodID')
+        ->join('payment_statuses as ps', 'p.PaymentStatusID', '=', 'ps.PaymentStatusID')
+        ->join('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
+        ->leftJoin('order_reviews as or', 'o.OrderID', '=', 'or.OrderID');
+        if ($request->timeFrame) {
+            $date = now();
+            switch ($request->timeFrame){
+                case '1_month':
+                    $queryStatisticsOrder->where('o.created_at', '>=', now()->subMonth());
+                    break;
+                case '6_months':
+                    $queryStatisticsOrder->where('o.created_at', '>=', now()->subMonths(6));
+                    break;
+                case '1_year':
+                    $queryStatisticsOrder->where('o.created_at', '>=', now()->subYear());
+                    break;
+            }
+        } else if ($request->startDate && $request->endDate) {
+            $queryStatisticsOrder->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
+        }
+        $statisticsOrder = $queryStatisticsOrder->get();
+
+        //
+        $queryStatisticsOrderStatus = DB::table('order_statuses as os')
+            ->select(
+                'os.StatusName',
+                DB::raw('IFNULL(COUNT(o.OrderID), 0) AS TotalOrders'),
+                DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue')
+            )
+            ->leftJoin('orders as o', 'o.OrderStatusID', '=', 'os.OrderStatusID')
+            ->leftJoin('payments as p', 'o.OrderID', '=', 'p.OrderID')
+            ->groupBy('os.StatusName')
+            ->orderBy('TotalOrders', 'DESC');
+        if ($request->timeFrame) {
+            $date = now();
+            switch ($request->timeFrame) {
+                case '1_month':
+                    $queryStatisticsOrderStatus->where('o.created_at', '>=', now()->subMonth());
+                    break;
+                case '6_months':
+                    $queryStatisticsOrderStatus->where('o.created_at', '>=', now()->subMonths(6));
+                    break;
+                case '1_year':
+                    $queryStatisticsOrderStatus->where('o.created_at', '>=', now()->subYear());
+                    break;
+            }
+        } else if ($request->startDate && $request->endDate) {
+            $queryStatisticsOrderStatus->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
+        }
+        $statisticsOrderStatus = $queryStatisticsOrderStatus->get();
+
+
+        return response()->json(['data' => [
+            'statistics' => $statistics,
+            'statisticsOrder' => $statisticsOrder,
+            'statisticsOrderStatus' => $statisticsOrderStatus
+        ]]);
     }
 
 
     public function getOrderStatusStatistics() {
         $statistics = DB::table('order_statuses as os')
             ->select(
-                'os.StatusName', // Tên trạng thái đơn hàng
-                DB::raw('IFNULL(COUNT(o.OrderID), 0) AS TotalOrders'), // Tổng số đơn hàng trong trạng thái (nếu không có thì là 0)
-                DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue') // Tổng doanh thu (nếu không có thì là 0)
+                'os.StatusName',
+                DB::raw('IFNULL(COUNT(o.OrderID), 0) AS TotalOrders'),
+                DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue')
             )
-            ->leftJoin('orders as o', 'o.OrderStatusID', '=', 'os.OrderStatusID') // Liên kết với bảng đơn hàng
-            ->leftJoin('payments as p', 'o.OrderID', '=', 'p.OrderID') // Liên kết với bảng thanh toán
-            ->groupBy('os.StatusName') // Nhóm theo trạng thái đơn hàng
-            ->orderBy('TotalOrders', 'DESC') // Sắp xếp theo tổng số đơn hàng
+            ->leftJoin('orders as o', 'o.OrderStatusID', '=', 'os.OrderStatusID')
+            ->leftJoin('payments as p', 'o.OrderID', '=', 'p.OrderID')
+            ->groupBy('os.StatusName')
+            ->orderBy('TotalOrders', 'DESC')
             ->get();
 
         return response()->json(['data' => $statistics]);
     }
 
-
-
-    //thống kê tổng doanh thu theo từng danh mục sản phẩm,
-    public function getRevenueByCategory(Request $request)
-{
-    $query = DB::table('categories as c')
-        ->select(
-            'c.CategoryName as Category',
-            DB::raw('ROUND(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 2) as TotalRevenue')
-        )
-        ->join('products as p', 'c.CategoryID', '=', 'p.CategoryID')
-        ->join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
-        ->join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
-        ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
-        ->groupBy('c.CategoryName')
-        ->orderByDesc('TotalRevenue');
-
-    // Lọc theo trạng thái đơn hàng (mặc định là trạng thái hợp lệ)
-    if ($request->OrderStatusID) {
-        $query->where('o.OrderStatusID', $request->OrderStatusID);
-    } else {
-        $query->whereIn('o.OrderStatusID', [1, 2, 3]);
-    }
-
-    // Lọc theo khung thời gian
-    if ($request->timeFrame) {
-        switch ($request->timeFrame) {
-            case '1_month':
-                $query->where('o.created_at', '>=', now()->subMonth());
-                break;
-            case '6_months':
-                $query->where('o.created_at', '>=', now()->subMonths(6));
-                break;
-            case '1_year':
-                $query->where('o.created_at', '>=', now()->subYear());
-                break;
-        }
-    } elseif ($request->startDate && $request->endDate) {
-        $query->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
-    }
-
-    // Lấy dữ liệu thống kê
-    $statistics = $query->get();
-
-    return response()->json(['data' => $statistics]);
-}
 
 }
 

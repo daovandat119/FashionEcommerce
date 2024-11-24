@@ -37,7 +37,7 @@ class WishlistController extends Controller
     public function index()
     {
         $userId = auth()->id();
-
+        
         $wishlist = $this->wishlist->getWishlistByUserID($userId);
 
         return response()->json(['message' => 'Success', 'data' => $wishlist], 200);

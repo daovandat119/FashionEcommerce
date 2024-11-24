@@ -50,6 +50,7 @@ class Order extends Model
             ->leftJoin('payment_methods as pm', 'pay.PaymentMethodID', '=', 'pm.PaymentMethodID')
             ->leftJoin('payment_statuses as ps', 'pay.PaymentStatusID', '=', 'ps.PaymentStatusID')
             ->leftJoin('addresses as ua', 'o.AddressID', '=', 'ua.AddressID')
+            ->leftJoin('order_reviews as or', 'o.OrderID', '=', 'or.OrderID')
             ->selectRaw('
                 o.OrderID,
                 os.StatusName AS OrderStatus,
@@ -59,7 +60,9 @@ class Order extends Model
                 pay.Amount AS TotalAmount,
                 o.OrderCode,
                 ua.AddressID,
-                o.created_at AS OrderDate
+                o.created_at AS OrderDate,
+                or.RatingLevelID AS Rating,
+                or.Review AS Review
             ')
             ->when($userId, function ($query, $userId) {
                 return $query->where('o.UserID', $userId);
@@ -84,7 +87,9 @@ class Order extends Model
                 'o.OrderCode',
                 'ua.AddressID',
                 'o.created_at',
-                'pay.Amount'
+                'pay.Amount',
+                'or.RatingLevelID',
+                'or.Review'
             )
             ->get();
     }

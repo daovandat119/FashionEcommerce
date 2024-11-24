@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('order_reviews', function (Blueprint $table) {
             $table->id('OrderReviewID');
-            $table->foreignId('OrderID')->constrained('orders', 'OrderID');
-            $table->foreignId('UserID')->constrained('users', 'UserID');
+            $table->foreignId('OrderID')->constrained('orders', 'OrderID')->onDelete('cascade');
+            $table->foreignId('UserID')->constrained('users', 'UserID')->onDelete('cascade');
             $table->foreignId('RatingLevelID')->constrained('rating_levels', 'RatingLevelID');
             $table->text('Review');
             $table->timestamps();
