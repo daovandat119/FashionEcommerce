@@ -160,4 +160,5 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(f
     Route::get('/product-variants-statistics/{id}', [StatisticsController::class, 'getProductVariantsStatistics']);
     Route::post('/orders-statistics', [StatisticsController::class, 'getOrderStatistics']);
     Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
+    // Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
 });

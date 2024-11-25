@@ -201,6 +201,34 @@ class StatisticsController extends Controller
         return response()->json(['data' => $query->get()]);
     }
 
+    // public function getProductVariantsStatistics($productId)
+    // {
+    //     $query = DB::table('products as p')
+    //         ->select(
+    //             'p.ProductName',
+    //             DB::raw('COALESCE(s.SizeName, "N/A") AS Size'),
+    //             DB::raw('COALESCE(c.ColorName, "N/A") AS Color'),
+    //             DB::raw('COALESCE(v.Quantity, 0) AS StockQuantity'),
+    //             DB::raw('SUM(oi.Quantity) AS TotalSold'),
+    //             DB::raw('ROUND(AVG(COALESCE(v.Price, p.Price)), 2) AS Price'),
+    //             DB::raw('ROUND(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 2) AS TotalRevenue')
+    //         )
+    //         ->join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
+    //         ->join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
+    //         ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
+    //         ->leftJoin('sizes as s', 'v.SizeID', '=', 's.SizeID')
+    //         ->leftJoin('colors as c', 'v.ColorID', '=', 'c.ColorID');
+
+    //     if ($productId) {
+    //         $query->where('p.ProductID', $productId);
+    //     }
+
+    //     $query->groupBy('p.ProductName', 'v.Quantity', 's.SizeName', 'c.ColorName')
+    //           ->orderBy('TotalRevenue', 'DESC');
+
+    //     return response()->json(['data' => $query->get()]);
+    // }
+
 }
 
 
