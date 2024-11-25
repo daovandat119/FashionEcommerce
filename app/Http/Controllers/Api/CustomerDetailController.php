@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Models\Users;
+use App\Services\UploadApi;
 
 class CustomerDetailController extends Controller
 {
     public function show(Request $request)
     {
-        // Lấy thông tin người dùng hiện tại
         $user = Auth::user();
         return response()->json([
             'message' => 'Thông tin tài khoản',
@@ -26,6 +27,7 @@ class CustomerDetailController extends Controller
             ]
         ], 200);
     }
+
     public function changePassword(Request $request)
     {
         $request->validate([
@@ -49,31 +51,34 @@ class CustomerDetailController extends Controller
 
     public function updateProfile(Request $request)
     {
-        // Xác thực dữ liệu đầu vào
+
+        return response()->json([
+            'message' => 'Thông tin tài khoản đã được cập nhật thành công.',
+            'data' => $request->all()
+        ], 200);
+
         $request->validate([
             'name' => 'nullable|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $user = Auth::user();
-        if ($request->has('name')) {
-            $user->Username = $request->name;
-        }
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('uploads', 'public');
-            $user->Image = $imagePath;
+        $userId = auth()->id();
+
+        $userUpdate = [
+            'Username' => $request->name,
+        ];
+
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $uploadedFileUrl = (new UploadApi())->upload($request->file('image')->getRealPath())['secure_url'];
+            $userUpdate['Image'] = $uploadedFileUrl;
         }
 
-        // Lưu thông tin mới
-        $user->save();
+        $user = (new Users())->updateUser($userId, $userUpdate);
 
         return response()->json([
             'message' => 'Thông tin tài khoản đã được cập nhật thành công.',
-            'data' => [
-                'name' => $user->Username,
-                'image' => asset('storage/' . $user->Image),
-            ],
         ], 200);
+
     }
 }
 

@@ -18,31 +18,27 @@ class GoogleController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
 
             $user = User::firstOrCreate(
                 ['Email' => $googleUser->getEmail()],
                 [
                     'RoleID' => 2,
                     'Username' => $googleUser->getName(),
-                    'Password' => Hash::make(strtoupper(Str::random(6))), 
+                    'Password' => Hash::make(strtoupper(Str::random(6))),
                     'IsActive' => true,
-                   
                 ]
             );
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            return response()->json([
-                'message' => 'Đăng nhập bằng Google thành công',
-                'token' => $token,
-            ], 200);
+            return redirect('http://localhost:5173/?token=' . $token);
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Đăng nhập bằng Google thất bại',
                 'error' => $e->getMessage(),
             ], 500);
-
         }
     }
 }

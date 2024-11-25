@@ -45,6 +45,7 @@ class Products extends Model
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
             ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
             ->leftJoin('reviews', 'products.ProductID', '=', 'reviews.ProductID')
+            ->leftJoin('product_variants', 'products.ProductID', '=', 'product_variants.ProductID')
             ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
             ->where('products.ProductName', 'like', "%{$search}%")
             ->groupBy("{$this->table}.ProductID", 'categories.CategoryName')

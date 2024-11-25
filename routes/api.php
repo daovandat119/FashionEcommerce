@@ -28,8 +28,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 Route::post('/admin/login', [GoogleController::class, 'loginAdmin']);
-Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
-Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 //
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -46,12 +46,12 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(functi
     Route::post('/restore/{id}', [UserController::class, 'restore']);
 });
 
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('account', [CustomerDetailController::class, 'show']);
     Route::post('change-password', [CustomerDetailController::class, 'changePassword']);
     Route::post('update-profile', [CustomerDetailController::class, 'updateProfile']);
 });
+
 Route::post('/products/index', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::get('/products/{id}', [ProductsController::class, 'edit']);
@@ -156,11 +156,8 @@ Route::post('/pay', [PaymentController::class, 'addPayment'])->name('pay');
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
 
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(function () {
-    Route::post('/products', [StatisticsController::class, 'getProductStatistics']);
-    Route::get('/product-variants/{id}', [StatisticsController::class, 'getProductVariantsStatistics']);
-    Route::get('/orders', [StatisticsController::class, 'getOrderStatistics']);
-    Route::get('/order-statuses', [StatisticsController::class, 'getOrderStatusStatistics']);
-
-    // Thống kê danh mục
-    Route::get('/revenue-by-category', [StatisticsController::class, 'getRevenueByCategory']); // Thêm route mới
+    Route::post('/products-statistics', [StatisticsController::class, 'getProductStatistics']);
+    Route::get('/product-variants-statistics/{id}', [StatisticsController::class, 'getProductVariantsStatistics']);
+    Route::post('/orders-statistics', [StatisticsController::class, 'getOrderStatistics']);
+    Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
 });
