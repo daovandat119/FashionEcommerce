@@ -162,3 +162,4 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(f
     Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
     // Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
 });
+
