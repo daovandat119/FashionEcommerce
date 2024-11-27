@@ -45,6 +45,8 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(functi
     Route::get('/{id}', [UserController::class, 'show']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
     Route::post('/restore/{id}', [UserController::class, 'restore']);
+    ////
+    Route::post('/restore/{id}', [UserController::class, 'restore']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

@@ -47,6 +47,7 @@ class UserController extends Controller
         return response()->json(['message' => 'Người dùng đã bị vô hiệu hóa']);
     }
 //
+//
     public function restore($id)
     {
         $user = User::findOrFail($id);
@@ -55,4 +56,32 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Người dùng đã được kích hoạt lại']);
     }
+    public function store(Request $request)
+{
+    // Xác thực dữ liệu đầu vào
+    $validatedData = $request->validate([
+        'Username' => 'required|string|max:255|unique:users,Username',
+        'Email' => 'required|email|unique:users,Email',
+        'Password' => 'required|string|min:8',
+        'Image' => 'nullable|string',
+        'RoleID' => 'required|integer',
+    ]);
+
+    // Tạo người dùng mới
+    $user = new User();
+    $user->Username = $validatedData['Username'];
+    $user->Email = $validatedData['Email'];
+    $user->Password = bcrypt($validatedData['Password']);
+    $user->Image = $validatedData['Image'] ?? null;
+    $user->RoleID = $validatedData['RoleID'];
+    $user->IsActive = true; // Mặc định kích hoạt
+    $user->save();
+
+    // Trả về phản hồi
+    return response()->json([
+        'message' => 'Người dùng mới đã được thêm thành công',
+        'data' => $user
+    ], 201);
+}
+
 }
