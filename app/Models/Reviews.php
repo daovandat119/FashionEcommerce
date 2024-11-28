@@ -55,7 +55,7 @@ class Reviews extends Model
             ->join('users', 'reviews.UserID', '=', 'users.UserID')
             ->where('ProductID', $productId)
             ->whereNull('ParentReviewID')
-            ->select('reviews.*', 'users.Username') 
+            ->select('reviews.*', 'users.Username', 'users.image')
             ->get();
 
         return $reviews;
@@ -63,7 +63,9 @@ class Reviews extends Model
 
     public function children()
     {
-        return $this->hasMany(Reviews::class, 'ParentReviewID', 'ReviewID');
+        return $this->hasMany(Reviews::class, 'ParentReviewID', 'ReviewID')
+            ->join('users', 'reviews.UserID', '=', 'users.UserID')
+            ->select('reviews.*', 'users.Username', 'users.image');
     }
 
     public function user()

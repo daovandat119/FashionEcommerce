@@ -7,13 +7,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Users;
-use App\Services\UploadApi;
+use Cloudinary\Cloudinary;
+use Cloudinary\Api\Upload\UploadApi;
+use Illuminate\Support\Facades\DB;
 
 class CustomerDetailController extends Controller
 {
     public function show(Request $request)
     {
         $user = Auth::user();
+
         return response()->json([
             'message' => 'Thông tin tài khoản',
             'data' => [
@@ -30,14 +33,16 @@ class CustomerDetailController extends Controller
 
     public function changePassword(Request $request)
     {
-        $request->validate([
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:6|confirmed',
-        ]);
         $user = Auth::user();
         if (!Hash::check($request->input('current_password'), $user->Password)) {
             return response()->json([
                 'message' => 'Mật khẩu hiện tại không chính xác.'
+            ], 400);
+        }
+
+        if($request->input('new_password') !== $request->input('new_password_confirmation')) {
+            return response()->json([
+                'message' => 'Mật khẩu không khớp.'
             ], 400);
         }
 
@@ -51,12 +56,6 @@ class CustomerDetailController extends Controller
 
     public function updateProfile(Request $request)
     {
-
-        return response()->json([
-            'message' => 'Thông tin tài khoản đã được cập nhật thành công.',
-            'data' => $request->all()
-        ], 200);
-
         $request->validate([
             'name' => 'nullable|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -70,10 +69,10 @@ class CustomerDetailController extends Controller
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $uploadedFileUrl = (new UploadApi())->upload($request->file('image')->getRealPath())['secure_url'];
-            $userUpdate['Image'] = $uploadedFileUrl;
+            $userUpdate['image'] = $uploadedFileUrl;
         }
 
-        $user = (new Users())->updateUser($userId, $userUpdate);
+        DB::table('users')->where('UserID', $userId)->update($userUpdate);
 
         return response()->json([
             'message' => 'Thông tin tài khoản đã được cập nhật thành công.',

@@ -55,14 +55,16 @@ class Wishlist extends Model
                 'products.*',
                 'categories.*',
                 DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating'),
-                DB::raw('COALESCE(SUM(order_items.Quantity), 0) as total_sold')
+                DB::raw('SUM(order_items.Quantity) as total_sold')
             )
             ->leftJoin('products', 'wishlist.ProductID', '=', 'products.ProductID')
             ->leftJoin('reviews', 'products.ProductID', '=', 'reviews.ProductID')
             ->leftJoin('categories', 'categories.CategoryID', '=', 'products.CategoryID')
             ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->leftJoin('orders', 'order_items.OrderID', '=', 'orders.OrderID')
+            ->leftJoin('product_variants', 'order_items.VariantID', '=', 'product_variants.VariantID')
             ->where('wishlist.UserID', $userID)
-            ->groupBy('wishlist.WishlistID', 'products.ProductID', 'products.ProductName', 'products.MainImageURL', 'products.Price', 'products.SalePrice', 'categories.CategoryName','order_items.Quantity')
+            ->groupBy('wishlist.WishlistID', 'products.ProductID', 'products.ProductName', 'products.MainImageURL', 'products.Price', 'products.SalePrice', 'categories.CategoryName')
             ->get();
     }
 

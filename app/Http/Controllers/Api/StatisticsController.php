@@ -8,45 +8,80 @@ class StatisticsController extends Controller
 {
 
     public function getUserStatistics(Request $request) {
+        $total = DB::table('users')
+        ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
+        ->where('r.RoleID', 2);
+        $this->applyTimeFrame($total, $request, 'users');
+        if($request->UserName) {
+            $total->where('users.UserName', 'like', '%'.$request->UserName.'%');
+        }
+        $total = $total->count();
+        $limit = $request->input('Limit', 2);
+        $page = $request->input('page', 1);
+        $totalPage = ceil($total / $limit);
+
         $monthlyRegistrations = DB::table('users')
-            ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as Month'), DB::raw('COUNT(*) as Total'))
-            ->groupBy('Month')
+            ->select(DB::raw('DATE_FORMAT(users.created_at, "%m") as Month'), DB::raw('COUNT(*) as Total'))
+            ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
+            ->where('r.RoleID', 2);
+            $this->applyTimeFrame($monthlyRegistrations, $request, 'users');
+            $monthlyRegistrations = $monthlyRegistrations->groupBy('Month')
             ->orderBy('Month')
             ->get();
-        $this->applyTimeFrame($monthlyRegistrations, $request);
 
 
-        $activeCount = DB::table('users')->where('IsActive', 1)->count();
-        $this->applyTimeFrame($activeCount, $request);
-        $bannedCount = DB::table('users')->where('IsActive', 0)->count();
-        $this->applyTimeFrame($bannedCount, $request);
 
-        $queryUser = DB::table('users')->get();
-        $this->applyTimeFrame($queryUser, $request);
+        $activeCountQuery = DB::table('users')->where('IsActive', 1)
+            ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
+            ->where('r.RoleID', 2);
+        $this->applyTimeFrame($activeCountQuery, $request, 'users');
+        $activeCount = $activeCountQuery->count();
+
+        $bannedCountQuery = DB::table('users')->where('IsActive', 0)
+            ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
+            ->where('r.RoleID', 2);
+        $this->applyTimeFrame($bannedCountQuery, $request, 'users');
+        $bannedCount = $bannedCountQuery->count();
+
+        $queryUser = DB::table('users')->skip(($page - 1) * $limit)
+            ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
+            ->where('r.RoleID', 2);
+            if($request->UserName) {
+                $queryUser->where('users.UserName', 'like', '%'.$request->UserName.'%');
+            }
+            $queryUser = $queryUser->take($limit)
+            ->get();
+        $this->applyTimeFrame($queryUser, $request, 'users');
 
         return response()->json(['data' => [
             'monthlyRegistrations' => $monthlyRegistrations,
             'activeCount' => $activeCount,
             'bannedCount' => $bannedCount,
-            'queryUser' => $queryUser
+            'queryUser' => [
+                'data' => $queryUser,
+                'total' => $total,
+                'limit' => $limit,
+                'page' => $page,
+                'totalPage' => $totalPage
+            ],
         ]]);
     }
 
-    private function applyTimeFrame($query, $request) {
+    private function applyTimeFrame($query, $request, $table) {
         if ($request->timeFrame) {
             switch ($request->timeFrame) {
                 case '1_month':
-                    $query->where('o.created_at', '>=', now()->subMonth());
+                    $query->where("{$table}.created_at", '>=', now()->subMonth());
                     break;
                 case '6_months':
-                    $query->where('o.created_at', '>=', now()->subMonths(6));
+                    $query->where("{$table}.created_at", '>=', now()->subMonths(6));
                     break;
                 case '1_year':
-                    $query->where('o.created_at', '>=', now()->subYear());
+                    $query->where("{$table}.created_at", '>=', now()->subYear());
                     break;
             }
         } elseif ($request->startDate && $request->endDate) {
-            $query->whereBetween('o.created_at', [$request->startDate, $request->endDate]);
+            $query->whereBetween(DB::raw("DATE({$table}.created_at)"), [$request->startDate, $request->endDate]);
         }
     }
 
@@ -60,6 +95,17 @@ class StatisticsController extends Controller
 
     public function getProductStatistics(Request $request)
     {
+        $total = DB::table('products as p');
+        $this->applyTimeFrame($total, $request, 'p');
+        if($request->ProductName) {
+            $total->where('p.ProductName', 'like', '%'.$request->ProductName.'%');
+        }
+        $total = $total->count();
+        $limit = $request->input('Limit', 2);
+        $page = $request->input('page', 1);
+        $totalPage = ceil($total / $limit);
+
+
         $queryProduct = DB::table('products as p')
             ->select(
                 'p.ProductID',
@@ -70,12 +116,17 @@ class StatisticsController extends Controller
             )
             ->join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
             ->join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
-            ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
+            ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID');
+            if($request->ProductName) {
+                $queryProduct->where('p.ProductName', 'like', '%'.$request->ProductName.'%');
+            }
+            $queryProduct->skip(($page - 1) * $limit)
+            ->take($limit)
             ->groupBy('p.ProductID', 'p.ProductName')
             ->orderBy('TotalRevenue', 'DESC');
 
         $this->applyOrderStatus($queryProduct, $request);
-        $this->applyTimeFrame($queryProduct, $request);
+        $this->applyTimeFrame($queryProduct, $request, 'p');
 
         $statisticsProduct = $queryProduct->get();
 
@@ -93,17 +144,33 @@ class StatisticsController extends Controller
             ->orderByDesc('TotalRevenue');
 
         $this->applyOrderStatus($queryCategory, $request);
-        $this->applyTimeFrame($queryCategory, $request);
+        $this->applyTimeFrame($queryCategory, $request, 'p');
 
         $statisticsCategory = $queryCategory->get();
 
         return response()->json(['data' => [
-            'statisticsProduct' => $statisticsProduct,
+            'statisticsProduct' => [
+                'data' => $statisticsProduct,
+                'limit' => $limit,
+                'page' => $page,
+                'total' => $totalPage
+            ],
             'statisticsCategory' => $statisticsCategory
         ]]);
     }
 
     public function getOrderStatistics(Request $request) {
+        $total = DB::table('payments as p');
+        $this->applyTimeFrame($total, $request, 'p');
+        $total = $total->join('orders as o', 'p.OrderID', '=', 'o.OrderID');
+        if($request->OrderCode) {
+            $total->where('o.OrderCode', '=', $request->OrderCode);
+        }
+        $total = $total->count();
+        $limit = $request->input('Limit', 2);
+        $page = $request->input('Page', 1);
+        $totalPage = ceil($total / $limit);
+
         $queryStatistics = DB::table(DB::raw('(SELECT 1 AS Month UNION ALL
                                            SELECT 2 AS Month UNION ALL
                                            SELECT 3 AS Month UNION ALL
@@ -116,9 +183,13 @@ class StatisticsController extends Controller
                                            SELECT 10 AS Month UNION ALL
                                            SELECT 11 AS Month UNION ALL
                                            SELECT 12 AS Month) AS months'))
-            ->leftJoin('payments as p', DB::raw('MONTH(p.created_at)'), '=', 'months.Month')
-            ->whereYear('p.created_at', 2024)
-            ->orWhereNull('p.PaymentID')
+            ->leftJoin('payments as p', DB::raw('MONTH(p.created_at)'), '=', 'months.Month');
+            if($request->timeFrame || $request->startDate || $request->endDate) {
+                $this->applyTimeFrame($queryStatistics, $request, 'p');
+            }else{
+                $queryStatistics->whereYear('p.created_at', 2024);
+            }
+            $queryStatistics->orWhereNull('p.PaymentID')
             ->select(
                 'months.Month',
                 DB::raw('IFNULL(COUNT(p.PaymentID), 0) AS TotalTransactions'),
@@ -127,8 +198,6 @@ class StatisticsController extends Controller
             ->whereYear('p.created_at', 2024)
             ->groupBy('months.Month')
             ->orderBy('months.Month');
-
-        $this->applyTimeFrame($queryStatistics, $request);
         $statistics = $queryStatistics->get();
 
         $queryStatisticsOrder = DB::table('orders as o')
@@ -148,9 +217,16 @@ class StatisticsController extends Controller
         ->join('payment_statuses as ps', 'p.PaymentStatusID', '=', 'ps.PaymentStatusID')
         ->join('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
         ->leftJoin('order_reviews as or', 'o.OrderID', '=', 'or.OrderID');
+        if($request->OrderCode) {
+            $queryStatisticsOrder->where('o.OrderCode', '=', $request->OrderCode);
+        }
+        $queryStatisticsOrder->skip(($page - 1) * $limit)
+        ->take($limit);
 
-        $this->applyTimeFrame($queryStatisticsOrder, $request);
+        $this->applyTimeFrame($queryStatisticsOrder, $request, 'o');
         $statisticsOrder = $queryStatisticsOrder->get();
+
+        $allOrderStatuses = DB::table('order_statuses')->select('StatusName')->get();
 
         $queryStatisticsOrderStatus = DB::table('order_statuses as os')
             ->select(
@@ -159,17 +235,35 @@ class StatisticsController extends Controller
                 DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue')
             )
             ->leftJoin('orders as o', 'o.OrderStatusID', '=', 'os.OrderStatusID')
-            ->leftJoin('payments as p', 'o.OrderID', '=', 'p.OrderID')
-            ->groupBy('os.StatusName')
+            ->leftJoin('payments as p', 'o.OrderID', '=', 'p.OrderID');
+
+        $this->applyTimeFrame($queryStatisticsOrderStatus, $request, 'o');
+
+        $queryStatisticsOrderStatus->groupBy('os.StatusName')
             ->orderBy('TotalOrders', 'DESC');
 
-        $this->applyTimeFrame($queryStatisticsOrderStatus, $request);
         $statisticsOrderStatus = $queryStatisticsOrderStatus->get();
+
+        $result = [];
+        foreach ($allOrderStatuses as $status) {
+            $statusData = $statisticsOrderStatus->firstWhere('StatusName', $status->StatusName);
+            $result[] = [
+                'StatusName' => $status->StatusName,
+                'TotalOrders' => $statusData->TotalOrders ?? 0,
+                'TotalRevenue' => $statusData->TotalRevenue ?? '0.00',
+            ];
+        }
 
         return response()->json(['data' => [
             'statistics' => $statistics,
-            'statisticsOrder' => $statisticsOrder,
-            'statisticsOrderStatus' => $statisticsOrderStatus
+            'statisticsOrder' => [
+                'data' => $statisticsOrder,
+                'limit' => $limit,
+                'page' => $page,
+                'totalPage' => $totalPage,
+                'total' => $total
+            ],
+            'statisticsOrderStatus' => $result
         ]]);
     }
 
@@ -200,7 +294,6 @@ class StatisticsController extends Controller
 
         return response()->json(['data' => $query->get()]);
     }
-
 }
 
 

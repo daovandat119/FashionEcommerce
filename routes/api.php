@@ -39,17 +39,16 @@ Route::get('/email/verify/{id}', [AuthController::class, 'verify'])
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
-Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('users')->group(function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::delete('/{id}', [UserController::class, 'destroy']);
-    Route::post('/restore/{id}', [UserController::class, 'restore']);
-});
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('account', [CustomerDetailController::class, 'show']);
-    Route::post('change-password', [CustomerDetailController::class, 'changePassword']);
-    Route::post('update-profile', [CustomerDetailController::class, 'updateProfile']);
+Route::middleware(['auth:sanctum'])->prefix('users')->group(function () {
+    Route::get('account', [UserController::class, 'showUser']);
+    Route::post('change-password', [UserController::class, 'changePassword']);
+    Route::post('update-profile', [UserController::class, 'updateProfile']);
+    Route::middleware('auth.admin')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+        Route::post('/restore/{id}', [UserController::class, 'restore']);
+    });
 });
 
 Route::post('/products/index', [ProductsController::class, 'index']);
