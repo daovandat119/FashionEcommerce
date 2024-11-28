@@ -23,7 +23,6 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\OrderReviewController;
-use App\Http\Controllers\Api\CustomerDetailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -35,7 +34,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
 Route::get('/email/verify/{id}', [AuthController::class, 'verify'])
-    ->name('verification.verify');
+->name('verification.verify');
+
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
@@ -50,6 +50,7 @@ Route::middleware(['auth:sanctum'])->prefix('users')->group(function () {
         Route::post('/restore/{id}', [UserController::class, 'restore']);
     });
 });
+
 
 Route::post('/products/index', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
@@ -159,4 +160,6 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(f
     Route::get('/product-variants-statistics/{id}', [StatisticsController::class, 'getProductVariantsStatistics']);
     Route::post('/orders-statistics', [StatisticsController::class, 'getOrderStatistics']);
     Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
+    // Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
 });
+

@@ -135,6 +135,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Tài khoản không tồn tại hoặc đã được xác minh.'], 400);
         }
 
+
         if ($user->CodeId && $user->CodeExpired > now()) {
             return response()->json([
                 'message' => 'Mã xác minh hiện tại vẫn còn hiệu lực. Vui lòng kiểm tra email của bạn.'
@@ -157,17 +158,14 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
 
+      
         $user = User::where('Email', $request->Email)->first(); 
 
         if (!$user) {
             return response()->json(['message' => 'Email không tồn tại trong hệ thống.'], 404);
         }
 
-        if ($user->CodeExpired && $user->CodeExpired->gt(now()->subDay())) {
-            return response()->json([
-                'message' => 'Bạn chỉ có thể đổi mật khẩu sau 24 giờ kể từ lần đổi gần nhất.'
-            ], 400);
-        }
+       
 
         $newPassword = Str::random(8);
         $user->Password = Hash::make($newPassword);
@@ -175,7 +173,14 @@ class AuthController extends Controller
         $user->save();
 
 
-        Mail::to($user->Email)->send(new NewPassword($user, $newPassword));
+        try {
+            Mail::to($user->Email)->send(new NewPassword($user, $newPassword));
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Không thể gửi email. Vui lòng thử lại sau.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Mật khẩu mới đã được gửi đến email của bạn. Vui lòng đổi mật khẩu !',
@@ -191,8 +196,6 @@ class AuthController extends Controller
             'message' => 'Đăng xuất thành công',
         ], 200);
     }
-
-
 
     public function getUserInfo(Request $request)
     {

@@ -10,7 +10,7 @@ use App\Models\Users;
 use Cloudinary\Cloudinary;
 use Cloudinary\Api\Upload\UploadApi;
 use Illuminate\Support\Facades\DB;
-
+use App\Http\Requests\UserRequest;
 class UserController extends Controller
 {
     public function index(Request $request)
@@ -53,7 +53,7 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Người dùng đã bị vô hiệu hóa']);
     }
-//
+
     public function restore($id)
     {
         $user = User::findOrFail($id);
@@ -62,7 +62,6 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Người dùng đã được kích hoạt lại']);
     }
-
 
     public function showUser(Request $request)
     {
@@ -105,7 +104,7 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(UserRequest $request)
     {
         $userId = auth()->id();
 
@@ -116,6 +115,9 @@ class UserController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $uploadedFileUrl = (new UploadApi())->upload($request->file('image')->getRealPath())['secure_url'];
             $userUpdate['image'] = $uploadedFileUrl;
+        }else {
+            $user = User::find($userId);
+            $userUpdate['image'] = $user->image;
         }
 
         DB::table('users')->where('UserID', $userId)->update($userUpdate);
@@ -125,4 +127,6 @@ class UserController extends Controller
         ], 200);
 
     }
+
 }
+

@@ -27,7 +27,6 @@ class OrderController extends Controller
     {
         $this->order = new Order();
     }
-    //
 
     public function index(Request $request)
     {
@@ -94,11 +93,11 @@ class OrderController extends Controller
             ];
 
 
-            if (!empty($user->Email) && filter_var($user->Email, FILTER_VALIDATE_EMAIL)) {
-                Mail::to($user->Email)->send(new OrderPlacedMail($orderDetails));
-            } else {
-                return response()->json(['message' => 'Invalid email address'], 400);
-            }
+            // if (!empty($user->Email) && filter_var($user->Email, FILTER_VALIDATE_EMAIL)) {
+            //     Mail::to($user->Email)->send(new OrderPlacedMail($orderDetails));
+            // } else {
+            //     return response()->json(['message' => 'Invalid email address'], 400);
+            // }
 
 
             return response()->json(['status' => 'success', 'data' => $payment, 'message' => 'Order created successfully, waiting for delivery.'], 201);
@@ -107,6 +106,7 @@ class OrderController extends Controller
             return (new PaymentController())->addPayment($userId, $request);
         }
     }
+
 
     public function getOrderDetails($orderID)
     {
