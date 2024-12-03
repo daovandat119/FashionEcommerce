@@ -48,20 +48,24 @@ class ReviewsController extends Controller
     {
         $userId = auth()->id();
 
-        $order = (new Order())->checkOrder($userId, $request->ProductID);
+        $roleName = auth()->user()->RoleName;
 
-        $checkReview = $this->reviewRepository->checkReview($userId, $request->ProductID);
+        if ($roleName == 'User') {
+            $order = (new Order())->checkOrder($userId, $request->ProductID);
 
-        if (!$order) {
-            return response()->json([
-               'message' => 'You have not bought this product',
-            ], 400);
+            $checkReview = $this->reviewRepository->checkReview($userId, $request->ProductID);
+
+            if (!$order) {
+                return response()->json([
+                    'message' => 'You have not bought this product',
+                ], 400);
+            }
         }
 
         $data = [
             'UserID' => $userId,
             'ProductID' => $request->ProductID,
-            'RatingLevelID' => $checkReview ? null : $request->RatingLevelID,
+            'RatingLevelID' => $request->RatingLevelID ?? null,
             'ReviewContent' => $request->ReviewContent,
             'ParentReviewID' => $request->ParentReviewID ?? null,
         ];

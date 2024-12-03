@@ -13,7 +13,8 @@ use App\Models\OrderItems;
 use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Http\Controllers\Api\CouponController;
-
+use App\Http\Controllers\Api\AddressController;
+use App\Models\Coupon;
 class PaymentController extends Controller
 {
 
@@ -29,7 +30,6 @@ class PaymentController extends Controller
             'UserID' => $userId,
             'CouponID' => $request->CouponID,
         ];
-
         $jsonData = json_encode($data);
         $base64Data = base64_encode($jsonData);
         $vnp_TxnRef = $base64Data;
@@ -98,13 +98,24 @@ class PaymentController extends Controller
 
                 $address = (new Addresses())->getDistrictID($data['UserID']);
 
-                (new CouponController())->updateDiscount($data['CouponID']);
+                if ($data['CouponID'] != null) {
+                    (new CouponController())->updateDiscount($data['CouponID']);
+                    $coupon = (new Coupon())->getCouponByID($data['CouponID']);
+                    $total = $request->vnp_Amount / 100;
+                    $totalDiscount = abs($total - ($total / abs(1 - ($coupon->DiscountPercentage / 100))));
 
+                }
+
+                $shippingFee = (new AddressController())->getShippingFee($request, $data['UserID']);
+
+                $totalShippingFee = $shippingFee->original['data']['total'];
                 $dataOrder = [
                     'UserID' => $data['UserID'],
                     'AddressID' => $address->AddressID,
                     'CartID' => $cart->CartID,
                     'OrderCode' => $codeOrder,
+                    'ShippingFee' => $totalShippingFee,
+                    'Discount' => $totalDiscount ?? 0,
                 ];
 
                 $orderID = (new Order())->createOrder($dataOrder);

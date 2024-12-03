@@ -28,30 +28,43 @@ class Coupon extends Model
         'updated_at',
     ];
 
-    public function listAllCoupons($role, $MinimumOrderValue)
+    public function listAllCoupons($role, $MinimumOrderValue, $Code = null, $offset = null, $limit = null)
     {
         if ($role->RoleName != 'Admin') {
-        $coupons = Coupon::query();
-
+            $coupons = Coupon::query();
 
             $coupons->where('ExpiresAt', '>', Carbon::now());
 
-
-        $coupons->where(function($query) use ($MinimumOrderValue) {
-            $query->where('MinimumOrderValue', '<=', $MinimumOrderValue)
+            $coupons->where(function($query) use ($MinimumOrderValue) {
+                $query->where('MinimumOrderValue', '<=', $MinimumOrderValue)
                   ->orWhere('MinimumOrderValue', '>', $MinimumOrderValue);
-        });
+                $query->where('UsageLimit', '>', 0);
+            });
 
-        return $coupons->get()->map(function($coupon) use ($MinimumOrderValue) {
-            if ($coupon->MinimumOrderValue > $MinimumOrderValue) {
-                $coupon->usable = false;
-            } else {
-                $coupon->usable = true;
+            if ($offset !== null && $limit !== null) {
+                $coupons->offset($offset)->limit($limit);
             }
-            return $coupon;
+
+            return $coupons->get()->map(function($coupon) use ($MinimumOrderValue) {
+                if ($coupon->MinimumOrderValue > $MinimumOrderValue) {
+                    $coupon->usable = false;
+                } else {
+                    $coupon->usable = true;
+                }
+                return $coupon;
             });
         }else {
-            return Coupon::all();
+            $coupons = Coupon::query();
+
+            if($Code){
+                $coupons->where('Code', 'like', '%' . $Code . '%');
+            }
+
+            if ($offset !== null && $limit !== null) {
+                $coupons->offset($offset)->limit($limit);
+            }
+
+            return $coupons->get();
         }
     }
 
@@ -84,5 +97,20 @@ class Coupon extends Model
     public function updateDiscountPercentage($id, $UsageLimit)
     {
         return Coupon::where('CouponID', $id)->update(['UsageLimit' => $UsageLimit - 1]);
+    }
+
+    public function calculateTotalCoupons($role, $Code = null)
+    {
+        if ($role->RoleName != 'Admin') {
+            return Coupon::where('ExpiresAt', '>', Carbon::now())->count();
+        } else {
+            $coupons = Coupon::query();
+
+            if($Code){
+                $coupons->where('Code', 'like', '%' . $Code . '%');
+            }
+
+            return $coupons->count();
+        }
     }
 }

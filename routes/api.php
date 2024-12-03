@@ -1,7 +1,4 @@
 <?php
-
-
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckAdmin;
 use App\Http\Controllers\Api\UserController;
@@ -29,7 +26,7 @@ use Illuminate\Support\Facades\Mail;
 Route::post('/admin/login', [GoogleController::class, 'loginAdmin']);
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
-//
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/admin/login', [AuthController::class, 'loginAdmin']);
@@ -44,13 +41,12 @@ Route::middleware(['auth:sanctum'])->prefix('users')->group(function () {
     Route::post('change-password', [UserController::class, 'changePassword']);
     Route::post('update-profile', [UserController::class, 'updateProfile']);
     Route::middleware('auth.admin')->group(function () {
-        Route::get('/', [UserController::class, 'index']);
+        Route::post('/', [UserController::class, 'index']);
         Route::get('/{id}', [UserController::class, 'show']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
         Route::post('/restore/{id}', [UserController::class, 'restore']);
     });
 });
-
 
 Route::post('/products/index', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
@@ -62,7 +58,6 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(fun
     Route::delete('/', [ProductsController::class, 'delete']);
     Route::post('/status/{id}', [ProductsController::class, 'updateStatus']);
 });
-//
 
 Route::get('/categories', [CategoriesController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('categories')->group(function () {
@@ -73,14 +68,15 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('categories')->group(f
     Route::delete('/', [CategoriesController::class, 'delete']);
     Route::post('/status/{id}', [CategoriesController::class, 'updateStatus']);
 });
+
 Route::get('/colors', [ColorsController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('colors')->group(function () {
-
     Route::post('/', [ColorsController::class, 'store']);
     Route::get('/{id}', [ColorsController::class, 'edit']);
     Route::put('/{id}', [ColorsController::class, 'update']);
     Route::delete('/{id}', [ColorsController::class, 'delete']);
 });
+
 Route::get('/sizes', [SizeController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(function () {
     Route::post('/', [SizeController::class, 'store']);
@@ -145,7 +141,6 @@ Route::middleware(['auth:sanctum'])->prefix('coupons')->group(function () {
     });
 });
 
-
 Route::get('/reviews/{id}', [ReviewsController::class, 'index']);
 Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
     Route::post('/', [ReviewsController::class, 'store']);
@@ -160,6 +155,5 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(f
     Route::get('/product-variants-statistics/{id}', [StatisticsController::class, 'getProductVariantsStatistics']);
     Route::post('/orders-statistics', [StatisticsController::class, 'getOrderStatistics']);
     Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
-    // Route::post('/user-statistics', [StatisticsController::class, 'getUserStatistics']);
 });
 

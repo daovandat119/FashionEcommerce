@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "cloudinary": "^2.5.1",
-        "laravel-echo": "^1.16.1",
+        "laravel-echo": "^1.17.1",
         "pusher-js": "^8.4.0-rc2"
     }
 }

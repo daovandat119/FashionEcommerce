@@ -10,6 +10,7 @@ use App\Models\OrderItems;
 use Illuminate\Support\Str;
 use App\Models\Payments;
 use App\Http\Requests\OrderRequest;
+use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\CouponController;
 use App\Models\CartItems;
@@ -17,6 +18,7 @@ use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Http;
 use App\Models\Addresses;
 use App\Mail\OrderPlacedMail;
+use App\Models\Coupon;
 use Mail;
 
 class OrderController extends Controller
@@ -30,11 +32,14 @@ class OrderController extends Controller
 
     public function index(Request $request)
     {
+        $page = $request->input('Page', 1);
+        $limit = $request->input('Limit', 3);
+
         $userId = auth()->id();
 
         $role = auth()->user()->role->RoleName;
 
-        $order = $this->order->getOrder(
+        $total = $this->order->countTotalOrders(
             $role == 'Admin' ? null : $userId,
             $request->OrderCode,
             $request->OrderStatusID,
@@ -42,7 +47,24 @@ class OrderController extends Controller
             $request->PaymentStatusID
         );
 
-        return response()->json(['message' => 'Success', 'data' => $order], 200);
+        $totalPage = ceil($total / $limit);
+
+        $order = $this->order->getOrder(
+            $role == 'Admin' ? null : $userId,
+            $request->OrderCode,
+            $request->OrderStatusID,
+            $request->PaymentMethodID,
+            $request->PaymentStatusID,
+            ($page - 1) * $limit,
+            $limit
+        );
+
+        return response()->json([
+            'message' => 'Success',
+            'data' => $order,
+            'totalPage' => $totalPage,
+            'page' => $page,
+        ], 200);
     }
 
 //
@@ -54,7 +76,13 @@ class OrderController extends Controller
         $checkOrderStatus = $this->order->countCanceledOrders($userId);
 
         if ($checkOrderStatus > 3 && $request->PaymentMethodID != 2) {
-            return response()->json(['message' => 'Bạn đã hủy quá 3 lần.Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
+            return response()->json(['message' => 'Bạn đã hủy quá 3 lần. Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
+        }
+
+        $countCartItems = (new CartItems())->countCartItemsByUserId($userId);
+
+        if ($countCartItems > 10 && $request->PaymentMethodID != 2) {
+            return response()->json(['message' => 'Số lượng mua quá lớn. Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
         }
 
         if ($request->PaymentMethodID == 1) {
@@ -63,16 +91,22 @@ class OrderController extends Controller
             $codeOrder = (string) Str::uuid();
 
             $address = (new Addresses())->getDistrictID($userId);
-
             if ($request->CouponID) {
                 (new CouponController())->updateDiscount($request->CouponID);
+                $coupon = (new Coupon())->getCouponByID($request->CouponID);
+                $totalDiscount = abs($request->TotalAmount - ($request->TotalAmount / abs(1 - ($coupon->DiscountPercentage / 100))));
             }
+
+            $shippingFee = (new AddressController())->getShippingFee($request);
+            $totalShippingFee = $shippingFee->original['data']['total'];
 
             $dataOrder = [
                 'UserID' => $userId,
                 'AddressID' => $address->AddressID,
                 'CartID' => $cart->CartID,
                 'OrderCode' => $codeOrder,
+                'ShippingFee' => $totalShippingFee,
+                'Discount' => $totalDiscount ?? 0,
             ];
 
             $orderID = $this->order->createOrder($dataOrder);
@@ -100,9 +134,8 @@ class OrderController extends Controller
             // }
 
 
-            return response()->json(['status' => 'success', 'data' => $payment, 'message' => 'Order created successfully, waiting for delivery.'], 201);
+            return response()->json(['status' => 'success', 'data' => $payment, 'shippingFee' => $shippingFee, 'message' => 'Order created successfully, waiting for delivery.'], 201);
         } else {
-
             return (new PaymentController())->addPayment($userId, $request);
         }
     }

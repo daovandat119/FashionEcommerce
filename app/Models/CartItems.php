@@ -92,5 +92,11 @@ class CartItems extends Model
         $deleteCartItemByCartID = CartItems::where('CartID', $cartID)->delete();
     }
 
+    public function countCartItemsByUserId($userId)
+    {
+        return CartItems::join('carts as c', 'cart_items.CartID', '=', 'c.CartID')
+            ->where('c.UserID', $userId)
+            ->sum('cart_items.Quantity');
+    }
 
 }

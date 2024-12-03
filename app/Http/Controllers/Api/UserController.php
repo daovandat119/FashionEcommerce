@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
-use App\Models\Users;
+use App\Models\User;
 use Cloudinary\Cloudinary;
 use Cloudinary\Api\Upload\UploadApi;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +19,6 @@ class UserController extends Controller
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
         $offset = ($page - 1) * $limit;
-
 
         $users = User::skip($offset)
             ->join('roles', 'users.RoleID', '=', 'roles.RoleID')
@@ -117,7 +116,7 @@ class UserController extends Controller
             $userUpdate['image'] = $uploadedFileUrl;
         }else {
             $user = User::find($userId);
-            $userUpdate['image'] = $user->image;
+            $userUpdate['image'] = $user->Image;
         }
 
         DB::table('users')->where('UserID', $userId)->update($userUpdate);

@@ -37,17 +37,14 @@ class Products extends Model
     {
         $query = Products::select("{$this->table}.*",
                 'categories.CategoryName as category_name',
-                DB::raw('GROUP_CONCAT(product_images.ImagePath) as image_paths'),
-                DB::raw('IF(products.Price > 0, CEIL(((products.Price - products.SalePrice) / products.Price) * 100), 0) as discount_percentage'),
-                DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating'),
+                DB::raw('CEIL(COALESCE(((products.Price - products.SalePrice) / products.Price) * 100, 0)) as discount_percentage'),
+                DB::raw('COALESCE(AVG(r.RatingLevelID), 5) as average_rating'),
                 DB::raw('COALESCE(SUM(order_items.Quantity), 0) as total_sold')
             )
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
-            ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
-            ->leftJoin('reviews', 'products.ProductID', '=', 'reviews.ProductID')
             ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
-            ->leftJoin('orders', 'order_items.OrderID', '=', 'orders.OrderID')
             ->leftJoin('product_variants', 'order_items.VariantID', '=', 'product_variants.VariantID')
+            ->leftJoin(DB::raw('(SELECT ProductID, AVG(RatingLevelID) AS RatingLevelID FROM reviews GROUP BY ProductID) as r'), 'products.ProductID', '=', 'r.ProductID')
             ->where('products.ProductName', 'like', "%{$search}%")
             ->groupBy("{$this->table}.ProductID", 'categories.CategoryName')
             ->skip($offset)
@@ -95,16 +92,18 @@ class Products extends Model
         return Products::select("{$this->table}.*",
             'categories.CategoryName as category_name',
             'product_images.ImagePath as image_paths',
-            DB::raw('IF(Price > 0, CEIL(((Price - SalePrice) / Price) * 100), 0) as discount_percentage'),
-            DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating'),
+            DB::raw('CEIL(COALESCE((products.Price - products.SalePrice) / products.Price * 100, 0)) as discount_percentage'),
+            DB::raw('COALESCE(AVG(r.RatingLevelID), 0) as average_rating'),
             DB::raw('COALESCE(SUM(order_items.Quantity), 0) as total_sold')
         )
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
-            ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
-            ->leftJoin('reviews', 'products.ProductID', '=', 'reviews.ProductID')
             ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->leftJoin('product_variants', 'order_items.VariantID', '=', 'product_variants.VariantID')
+            ->leftJoin(DB::raw('(SELECT ProductID, AVG(RatingLevelID) AS RatingLevelID FROM reviews GROUP BY ProductID) as r'), 'products.ProductID', '=', 'r.ProductID')
+            ->leftJoin('product_images', 'products.ProductID', '=', 'product_images.ProductID')
             ->where('products.ProductID', $id)
             ->groupBy("{$this->table}.ProductID", 'categories.CategoryName', 'product_images.ImagePath')
+            ->orderBy("{$this->table}.ProductID")
             ->first();
     }
 

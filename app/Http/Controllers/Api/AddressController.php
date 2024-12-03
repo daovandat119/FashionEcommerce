@@ -201,9 +201,9 @@ class AddressController extends Controller
     }
 
 
-    public function getShippingFee(Request $request)
+    public function getShippingFee(Request $request, $UserID = null)
     {
-        $userId = auth()->id();
+        $userId = $UserID ?? auth()->id();
 
         $addressUser = $this->repoAddress->getDistrictID($userId);
 

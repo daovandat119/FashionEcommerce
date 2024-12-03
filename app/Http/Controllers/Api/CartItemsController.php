@@ -129,4 +129,6 @@ class CartItemsController extends Controller
         return response()->json(['message' => 'Success', 'deleted_count' => $deletedCartItemsCount], 200);
     }
 
+    
+
 }

@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 class StatisticsController extends Controller
 {
-
     public function getUserStatistics(Request $request) {
         $total = DB::table('users')
         ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
@@ -28,8 +27,6 @@ class StatisticsController extends Controller
             $monthlyRegistrations = $monthlyRegistrations->groupBy('Month')
             ->orderBy('Month')
             ->get();
-
-
 
         $activeCountQuery = DB::table('users')->where('IsActive', 1)
             ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
@@ -101,29 +98,33 @@ class StatisticsController extends Controller
             $total->where('p.ProductName', 'like', '%'.$request->ProductName.'%');
         }
         $total = $total->count();
-        $limit = $request->input('Limit', 2);
+        $limit = $request->input('Limit', 3);
         $page = $request->input('page', 1);
         $totalPage = ceil($total / $limit);
-
 
         $queryProduct = DB::table('products as p')
             ->select(
                 'p.ProductID',
                 'p.ProductName',
-                DB::raw('SUM(oi.Quantity) AS TotalSold'),
-                DB::raw('ROUND(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 2) AS TotalRevenue'),
-                DB::raw('COALESCE(SUM(v.Quantity), 0) AS Quantity')
+                DB::raw('COALESCE(SUM(oi.Quantity), 0) AS TotalSold'),
+                DB::raw('ROUND(COALESCE(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 0), 2) AS TotalRevenue'),
+                DB::raw('(
+                    SELECT SUM(v2.Quantity)
+                    FROM product_variants AS v2
+                    WHERE v2.ProductID = p.ProductID AND v2.Quantity > 0
+                ) AS Quantity')
             )
-            ->join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
-            ->join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
-            ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID');
+            ->leftJoin('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
+            ->leftJoin('orders as o', 'oi.OrderID', '=', 'o.OrderID')
+            ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
+            ->groupBy('p.ProductID', 'p.ProductName');
             if($request->ProductName) {
                 $queryProduct->where('p.ProductName', 'like', '%'.$request->ProductName.'%');
             }
             $queryProduct->skip(($page - 1) * $limit)
             ->take($limit)
-            ->groupBy('p.ProductID', 'p.ProductName')
-            ->orderBy('TotalRevenue', 'DESC');
+            ->groupBy('p.ProductID', 'p.ProductName');
+
 
         $this->applyOrderStatus($queryProduct, $request);
         $this->applyTimeFrame($queryProduct, $request, 'p');
@@ -209,14 +210,15 @@ class StatisticsController extends Controller
             'p.Amount',
             'pm.MethodName as PaymentMethodName',
             'ps.StatusName as PaymentStatusName',
-            'oi.Quantity'
+            DB::raw('COALESCE(SUM(oi.Quantity), 0) AS Quantity')
         )
         ->join('payments as p', 'o.OrderID', '=', 'p.OrderID')
         ->join('order_statuses as os', 'o.OrderStatusID', '=', 'os.OrderStatusID')
         ->join('payment_methods as pm', 'p.PaymentMethodID', '=', 'pm.PaymentMethodID')
         ->join('payment_statuses as ps', 'p.PaymentStatusID', '=', 'ps.PaymentStatusID')
         ->join('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
-        ->leftJoin('order_reviews as or', 'o.OrderID', '=', 'or.OrderID');
+        ->leftJoin('order_reviews as or', 'o.OrderID', '=', 'or.OrderID')
+        ->groupBy('o.OrderID', 'o.OrderCode', 'os.StatusName', 'o.created_at', 'p.Amount', 'pm.MethodName', 'ps.StatusName');
         if($request->OrderCode) {
             $queryStatisticsOrder->where('o.OrderCode', '=', $request->OrderCode);
         }
@@ -275,13 +277,13 @@ class StatisticsController extends Controller
                 DB::raw('COALESCE(s.SizeName, "N/A") AS Size'),
                 DB::raw('COALESCE(c.ColorName, "N/A") AS Color'),
                 DB::raw('COALESCE(v.Quantity, 0) AS StockQuantity'),
-                DB::raw('SUM(oi.Quantity) AS TotalSold'),
-                DB::raw('ROUND(AVG(COALESCE(v.Price, p.Price)), 2) AS Price'),
-                DB::raw('ROUND(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 2) AS TotalRevenue')
+                DB::raw('COALESCE(SUM(oi.Quantity), 0) AS TotalSold'),
+                DB::raw('ROUND(COALESCE(AVG(COALESCE(v.Price, p.Price)), 0), 2) AS Price'),
+                DB::raw('ROUND(COALESCE(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 0), 2) AS TotalRevenue')
             )
-            ->join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
-            ->join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
-            ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
+            ->leftJoin('product_variants as v', 'p.ProductID', '=', 'v.ProductID')
+            ->leftJoin('order_items as oi', 'v.VariantID', '=', 'oi.VariantID')
+            ->leftJoin('orders as o', 'oi.OrderID', '=', 'o.OrderID')
             ->leftJoin('sizes as s', 'v.SizeID', '=', 's.SizeID')
             ->leftJoin('colors as c', 'v.ColorID', '=', 'c.ColorID');
 
@@ -294,6 +296,7 @@ class StatisticsController extends Controller
 
         return response()->json(['data' => $query->get()]);
     }
+
 }
 
 

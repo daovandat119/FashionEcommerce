@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignId('OrderStatusID')->constrained('order_statuses', 'OrderStatusID');
             $table->string('OrderCode');
             $table->text('CancellationReason')->nullable();
+            $table->decimal('ShippingFee', 10, 2);
+            $table->decimal('Discount', 10, 2);
             $table->timestamps();
         });
     }

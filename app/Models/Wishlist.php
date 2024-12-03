@@ -51,20 +51,26 @@ class Wishlist extends Model
     public function getWishlistByUserID($userID){
 
         return Wishlist::select(
-                'wishlist.*',
-                'products.*',
-                'categories.*',
-                DB::raw('COALESCE(AVG(reviews.RatingLevelID), 5) as average_rating'),
-                DB::raw('SUM(order_items.Quantity) as total_sold')
+                'wishlist.WishlistID',
+                'wishlist.UserID',
+                'products.ProductID',
+                'products.ProductName',
+                'products.Price',
+                'products.SalePrice',
+                'categories.CategoryName',
+                'products.MainImageURL',
+                'products.created_at',
+                DB::raw('COALESCE(SUM(order_items.Quantity), 0) AS total_sold'),
+                DB::raw('CEIL(COALESCE(AVG(((products.Price - products.SalePrice) / products.Price) * 100), 0)) AS discount_percentage'),
+                DB::raw('COALESCE(r.RatingLevelID, 5) AS average_rating')
             )
             ->leftJoin('products', 'wishlist.ProductID', '=', 'products.ProductID')
-            ->leftJoin('reviews', 'products.ProductID', '=', 'reviews.ProductID')
             ->leftJoin('categories', 'categories.CategoryID', '=', 'products.CategoryID')
             ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
-            ->leftJoin('orders', 'order_items.OrderID', '=', 'orders.OrderID')
-            ->leftJoin('product_variants', 'order_items.VariantID', '=', 'product_variants.VariantID')
+            ->leftJoin(DB::raw('(SELECT ProductID, AVG(RatingLevelID) AS RatingLevelID FROM reviews GROUP BY ProductID) AS r'), 'products.ProductID', '=', 'r.ProductID')
             ->where('wishlist.UserID', $userID)
-            ->groupBy('wishlist.WishlistID', 'products.ProductID', 'products.ProductName', 'products.MainImageURL', 'products.Price', 'products.SalePrice', 'categories.CategoryName')
+            ->groupBy('wishlist.WishlistID', 'wishlist.UserID', 'products.ProductID', 'products.ProductName', 'products.Price', 'products.SalePrice', 'categories.CategoryName', 'products.MainImageURL', 'products.created_at')
+            ->orderBy('products.ProductID')
             ->get();
     }
 

@@ -19,7 +19,9 @@ class OrdersTableSeeder extends Seeder
                 'CartID' => 1,
                 'OrderStatusID' => 1,
                 'OrderCode' => '1234567890',
-                'CancellationReason' => 'Khách hàng hủy đơn'
+                'CancellationReason' => 'Khách hàng hủy đơn',
+                'ShippingFee' => 10000,
+                'Discount' => 10000
             ],
             [
                 'UserID' => 2,
@@ -27,7 +29,9 @@ class OrdersTableSeeder extends Seeder
                 'CartID' => 1,
                 'OrderStatusID' => 2,
                 'OrderCode' => '1234567890',
-                'CancellationReason' => null
+                'CancellationReason' => null,
+                'ShippingFee' => 10000,
+                'Discount' => 10000
             ],
         ]);
     }

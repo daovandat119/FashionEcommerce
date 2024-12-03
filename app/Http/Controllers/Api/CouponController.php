@@ -18,15 +18,30 @@ class CouponController extends Controller
 
     public function index(Request $request)
     {
+        $page = $request->input('Page', 1);
+        $limit = $request->input('Limit', 1);
+
         $role = auth()->user()->role;
+
+        $total = $this->repoCoupon->calculateTotalCoupons($role, $request->Code);
+
+        $totalPage = ceil($total / $limit);
 
         $MinimumOrderValue = $request->MinimumOrderValue;
 
-        $coupons = $this->repoCoupon->listAllCoupons($role, $MinimumOrderValue);
+        $coupons = $this->repoCoupon->listAllCoupons(
+            $role,
+            $MinimumOrderValue,
+            $request->Code,
+            ($page - 1) * $limit,
+            $limit
+        );
 
         return response()->json([
             'message' => 'Success',
             'data' => $coupons,
+            'totalPage' => $total,
+            'page' => $page,
         ], 200);
     }
 
@@ -108,3 +123,5 @@ class CouponController extends Controller
         return $this->repoCoupon->updateDiscountPercentage($id, $discountPercentage->UsageLimit);
     }
 }
+
+
