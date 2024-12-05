@@ -25,7 +25,12 @@ class ProductsController extends Controller
     {
         $role = auth()->check() ? auth()->user()->role->RoleName : 'User';
 
-        $total = $this->repoProducts->countProducts($role == 'Admin' ? null : 'ACTIVE');
+        $total = $this->repoProducts->countProducts(
+            $role == 'Admin' ? null : 'ACTIVE',
+            $request->input('CategoryID'),
+            $request->input('ColorID'),
+            $request->input('SizeID'),
+        );
 
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);

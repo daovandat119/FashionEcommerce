@@ -92,12 +92,25 @@ class StatisticsController extends Controller
 
     public function getProductStatistics(Request $request)
     {
-        $total = DB::table('products as p');
-        $this->applyTimeFrame($total, $request, 'p');
-        if($request->ProductName) {
-            $total->where('p.ProductName', 'like', '%'.$request->ProductName.'%');
-        }
-        $total = $total->count();
+        $total = DB::table('products as p')
+        ->select(
+            'p.ProductID',
+            'p.ProductName',
+            DB::raw('COALESCE(SUM(oi.Quantity), 0) AS TotalSold'),
+            DB::raw('ROUND(COALESCE(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 0), 2) AS TotalRevenue'),
+            DB::raw('(
+                SELECT SUM(v2.Quantity)
+                FROM product_variants AS v2
+                WHERE v2.ProductID = p.ProductID AND v2.Quantity > 0
+            ) AS Quantity')
+        )
+        ->Join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
+        ->Join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
+        ->Join('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
+        ->groupBy('p.ProductID', 'p.ProductName')
+        ->get();
+
+        $total = count($total);
         $limit = $request->input('Limit', 3);
         $page = $request->input('page', 1);
         $totalPage = ceil($total / $limit);
@@ -154,7 +167,8 @@ class StatisticsController extends Controller
                 'data' => $statisticsProduct,
                 'limit' => $limit,
                 'page' => $page,
-                'total' => $totalPage
+                'total' => $totalPage,
+                'yes' => $total
             ],
             'statisticsCategory' => $statisticsCategory
         ]]);

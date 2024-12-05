@@ -30,6 +30,8 @@ class PaymentController extends Controller
             'UserID' => $userId,
             'CouponID' => $request->CouponID,
         ];
+
+
         $jsonData = json_encode($data);
         $base64Data = base64_encode($jsonData);
         $vnp_TxnRef = $base64Data;

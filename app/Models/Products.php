@@ -54,12 +54,28 @@ class Products extends Model
             $query->where("categories.CategoryID", "=", $category_id);
         }
 
-        if ($color_id) {
-            $query->where("product_variants.ColorID", $color_id);
-        }
-
-        if ($size_id) {
-            $query->where("product_variants.SizeID", $size_id);
+        if ($color_id && $size_id) {
+            $query->whereExists(function($query) use ($color_id, $size_id) {
+                $query->select(DB::raw(1))
+                      ->from('product_variants')
+                      ->whereRaw('product_variants.ProductID = products.ProductID')
+                      ->where('product_variants.ColorID', $color_id)
+                      ->where('product_variants.SizeID', $size_id);
+            });
+        } elseif ($color_id) {
+            $query->whereExists(function($query) use ($color_id) {
+                $query->select(DB::raw(1))
+                      ->from('product_variants')
+                      ->whereRaw('product_variants.ProductID = products.ProductID')
+                      ->where('product_variants.ColorID', $color_id);
+            });
+        } elseif ($size_id) {
+            $query->whereExists(function($query) use ($size_id) {
+                $query->select(DB::raw(1))
+                      ->from('product_variants')
+                      ->whereRaw('product_variants.ProductID = products.ProductID')
+                      ->where('product_variants.SizeID', $size_id);
+            });
         }
 
         if($status){
@@ -93,7 +109,7 @@ class Products extends Model
             'categories.CategoryName as category_name',
             'product_images.ImagePath as image_paths',
             DB::raw('CEIL(COALESCE((products.Price - products.SalePrice) / products.Price * 100, 0)) as discount_percentage'),
-            DB::raw('COALESCE(AVG(r.RatingLevelID), 0) as average_rating'),
+            DB::raw('COALESCE(AVG(r.RatingLevelID), 5) as average_rating'),
             DB::raw('COALESCE(SUM(order_items.Quantity), 0) as total_sold')
         )
             ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
@@ -172,9 +188,40 @@ class Products extends Model
         }
     }
 
-    public function countProducts($status)
+    public function countProducts($status, $category_id, $color_id, $size_id )
     {
-        $query = Products::query();
+        $query = Products::join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
+            ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
+            ->leftJoin('product_variants', 'order_items.VariantID', '=', 'product_variants.VariantID')
+            ->leftJoin(DB::raw('(SELECT ProductID, AVG(RatingLevelID) AS RatingLevelID FROM reviews GROUP BY ProductID) as r'), 'products.ProductID', '=', 'r.ProductID');
+
+        if ($category_id) {
+            $query->where("categories.CategoryID", "=", $category_id);
+        }
+
+        if ($color_id && $size_id) {
+            $query->whereExists(function($query) use ($color_id, $size_id) {
+                $query->select(DB::raw(1))
+                      ->from('product_variants')
+                      ->whereRaw('product_variants.ProductID = products.ProductID')
+                      ->where('product_variants.ColorID', $color_id)
+                      ->where('product_variants.SizeID', $size_id);
+            });
+        } elseif ($color_id) {
+            $query->whereExists(function($query) use ($color_id) {
+                $query->select(DB::raw(1))
+                      ->from('product_variants')
+                      ->whereRaw('product_variants.ProductID = products.ProductID')
+                      ->where('product_variants.ColorID', $color_id);
+            });
+        } elseif ($size_id) {
+            $query->whereExists(function($query) use ($size_id) {
+                $query->select(DB::raw(1))
+                      ->from('product_variants')
+                      ->whereRaw('product_variants.ProductID = products.ProductID')
+                      ->where('product_variants.SizeID', $size_id);
+            });
+        }
 
         if($status){
             $query->where("{$this->table}.Status", $status);

@@ -33,7 +33,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $page = $request->input('Page', 1);
-        $limit = $request->input('Limit', 3);
+        $limit = $request->input('Limit', 10);
 
         $userId = auth()->id();
 
@@ -81,7 +81,7 @@ class OrderController extends Controller
 
         $countCartItems = (new CartItems())->countCartItemsByUserId($userId);
 
-        if ($countCartItems > 10 && $request->PaymentMethodID != 2) {
+        if ($countCartItems > 100 && $request->PaymentMethodID != 2) {
             return response()->json(['message' => 'Số lượng mua quá lớn. Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
         }
 

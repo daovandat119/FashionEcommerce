@@ -19,7 +19,7 @@ class CouponController extends Controller
     public function index(Request $request)
     {
         $page = $request->input('Page', 1);
-        $limit = $request->input('Limit', 1);
+        $limit = $request->input('Limit', 10);
 
         $role = auth()->user()->role;
 
@@ -40,7 +40,7 @@ class CouponController extends Controller
         return response()->json([
             'message' => 'Success',
             'data' => $coupons,
-            'totalPage' => $total,
+            'totalPage' => $totalPage,
             'page' => $page,
         ], 200);
     }

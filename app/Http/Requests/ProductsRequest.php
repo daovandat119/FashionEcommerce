@@ -33,8 +33,8 @@ class ProductsRequest extends FormRequest
             'ImagePath.*' => 'image|mimes:jpeg,png,jpg,gif|max:10000',
             'Price' => 'required|numeric|min:0',
             'SalePrice' => 'nullable|numeric|min:0|lte:Price',
-            'ShortDescription' => 'nullable|string|max:255',
-            'Description' => 'nullable|string|max:255',
+            'ShortDescription' => 'nullable|string',
+            'Description' => 'nullable|string',
         ];
     }
 
