@@ -33,7 +33,7 @@ class Products extends Model
         'updated_at',
     ];
 
-    public function listProducts($search, $offset, $limit, $category_id = null, $status = null, $color_id = null, $size_id = null)
+    public function listProducts($search, $offset, $limit, $category_id = null, $status = null, $color_id = null, $size_id = null, $sortBy = null)
     {
         $query = Products::select("{$this->table}.*",
                 'categories.CategoryName as category_name',
@@ -49,6 +49,21 @@ class Products extends Model
             ->groupBy("{$this->table}.ProductID", 'categories.CategoryName')
             ->skip($offset)
             ->take($limit);
+
+        if ($sortBy) {
+            $query->where('created_at', '>=', now()->subMonths(2));
+
+            if ($sortBy === 'average_rating') {
+                $query
+                ->orderBy('average_rating', 'desc')->take(10);
+            } elseif ($sortBy === 'created_at') {
+                $query->orderBy('created_at', 'desc')->take(10);
+            } elseif ($sortBy === 'total_sold'){
+                $query->orderBy('total_sold', 'desc')->take(10);
+            } elseif ($sortBy === 'view') {
+                $query->orderBy('Views', 'desc')->take(10);
+            }
+        }
 
         if ($category_id) {
             $query->where("categories.CategoryID", "=", $category_id);

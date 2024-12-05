@@ -43,7 +43,8 @@ class ProductsController extends Controller
             $categoryId,
             $role == 'Admin' ? null : 'ACTIVE',
             $request->input('ColorID'),
-            $request->input('SizeID')
+            $request->input('SizeID'),
+            $request->input('SortBy')
         );
 
         $totalPage = ceil($total / $limit);
