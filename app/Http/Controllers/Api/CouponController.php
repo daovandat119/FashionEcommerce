@@ -53,7 +53,7 @@ class CouponController extends Controller
             'DiscountPercentage' => $request->DiscountPercentage,
             'MinimumOrderValue' => $request->MinimumOrderValue,
             'UsedCount' => 0,
-            'UsageLimit' => $request->UsageLimit,
+            'MaxAmount' => $request->MaxAmount,
             'ExpiresAt' => $request->ExpiresAt,
         ];
 
@@ -82,7 +82,7 @@ class CouponController extends Controller
             'Code' => $request->Code,
             'DiscountPercentage' => $request->DiscountPercentage,
             'MinimumOrderValue' => $request->MinimumOrderValue,
-            'UsageLimit' => $request->UsageLimit,
+            'MaxAmount' => $request->MaxAmount,
             'ExpiresAt' => $request->ExpiresAt,
         ];
 
@@ -120,7 +120,7 @@ class CouponController extends Controller
     {
         $discountPercentage = $this->repoCoupon->getCouponByID($id);
 
-        return $this->repoCoupon->updateDiscountPercentage($id, $discountPercentage->UsageLimit);
+        return $this->repoCoupon->updateDiscountPercentage($id, $discountPercentage->MaxAmount);
     }
 }
 

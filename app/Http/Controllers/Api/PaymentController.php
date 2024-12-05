@@ -122,7 +122,7 @@ class PaymentController extends Controller
 
                 $orderID = (new Order())->createOrder($dataOrder);
 
-                $cartItems = (new CartItems())->getCartItem($cart->CartID);
+                $cartItems = (new CartItems())->getCartItem($cart->CartID, 'ACTIVE');
 
                 foreach ($cartItems as $cartItem) {
                     $this->createOrderItem($orderID, $cartItem);
@@ -166,7 +166,7 @@ class PaymentController extends Controller
     {
         (new Payments())->createPayment($paymentData);
 
-        (new CartItems())->deleteCartItemByCartID($cart->CartID);
+        (new CartItems())->deleteCartItemByCartID($cart->CartID,'ACTIVE');
 
         foreach ($cartItems as $cartItem) {
             $variant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);

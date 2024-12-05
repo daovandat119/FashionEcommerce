@@ -64,7 +64,7 @@ class ProductsController extends Controller
         $category = (new Categories())->getDetail($request->CategoryID);
 
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy danh mục'], 404);
         }
 
         $data = [
@@ -97,7 +97,7 @@ class ProductsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Product created successfully',
+                'message' => 'Sản phẩm được tạo thành công',
             ], 201);
         }
     }
@@ -107,12 +107,12 @@ class ProductsController extends Controller
         $product = $this->repoProducts->getDetail($id);
 
         if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Product updated successfully',
+            'message' => 'Sản phẩm được cập nhật thành công',
             'data' => $product
         ], 200);
     }
@@ -122,7 +122,7 @@ class ProductsController extends Controller
         $product = $this->repoProducts->getDetail($id);
 
         if (!$product) {
-            return response()->json(['message' => 'Product not found.'], 404);
+            return response()->json(['message' => 'Không tìm thấy sản phẩm.'], 404);
         }
 
         $data = [
@@ -158,13 +158,13 @@ class ProductsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Product update successfully',
+                'message' => 'Cập nhật sản phẩm thành công',
             ], 201);
         } else {
             (new ProductImage())->updateProductImage($id, $product->image_paths);
             return response()->json([
                 'success' => true,
-                'message' => 'Product update successfully',
+                'message' => 'Cập nhật sản phẩm thành công',
             ], 201);
         }
     }

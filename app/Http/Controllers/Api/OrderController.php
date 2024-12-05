@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Addresses;
 use App\Mail\OrderPlacedMail;
 use App\Models\Coupon;
+
 use Mail;
 
 class OrderController extends Controller
@@ -85,9 +86,20 @@ class OrderController extends Controller
             return response()->json(['message' => 'Số lượng mua quá lớn. Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
         }
 
-        if ($request->PaymentMethodID == 1) {
-            $cart = (new Cart())->getCartByUserID($userId);
+        $cart = (new Cart())->getCartByUserID($userId);
 
+        $cartItems = (new CartItems())->getCartItem($cart->CartID);
+
+        foreach ($cartItems as $cartItem) {
+
+            $productVariant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);
+
+            if ($cartItem->Quantity > $productVariant->Quantity) {
+                return response()->json(['message' => 'Sản phẩm đã hết hàng'], 200);
+            }
+        }
+
+        if ($request->PaymentMethodID == 1) {
             $codeOrder = (string) Str::uuid();
 
             $address = (new Addresses())->getDistrictID($userId);
@@ -111,7 +123,7 @@ class OrderController extends Controller
 
             $orderID = $this->order->createOrder($dataOrder);
 
-            $cartItems = (new CartItems())->getCartItem($cart->CartID);
+            $cartItems = (new CartItems())->getCartItem($cart->CartID, 'ACTIVE');
 
             foreach ($cartItems as $cartItem) {
                 $this->createOrderItem($orderID, $cartItem);
@@ -175,7 +187,7 @@ class OrderController extends Controller
 
         $payment = (new Payments())->createPayment($paymentData);
 
-        (new CartItems())->deleteCartItemByCartID($cart->CartID);
+        (new CartItems())->deleteCartItemByCartID($cart->CartID, 'ACTIVE');
 
         foreach ($cartItems as $cartItem) {
             $variant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);
@@ -200,8 +212,14 @@ class OrderController extends Controller
     public function updateOrderStatus(Request $request, $id)
     {
         $userId = auth()->id();
-
         $role = auth()->user()->role->RoleName;
+
+        $checkOrder = $this->order->checkStatusOrder($id);
+        if ($request->OrderStatusID == 4) {
+            if ($checkOrder->OrderStatusID != 1) {
+                return response()->json(['message' => 'Không thể huỷ đơn hàng'], 400);
+            }
+        }
 
         $order = $this->order->updateOrderStatus($id, $request->OrderStatusID, $request->CancellationReason, $role == 'Admin' ? null : $userId);
 

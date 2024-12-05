@@ -62,7 +62,7 @@ class CategoriesController extends Controller
         $this->repoCategories->addCategory($dataInsert);
 
         return response()->json([
-            'message' => 'Category created successfully',
+            'message' => 'Danh mục được tạo thành công',
             'data' => $dataInsert
         ], 201);
     }
@@ -72,7 +72,7 @@ class CategoriesController extends Controller
         $category = $this->repoCategories->getDetail($id);
 
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy danh mục'], 404);
         }
 
         return response()->json([
@@ -86,7 +86,7 @@ class CategoriesController extends Controller
         $category = $this->repoCategories->getDetail($id);
 
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy danh mục'], 404);
         }
 
         $newCategoryName = $request->input('CategoryName');
@@ -100,7 +100,7 @@ class CategoriesController extends Controller
         $updatedCategory = $this->repoCategories->getDetail($id);
 
         return response()->json([
-            'message' => 'Category updated successfully',
+            'message' => 'Danh mục được cập nhật thành công',
             'data' => $updatedCategory
         ], 200);
     }
@@ -114,7 +114,7 @@ class CategoriesController extends Controller
             $category = $this->repoCategories->getDetail($id);
 
             if (!$category) {
-                return response()->json(['message' => 'Category not found'], 404);
+                return response()->json(['message' => 'Không tìm thấy danh mục'], 404);
             }
 
             $this->repoCategories->deleteCategoryAndRelatedData($id);
@@ -123,7 +123,7 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Categories deleted successfully',
+            'message' => 'Danh mục đã được xóa thành công',
         ], 200);
     }
 
@@ -132,14 +132,14 @@ class CategoriesController extends Controller
         $category = $this->repoCategories->getDetail($id);
 
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy danh mục'], 404);
         }
 
         $this->repoCategories->updateCategoryAndRelatedStatus($id, $request->input('Status'));
 
         return response()->json([
             'success' => true,
-            'message' => 'Category status updated successfully',
+            'message' => 'Trạng thái danh mục được cập nhật thành công',
         ], 200);
     }
 }
