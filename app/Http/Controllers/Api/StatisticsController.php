@@ -201,16 +201,17 @@ class StatisticsController extends Controller
             ->leftJoin('payments as p', DB::raw('MONTH(p.created_at)'), '=', 'months.Month');
             if($request->timeFrame || $request->startDate || $request->endDate) {
                 $this->applyTimeFrame($queryStatistics, $request, 'p');
-            }else{
-                $queryStatistics->whereYear('p.created_at', 2024);
             }
+
+            $queryStatistics->whereYear('p.created_at', $request->year == null ? 2024 : $request->year);
+
             $queryStatistics->orWhereNull('p.PaymentID')
             ->select(
                 'months.Month',
                 DB::raw('IFNULL(COUNT(p.PaymentID), 0) AS TotalTransactions'),
                 DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue')
             )
-            ->whereYear('p.created_at', 2024)
+            ->whereYear('p.created_at', $request->year == null ? 2024 : $request->year)
             ->groupBy('months.Month')
             ->orderBy('months.Month');
         $statistics = $queryStatistics->get();

@@ -103,10 +103,10 @@ class OrderController extends Controller
             $codeOrder = (string) Str::uuid();
 
             $address = (new Addresses())->getDistrictID($userId);
+
             if ($request->CouponID) {
                 (new CouponController())->updateDiscount($request->CouponID);
-                $coupon = (new Coupon())->getCouponByID($request->CouponID);
-                $totalDiscount = abs($request->TotalAmount - ($request->TotalAmount / abs(1 - ($coupon->DiscountPercentage / 100))));
+                $discount = ($request->Discount == null) ? 0 : $request->Discount;
             }
 
             $shippingFee = (new AddressController())->getShippingFee($request);
@@ -118,7 +118,7 @@ class OrderController extends Controller
                 'CartID' => $cart->CartID,
                 'OrderCode' => $codeOrder,
                 'ShippingFee' => $totalShippingFee,
-                'Discount' => $totalDiscount ?? 0,
+                'Discount' => $discount ?? 0
             ];
 
             $orderID = $this->order->createOrder($dataOrder);
@@ -132,6 +132,7 @@ class OrderController extends Controller
             $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
 
             $user = auth()->user();
+
             $orderDetails = [
                 'UserName' => $user->name,
                 'TotalAmount' => $request->TotalAmount,

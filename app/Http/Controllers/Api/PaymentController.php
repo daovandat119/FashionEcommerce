@@ -29,6 +29,7 @@ class PaymentController extends Controller
             'vnp_TxnRef' => time(),
             'UserID' => $userId,
             'CouponID' => $request->CouponID,
+            'Discount' => $request->Discount,
         ];
 
 
@@ -102,22 +103,19 @@ class PaymentController extends Controller
 
                 if ($data['CouponID'] != null) {
                     (new CouponController())->updateDiscount($data['CouponID']);
-                    $coupon = (new Coupon())->getCouponByID($data['CouponID']);
-                    $total = $request->vnp_Amount / 100;
-                    $totalDiscount = abs($total - ($total / abs(1 - ($coupon->DiscountPercentage / 100))));
-
+                    $discount = ($data['Discount'] == null) ? 0 : $data['Discount'];
                 }
 
                 $shippingFee = (new AddressController())->getShippingFee($request, $data['UserID']);
-
                 $totalShippingFee = $shippingFee->original['data']['total'];
+
                 $dataOrder = [
                     'UserID' => $data['UserID'],
                     'AddressID' => $address->AddressID,
                     'CartID' => $cart->CartID,
                     'OrderCode' => $codeOrder,
                     'ShippingFee' => $totalShippingFee,
-                    'Discount' => $totalDiscount ?? 0,
+                    'Discount' => $discount ?? 0
                 ];
 
                 $orderID = (new Order())->createOrder($dataOrder);
@@ -164,6 +162,7 @@ class PaymentController extends Controller
 
     private function processPayment($paymentData, $cartItems, $cart)
     {
+
         (new Payments())->createPayment($paymentData);
 
         (new CartItems())->deleteCartItemByCartID($cart->CartID,'ACTIVE');
