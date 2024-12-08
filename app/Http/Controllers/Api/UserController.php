@@ -11,17 +11,29 @@ use Cloudinary\Cloudinary;
 use Cloudinary\Api\Upload\UploadApi;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\UserRequest;
+
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $total = User::count();
+        $total = User::join('roles', 'users.RoleID', '=', 'roles.RoleID')
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('users.Username', 'like', "%{$request->search}%");
+            })
+            ->where('roles.RoleID', 2)
+            ->count();
         $page = $request->input('Page', 1);
-        $limit = $request->input('Limit', 10);
+        $limit = $request->input(
+            'Limit',
+            10
+        );
         $offset = ($page - 1) * $limit;
 
         $users = User::skip($offset)
             ->join('roles', 'users.RoleID', '=', 'roles.RoleID')
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('users.Username', 'like', "%{$request->search}%");
+            })
             ->where('roles.RoleID', 2)
             ->take($limit)
             ->get();
@@ -89,7 +101,7 @@ class UserController extends Controller
             ], 400);
         }
 
-        if($request->input('new_password') !== $request->input('new_password_confirmation')) {
+        if ($request->input('new_password') !== $request->input('new_password_confirmation')) {
             return response()->json([
                 'message' => 'Mật khẩu không khớp.'
             ], 400);
@@ -114,7 +126,7 @@ class UserController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $uploadedFileUrl = (new UploadApi())->upload($request->file('image')->getRealPath())['secure_url'];
             $userUpdate['image'] = $uploadedFileUrl;
-        }else {
+        } else {
             $user = User::find($userId);
             $userUpdate['image'] = $user->Image;
         }
@@ -124,8 +136,5 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Thông tin tài khoản đã được cập nhật thành công.',
         ], 200);
-
     }
-
 }
-

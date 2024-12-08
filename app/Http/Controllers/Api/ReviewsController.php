@@ -57,7 +57,7 @@ class ReviewsController extends Controller
 
             if (!$order) {
                 return response()->json([
-                    'message' => 'You have not bought this product',
+                    'message' => 'Bạn chưa mua sản phẩm này',
                 ], 400);
             }
         }

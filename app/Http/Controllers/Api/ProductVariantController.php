@@ -31,7 +31,7 @@ class ProductVariantController extends Controller
         $product = (new Products())->getDetail($request->ProductID);
 
         if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
         }
 
         if ($request->Price > $product->Price) {
@@ -92,7 +92,7 @@ class ProductVariantController extends Controller
         $variant = $this->repoProductVariant->getVariantByIDAdmin($request->VariantID);
 
         if (!$variant) {
-            return response()->json(['message' => 'Variant not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy biến thể'], 404);
         }
 
         return response()->json(['message' => 'Success', 'data' => $variant], 200);
@@ -103,7 +103,7 @@ class ProductVariantController extends Controller
         $product = (new Products())->getDetail($request->ProductID);
 
         if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
         }
 
         $data = [
@@ -127,7 +127,7 @@ class ProductVariantController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Variants deleted successfully',
+            'message' => 'Đã xóa biến thể thành công',
         ], 200);
     }
 

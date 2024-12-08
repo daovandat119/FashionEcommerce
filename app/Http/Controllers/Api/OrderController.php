@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Addresses;
 use App\Mail\OrderPlacedMail;
 use App\Models\Coupon;
+
 use Mail;
 
 class OrderController extends Controller
@@ -33,7 +34,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $page = $request->input('Page', 1);
-        $limit = $request->input('Limit', 3);
+        $limit = $request->input('Limit', 10);
 
         $userId = auth()->id();
 
@@ -67,7 +68,7 @@ class OrderController extends Controller
         ], 200);
     }
 
-//
+    //
     public function store(OrderRequest $request)
     {
 
@@ -81,20 +82,31 @@ class OrderController extends Controller
 
         $countCartItems = (new CartItems())->countCartItemsByUserId($userId);
 
-        if ($countCartItems > 10 && $request->PaymentMethodID != 2) {
-            return response()->json(['message' => 'Số lượng mua quá lớn. Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
+        if ($countCartItems > 100 && $request->PaymentMethodID != 2) {
+            return response()->json(['message' => 'Số lượng mua quá lớn. Vui lòng thanh toán chuy��n khoản để tiếp tục.'], 200);
+        }
+
+        $cart = (new Cart())->getCartByUserID($userId);
+
+        $cartItems = (new CartItems())->getCartItem($cart->CartID);
+
+        foreach ($cartItems as $cartItem) {
+
+            $productVariant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);
+
+            if ($cartItem->Status == 'ACTIVE' && $cartItem->Quantity > $productVariant->Quantity) {
+                return response()->json(['message' => 'Sản phẩm đã hết hàng'], 200);
+            }
         }
 
         if ($request->PaymentMethodID == 1) {
-            $cart = (new Cart())->getCartByUserID($userId);
-
             $codeOrder = (string) Str::uuid();
 
             $address = (new Addresses())->getDistrictID($userId);
+
             if ($request->CouponID) {
                 (new CouponController())->updateDiscount($request->CouponID);
-                $coupon = (new Coupon())->getCouponByID($request->CouponID);
-                $totalDiscount = abs($request->TotalAmount - ($request->TotalAmount / abs(1 - ($coupon->DiscountPercentage / 100))));
+                $discount = ($request->Discount == null) ? 0 : $request->Discount;
             }
 
             $shippingFee = (new AddressController())->getShippingFee($request);
@@ -106,12 +118,12 @@ class OrderController extends Controller
                 'CartID' => $cart->CartID,
                 'OrderCode' => $codeOrder,
                 'ShippingFee' => $totalShippingFee,
-                'Discount' => $totalDiscount ?? 0,
+                'Discount' => $discount ?? 0
             ];
 
             $orderID = $this->order->createOrder($dataOrder);
 
-            $cartItems = (new CartItems())->getCartItem($cart->CartID);
+            $cartItems = (new CartItems())->getCartItem($cart->CartID, 'ACTIVE');
 
             foreach ($cartItems as $cartItem) {
                 $this->createOrderItem($orderID, $cartItem);
@@ -120,6 +132,7 @@ class OrderController extends Controller
             $payment = $this->processPayment($cartItems, $orderID, $request, $cart);
 
             $user = auth()->user();
+
             $orderDetails = [
                 'UserName' => $user->name,
                 'TotalAmount' => $request->TotalAmount,
@@ -175,7 +188,7 @@ class OrderController extends Controller
 
         $payment = (new Payments())->createPayment($paymentData);
 
-        (new CartItems())->deleteCartItemByCartID($cart->CartID);
+        (new CartItems())->deleteCartItemByCartID($cart->CartID, 'ACTIVE');
 
         foreach ($cartItems as $cartItem) {
             $variant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);
@@ -200,12 +213,17 @@ class OrderController extends Controller
     public function updateOrderStatus(Request $request, $id)
     {
         $userId = auth()->id();
-
         $role = auth()->user()->role->RoleName;
+
+        $checkOrder = $this->order->checkStatusOrder($id);
+        if ($request->OrderStatusID == 4) {
+            if ($checkOrder->OrderStatusID != 1) {
+                return response()->json(['message' => 'Không thể huỷ đơn hàng'], 400);
+            }
+        }
 
         $order = $this->order->updateOrderStatus($id, $request->OrderStatusID, $request->CancellationReason, $role == 'Admin' ? null : $userId);
 
         return response()->json(['message' => 'Success', 'data' => $order], 200);
     }
-
 }

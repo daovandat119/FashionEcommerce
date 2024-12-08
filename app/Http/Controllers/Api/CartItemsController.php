@@ -41,18 +41,18 @@ class CartItemsController extends Controller
 
         $productVariant = (new ProductVariant())->getVariantByID($request->productID, $request->sizeID, $request->colorID);
         if (!$productVariant) {
-            return response()->json(['message' => 'Product variant not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
         }
 
         $cartItem = $this->repoCartItems->getCartItemByCartID($cart->CartID, $request->productID, $productVariant->VariantID);
 
         if ($request->quantity <= 0) {
-            return response()->json(['message' => 'Quantity must be greater than 0'], 400);
+            return response()->json(['message' => 'Số lượng phải lớn hơn 0'], 400);
         }
 
         if (!$cartItem) {
             if ($request->quantity > $productVariant->Quantity) {
-                return response()->json(['message' => 'Quantity is not enough'], 400);
+                return response()->json(['message' => 'Số lượng là không đủ'], 400);
             }
 
             $data = [
@@ -68,7 +68,7 @@ class CartItemsController extends Controller
         } else {
             $newQuantity = $cartItem->Quantity + $request->quantity;
             if ($newQuantity > $productVariant->Quantity) {
-                return response()->json(['message' => 'Quantity is not enough'], 400);
+                return response()->json(['message' => 'Số lượng là không đủ'], 400);
             }
 
             $data = [
@@ -80,7 +80,7 @@ class CartItemsController extends Controller
             if ($updateCartItems) {
                 return response()->json(['message' => 'Success', 'data' => $updateCartItems], 200);
             } else {
-                return response()->json(['message' => 'Failed to update cart item'], 500);
+                return response()->json(['message' => 'Không thể cập nhật mặt hàng trong giỏ hàng'], 500);
             }
         }
     }
@@ -92,17 +92,17 @@ class CartItemsController extends Controller
         $cart = (new Cart())->getCartByUserID($userId);
 
         if (!$cart) {
-            return response()->json(['message' => 'Cart not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy giỏ hàng'], 404);
         }
 
         $productVariant = (new ProductVariant())->getVariantByID($request->productID, $request->sizeID, $request->colorID);
 
         if (!$productVariant) {
-            return response()->json(['message' => 'Product variant not found'], 404);
+            return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
         }
 
         if ($request->quantity > $productVariant->Quantity) {
-            return response()->json(['message' => 'Quantity is not enough'], 400);
+            return response()->json(['message' => 'Số lượng là không đủ'], 400);
         }
 
         $data = [
@@ -114,7 +114,7 @@ class CartItemsController extends Controller
         if ($updateCartItems) {
             return response()->json(['message' => 'Success', 'data' => $updateCartItems], 200);
         } else {
-            return response()->json(['message' => 'Failed to update cart item'], 500);
+            return response()->json(['message' => 'Không thể cập nhật mặt hàng trong giỏ hàng'], 500);
         }
     }
 
@@ -129,6 +129,20 @@ class CartItemsController extends Controller
         return response()->json(['message' => 'Success', 'deleted_count' => $deletedCartItemsCount], 200);
     }
 
-    
+    public function updateStatusCartItem(Request $request) {
+        $userId = auth()->id();
+
+        $ids = explode(',', $request->input('ids'));
+
+        $updateStatus = $this->repoCartItems->updateCartItemStatus($ids);
+
+        if ($updateStatus) {
+            return response()->json(['message' => 'Status updated successfully'], 200);
+        } else {
+            return response()->json(['message' => 'Failed to update status'], 500);
+        }
+    }
+
+
 
 }

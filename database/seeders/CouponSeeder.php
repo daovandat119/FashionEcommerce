@@ -14,7 +14,7 @@ class CouponSeeder extends Seeder
     public function run(): void
     {
         DB::table('coupons')->insert([
-            ['Name' => 'Coupon 1', 'Code' => 'COUPON1', 'DiscountPercentage' => 10, 'MinimumOrderValue' => 100, 'UsageLimit' => 10, 'UsedCount' => 0, 'ExpiresAt' => now()->addDays(30)],
+            ['Name' => 'Coupon 1', 'Code' => 'COUPON1', 'DiscountPercentage' => 10, 'MinimumOrderValue' => 100, 'UsageLimit' => 10, 'MaxAmount' => 10000, 'ExpiresAt' => now()->addDays(30)],
         ]);
     }
 }

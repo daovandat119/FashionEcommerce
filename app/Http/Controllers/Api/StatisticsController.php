@@ -1,18 +1,21 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+
 class StatisticsController extends Controller
 {
-    public function getUserStatistics(Request $request) {
+    public function getUserStatistics(Request $request)
+    {
         $total = DB::table('users')
-        ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
-        ->where('r.RoleID', 2);
+            ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
+            ->where('r.RoleID', 2);
         $this->applyTimeFrame($total, $request, 'users');
-        if($request->UserName) {
-            $total->where('users.UserName', 'like', '%'.$request->UserName.'%');
+        if ($request->UserName) {
+            $total->where('users.UserName', 'like', '%' . $request->UserName . '%');
         }
         $total = $total->count();
         $limit = $request->input('Limit', 2);
@@ -22,9 +25,9 @@ class StatisticsController extends Controller
         $monthlyRegistrations = DB::table('users')
             ->select(DB::raw('DATE_FORMAT(users.created_at, "%m") as Month'), DB::raw('COUNT(*) as Total'))
             ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
-            ->where('r.RoleID', 2);
-            $this->applyTimeFrame($monthlyRegistrations, $request, 'users');
-            $monthlyRegistrations = $monthlyRegistrations->groupBy('Month')
+            ->where('r.RoleID', 2)
+            ->whereYear('users.created_at', $request->year ?? 2024);
+        $monthlyRegistrations = $monthlyRegistrations->groupBy('Month')
             ->orderBy('Month')
             ->get();
 
@@ -43,10 +46,10 @@ class StatisticsController extends Controller
         $queryUser = DB::table('users')->skip(($page - 1) * $limit)
             ->join('roles as r', 'users.RoleID', '=', 'r.RoleID')
             ->where('r.RoleID', 2);
-            if($request->UserName) {
-                $queryUser->where('users.UserName', 'like', '%'.$request->UserName.'%');
-            }
-            $queryUser = $queryUser->take($limit)
+        if ($request->UserName) {
+            $queryUser->where('users.UserName', 'like', '%' . $request->UserName . '%');
+        }
+        $queryUser = $queryUser->take($limit)
             ->get();
         $this->applyTimeFrame($queryUser, $request, 'users');
 
@@ -64,7 +67,8 @@ class StatisticsController extends Controller
         ]]);
     }
 
-    private function applyTimeFrame($query, $request, $table) {
+    private function applyTimeFrame($query, $request, $table)
+    {
         if ($request->timeFrame) {
             switch ($request->timeFrame) {
                 case '1_month':
@@ -82,7 +86,8 @@ class StatisticsController extends Controller
         }
     }
 
-    private function applyOrderStatus($query, $request) {
+    private function applyOrderStatus($query, $request)
+    {
         if ($request->OrderStatusID) {
             $query->where('o.OrderStatusID', $request->OrderStatusID);
         } else {
@@ -92,12 +97,25 @@ class StatisticsController extends Controller
 
     public function getProductStatistics(Request $request)
     {
-        $total = DB::table('products as p');
-        $this->applyTimeFrame($total, $request, 'p');
-        if($request->ProductName) {
-            $total->where('p.ProductName', 'like', '%'.$request->ProductName.'%');
-        }
-        $total = $total->count();
+        $total = DB::table('products as p')
+            ->select(
+                'p.ProductID',
+                'p.ProductName',
+                DB::raw('COALESCE(SUM(oi.Quantity), 0) AS TotalSold'),
+                DB::raw('ROUND(COALESCE(SUM(oi.Quantity * COALESCE(v.Price, p.Price)), 0), 2) AS TotalRevenue'),
+                DB::raw('(
+                SELECT SUM(v2.Quantity)
+                FROM product_variants AS v2
+                WHERE v2.ProductID = p.ProductID AND v2.Quantity > 0
+            ) AS Quantity')
+            )
+            ->Join('order_items as oi', 'p.ProductID', '=', 'oi.ProductID')
+            ->Join('orders as o', 'oi.OrderID', '=', 'o.OrderID')
+            ->Join('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
+            ->groupBy('p.ProductID', 'p.ProductName')
+            ->get();
+
+        $total = count($total);
         $limit = $request->input('Limit', 3);
         $page = $request->input('page', 1);
         $totalPage = ceil($total / $limit);
@@ -118,10 +136,10 @@ class StatisticsController extends Controller
             ->leftJoin('orders as o', 'oi.OrderID', '=', 'o.OrderID')
             ->leftJoin('product_variants as v', 'oi.VariantID', '=', 'v.VariantID')
             ->groupBy('p.ProductID', 'p.ProductName');
-            if($request->ProductName) {
-                $queryProduct->where('p.ProductName', 'like', '%'.$request->ProductName.'%');
-            }
-            $queryProduct->skip(($page - 1) * $limit)
+        if ($request->ProductName) {
+            $queryProduct->where('p.ProductName', 'like', '%' . $request->ProductName . '%');
+        }
+        $queryProduct->skip(($page - 1) * $limit)
             ->take($limit)
             ->groupBy('p.ProductID', 'p.ProductName');
 
@@ -154,17 +172,19 @@ class StatisticsController extends Controller
                 'data' => $statisticsProduct,
                 'limit' => $limit,
                 'page' => $page,
-                'total' => $totalPage
+                'total' => $totalPage,
+                'yes' => $total
             ],
             'statisticsCategory' => $statisticsCategory
         ]]);
     }
 
-    public function getOrderStatistics(Request $request) {
+    public function getOrderStatistics(Request $request)
+    {
         $total = DB::table('payments as p');
         $this->applyTimeFrame($total, $request, 'p');
         $total = $total->join('orders as o', 'p.OrderID', '=', 'o.OrderID');
-        if($request->OrderCode) {
+        if ($request->OrderCode) {
             $total->where('o.OrderCode', '=', $request->OrderCode);
         }
         $total = $total->count();
@@ -185,45 +205,46 @@ class StatisticsController extends Controller
                                            SELECT 11 AS Month UNION ALL
                                            SELECT 12 AS Month) AS months'))
             ->leftJoin('payments as p', DB::raw('MONTH(p.created_at)'), '=', 'months.Month');
-            if($request->timeFrame || $request->startDate || $request->endDate) {
-                $this->applyTimeFrame($queryStatistics, $request, 'p');
-            }else{
-                $queryStatistics->whereYear('p.created_at', 2024);
-            }
-            $queryStatistics->orWhereNull('p.PaymentID')
+        if ($request->timeFrame || $request->startDate || $request->endDate) {
+            $this->applyTimeFrame($queryStatistics, $request, 'p');
+        }
+
+        $queryStatistics->whereYear('p.created_at', $request->year == null ? 2024 : $request->year);
+
+        $queryStatistics->orWhereNull('p.PaymentID')
             ->select(
                 'months.Month',
                 DB::raw('IFNULL(COUNT(p.PaymentID), 0) AS TotalTransactions'),
                 DB::raw('IFNULL(SUM(p.Amount), 0) AS TotalRevenue')
             )
-            ->whereYear('p.created_at', 2024)
+            ->whereYear('p.created_at', $request->year == null ? 2024 : $request->year)
             ->groupBy('months.Month')
             ->orderBy('months.Month');
         $statistics = $queryStatistics->get();
 
         $queryStatisticsOrder = DB::table('orders as o')
-        ->select(
-            'o.OrderID',
-            'o.OrderCode',
-            'os.StatusName as OrderStatusName',
-            'o.created_at',
-            'p.Amount',
-            'pm.MethodName as PaymentMethodName',
-            'ps.StatusName as PaymentStatusName',
-            DB::raw('COALESCE(SUM(oi.Quantity), 0) AS Quantity')
-        )
-        ->join('payments as p', 'o.OrderID', '=', 'p.OrderID')
-        ->join('order_statuses as os', 'o.OrderStatusID', '=', 'os.OrderStatusID')
-        ->join('payment_methods as pm', 'p.PaymentMethodID', '=', 'pm.PaymentMethodID')
-        ->join('payment_statuses as ps', 'p.PaymentStatusID', '=', 'ps.PaymentStatusID')
-        ->join('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
-        ->leftJoin('order_reviews as or', 'o.OrderID', '=', 'or.OrderID')
-        ->groupBy('o.OrderID', 'o.OrderCode', 'os.StatusName', 'o.created_at', 'p.Amount', 'pm.MethodName', 'ps.StatusName');
-        if($request->OrderCode) {
+            ->select(
+                'o.OrderID',
+                'o.OrderCode',
+                'os.StatusName as OrderStatusName',
+                'o.created_at',
+                'p.Amount',
+                'pm.MethodName as PaymentMethodName',
+                'ps.StatusName as PaymentStatusName',
+                DB::raw('COALESCE(SUM(oi.Quantity), 0) AS Quantity')
+            )
+            ->join('payments as p', 'o.OrderID', '=', 'p.OrderID')
+            ->join('order_statuses as os', 'o.OrderStatusID', '=', 'os.OrderStatusID')
+            ->join('payment_methods as pm', 'p.PaymentMethodID', '=', 'pm.PaymentMethodID')
+            ->join('payment_statuses as ps', 'p.PaymentStatusID', '=', 'ps.PaymentStatusID')
+            ->join('order_items as oi', 'o.OrderID', '=', 'oi.OrderID')
+            ->leftJoin('order_reviews as or', 'o.OrderID', '=', 'or.OrderID')
+            ->groupBy('o.OrderID', 'o.OrderCode', 'os.StatusName', 'o.created_at', 'p.Amount', 'pm.MethodName', 'ps.StatusName');
+        if ($request->OrderCode) {
             $queryStatisticsOrder->where('o.OrderCode', '=', $request->OrderCode);
         }
         $queryStatisticsOrder->skip(($page - 1) * $limit)
-        ->take($limit);
+            ->take($limit);
 
         $this->applyTimeFrame($queryStatisticsOrder, $request, 'o');
         $statisticsOrder = $queryStatisticsOrder->get();
@@ -292,15 +313,8 @@ class StatisticsController extends Controller
         }
 
         $query->groupBy('p.ProductName', 'v.Quantity', 's.SizeName', 'c.ColorName')
-              ->orderBy('TotalRevenue', 'DESC');
+            ->orderBy('TotalRevenue', 'DESC');
 
         return response()->json(['data' => $query->get()]);
     }
-
 }
-
-
-
-
-
-

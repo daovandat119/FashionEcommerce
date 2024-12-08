@@ -99,6 +99,7 @@ Route::middleware('auth:sanctum')->prefix('/cart-items')->group(function () {
     Route::post('/', [CartItemsController::class, 'store']);
     Route::patch('/{id}', [CartItemsController::class, 'update']);
     Route::delete('/', [CartItemsController::class, 'destroy']);
+    Route::post('/status', [CartItemsController::class, 'updateStatusCartItem']);
 });
 
 Route::middleware('auth:sanctum')->prefix('/wishlist')->group(function () {

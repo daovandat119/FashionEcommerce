@@ -23,6 +23,7 @@ class CartItems extends Model
         'VariantID',
         'Quantity',
         'Price',
+        'Status',
         'created_at',
         'updated_at',
     ];
@@ -35,16 +36,33 @@ class CartItems extends Model
             ->join('colors as col', 'pv.ColorID', '=', 'col.ColorID')
             ->join('sizes as s', 'pv.SizeID', '=', 's.SizeID')
             ->where('c.UserID', $userId)
-            ->select('cart_items.*', 's.SizeID', 'col.ColorID', 'p.ProductID', 'col.ColorName as ColorName', 's.SizeName as SizeName', 'p.ProductName as ProductName', 'p.MainImageURL as ImageUrl', 'pv.Price as Price');
+            ->select(
+                'cart_items.*',
+                's.SizeID',
+                'col.ColorID',
+                'p.ProductID',
+                'col.ColorName as ColorName',
+                's.SizeName as SizeName',
+                'p.ProductName as ProductName',
+                'p.MainImageURL as ImageUrl',
+                'pv.Price as Price',
+                'pv.Quantity as QuantityLimit'
+            );
 
         $cartItems = $query->get();
 
         return $cartItems;
     }
 
-    public function getCartItem($cartID)
+    public function getCartItem($cartID, $Status = null)
     {
-        $cartItems = CartItems::where('CartID', $cartID)->get();
+        $query = CartItems::where('CartID', $cartID);
+
+        if ($Status !== null) {
+            $query->where('Status', $Status);
+        }
+
+        $cartItems = $query->get();
 
         return $cartItems;
     }
@@ -65,6 +83,7 @@ class CartItems extends Model
             'ProductID' => $data['ProductID'],
             'VariantID' => $data['VariantID'],
             'Quantity' => $data['Quantity'],
+            'Status' => 'ACTIVE'
         ]);
         return $createCartItem;
     }
@@ -87,9 +106,13 @@ class CartItems extends Model
 
     }
 
-    public function deleteCartItemByCartID($cartID)
+    public function deleteCartItemByCartID($cartID, $Status = null)
     {
-        $deleteCartItemByCartID = CartItems::where('CartID', $cartID)->delete();
+        $deleteCartItemByCartID = CartItems::where('CartID', $cartID);
+        if ($Status !== null) {
+            $deleteCartItemByCartID->where('Status', $Status);
+        }
+        $deleteCartItemByCartID->delete();
     }
 
     public function countCartItemsByUserId($userId)
@@ -97,6 +120,14 @@ class CartItems extends Model
         return CartItems::join('carts as c', 'cart_items.CartID', '=', 'c.CartID')
             ->where('c.UserID', $userId)
             ->sum('cart_items.Quantity');
+    }
+
+    public function updateCartItemStatus($cartItemIDs)
+    {
+        $updateStatus = CartItems::whereIn('CartItemID', $cartItemIDs)
+        ->update(['Status' => 'INACTIVE']);
+
+        return $updateStatus;
     }
 
 }

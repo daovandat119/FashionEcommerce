@@ -22,7 +22,7 @@ class OrderReviewController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Order review created successfully',
+            'message' => 'Đã tạo đánh giá đơn hàng thành công',
         ], 201);
 
     }

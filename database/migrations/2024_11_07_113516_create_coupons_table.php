@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('Code')->unique();
             $table->integer('DiscountPercentage');
             $table->decimal('MinimumOrderValue', 10, 2)->nullable();
+            $table->decimal('MaxAmount', 10, 2)->nullable();
             $table->integer('UsageLimit')->nullable();
-            $table->integer('UsedCount')->default(0);
             $table->timestamp('ExpiresAt')->nullable();
             $table->timestamps();
         });

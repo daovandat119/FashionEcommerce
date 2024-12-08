@@ -15,10 +15,12 @@ use App\Models\ProductVariant;
 use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\AddressController;
 use App\Models\Coupon;
+
 class PaymentController extends Controller
 {
 
-    public function addPayment($userId, Request $request) {
+    public function addPayment($userId, Request $request)
+    {
 
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
@@ -29,7 +31,10 @@ class PaymentController extends Controller
             'vnp_TxnRef' => time(),
             'UserID' => $userId,
             'CouponID' => $request->CouponID,
+            'Discount' => $request->Discount,
         ];
+
+
         $jsonData = json_encode($data);
         $base64Data = base64_encode($jsonData);
         $vnp_TxnRef = $base64Data;
@@ -74,7 +79,8 @@ class PaymentController extends Controller
         return response()->json(['vnpay_url' => $vnp_Url]);
     }
 
-    public function vnpayReturn(Request $request) {
+    public function vnpayReturn(Request $request)
+    {
 
         $vnp_SecureHash = $request->vnp_SecureHash;
         $inputData = $request->all();
@@ -100,27 +106,24 @@ class PaymentController extends Controller
 
                 if ($data['CouponID'] != null) {
                     (new CouponController())->updateDiscount($data['CouponID']);
-                    $coupon = (new Coupon())->getCouponByID($data['CouponID']);
-                    $total = $request->vnp_Amount / 100;
-                    $totalDiscount = abs($total - ($total / abs(1 - ($coupon->DiscountPercentage / 100))));
-
+                    $discount = ($data['Discount'] == null) ? 0 : $data['Discount'];
                 }
 
                 $shippingFee = (new AddressController())->getShippingFee($request, $data['UserID']);
-
                 $totalShippingFee = $shippingFee->original['data']['total'];
+
                 $dataOrder = [
                     'UserID' => $data['UserID'],
                     'AddressID' => $address->AddressID,
                     'CartID' => $cart->CartID,
                     'OrderCode' => $codeOrder,
                     'ShippingFee' => $totalShippingFee,
-                    'Discount' => $totalDiscount ?? 0,
+                    'Discount' => $discount ?? 0
                 ];
 
                 $orderID = (new Order())->createOrder($dataOrder);
 
-                $cartItems = (new CartItems())->getCartItem($cart->CartID);
+                $cartItems = (new CartItems())->getCartItem($cart->CartID, 'ACTIVE');
 
                 foreach ($cartItems as $cartItem) {
                     $this->createOrderItem($orderID, $cartItem);
@@ -142,7 +145,7 @@ class PaymentController extends Controller
 
                 return redirect()->to("http://localhost:5173/shop_order_complete/$orderID");
             } else {
-                return redirect()->to("http://localhost:5173/shop_checkout");
+                return redirect()->to("http://localhost:5173/shop_cart");
             }
         } else {
             return response()->json(['message' => 'Mã bảo mật không hợp lệ'], 400);
@@ -162,9 +165,10 @@ class PaymentController extends Controller
 
     private function processPayment($paymentData, $cartItems, $cart)
     {
+
         (new Payments())->createPayment($paymentData);
 
-        (new CartItems())->deleteCartItemByCartID($cart->CartID);
+        (new CartItems())->deleteCartItemByCartID($cart->CartID, 'ACTIVE');
 
         foreach ($cartItems as $cartItem) {
             $variant = (new ProductVariant())->getVariantByIDAdmin($cartItem->VariantID);
@@ -172,5 +176,4 @@ class PaymentController extends Controller
             (new ProductVariant())->updateQuantity($cartItem->VariantID, $variant->Quantity - $cartItem->Quantity);
         }
     }
-
 }

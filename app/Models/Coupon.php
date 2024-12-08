@@ -22,7 +22,7 @@ class Coupon extends Model
         'DiscountPercentage',
         'MinimumOrderValue',
         'UsageLimit',
-        'UsedCount',
+        'MaxAmount',
         'ExpiresAt',
         'created_at',
         'updated_at',
@@ -38,7 +38,6 @@ class Coupon extends Model
             $coupons->where(function($query) use ($MinimumOrderValue) {
                 $query->where('MinimumOrderValue', '<=', $MinimumOrderValue)
                   ->orWhere('MinimumOrderValue', '>', $MinimumOrderValue);
-                $query->where('UsageLimit', '>', 0);
             });
 
             if ($offset !== null && $limit !== null) {

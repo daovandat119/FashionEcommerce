@@ -280,4 +280,10 @@ class Order extends Model
             })
             ->count();
     }
+
+    public function checkStatusOrder($id) {
+        return DB::table('orders')
+            ->where('OrderID', $id)
+            ->first();
+    }
 }
