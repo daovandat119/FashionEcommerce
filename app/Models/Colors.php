@@ -22,9 +22,13 @@ class Colors extends Model
         'updated_at',
     ];
 
-    public function listColors()
+    public function listColors($role)
     {
-        return Colors::get();
+        if ($role === 'Admin') {
+            return Colors::all(); 
+        } else {
+            return Colors::where('status', 'ACTIVE')->get();
+        }
     }
 
     public function addColor($data)
@@ -39,7 +43,6 @@ class Colors extends Model
         return Colors::where('ColorID', $id)->first();
     }
 
-
     public function updateColor($id, $dataUpdate)
     {
         return Colors::where('ColorID', $id)->update([
@@ -49,7 +52,12 @@ class Colors extends Model
 
     public function deleteColor($id)
     {
-        return Colors::where('ColorID', $id)->delete();
+        $color = Colors::where('ColorID', $id)->first();
+
+        return Colors::where('ColorID', $id)
+
+        ->update(['status' => $color->status === "ACTIVE" ? "INACTIVE" : "ACTIVE"]);
+
     }
 
 }

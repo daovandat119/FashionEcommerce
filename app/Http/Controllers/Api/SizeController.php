@@ -16,7 +16,9 @@ class SizeController extends Controller
 
     public function index()
     {
-        $sizes = $this->repoSizes->listSizes();
+        $role = auth()->check() ? auth()->user()->role->RoleName : 'User';
+
+        $sizes = $this->repoSizes->listSizes($role);
         return response()->json(['message' => 'Success', 'data' => $sizes], 200);
     }
 
@@ -66,7 +68,7 @@ class SizeController extends Controller
 
         $this->repoSizes->deleteSize($id);
 
-        return response()->json(['message' => 'Xóa thành công!'], 200);
+        return response()->json(['message' => 'Thành công!'], 200);
     }
 
 }

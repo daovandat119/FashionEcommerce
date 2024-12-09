@@ -21,9 +21,13 @@ class Sizes extends Model
         'updated_at',
     ];
 
-    public function listSizes()
+    public function listSizes($role)
     {
-        return Sizes::get();
+        if ($role === 'Admin') {
+            return Sizes::all();
+        } else {
+            return Sizes::where('status', 'ACTIVE')->get();
+        }
     }
 
     public function addSize($data)
@@ -47,6 +51,11 @@ class Sizes extends Model
 
     public function deleteSize($id)
     {
-        return Sizes::where('SizeID', $id)->delete();
+        $size = Sizes::where('SizeID', $id)->first();
+
+        return Sizes::where('SizeID', $id)
+
+        ->update(['status' => $size->status === "ACTIVE" ? "INACTIVE" : "ACTIVE"]);
+
     }
 }

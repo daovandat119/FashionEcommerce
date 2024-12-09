@@ -126,6 +126,7 @@ class ProductsController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $product = $this->repoProducts->getDetail($id);
 
         if (!$product) {

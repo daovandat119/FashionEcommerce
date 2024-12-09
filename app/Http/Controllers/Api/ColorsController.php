@@ -17,7 +17,9 @@ class ColorsController extends Controller
 
     public function index()
     {
-        $colors = $this->repoColors->listColors();
+        $role = auth()->check() ? auth()->user()->role->RoleName : 'User';
+
+        $colors = $this->repoColors->listColors($role);
         return response()->json(['message' => 'Success', 'data' => $colors], 200);
     }
 
@@ -69,8 +71,7 @@ class ColorsController extends Controller
         }
 
         $this->repoColors->deleteColor($id);
-        return response()->json(['message' => 'Xóa thành công!'], 200);
+
+        return response()->json(['message' => 'Thành công!'], 200);
     }
-
-
 }

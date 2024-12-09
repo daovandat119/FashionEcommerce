@@ -72,6 +72,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('categories')->group(f
 
 Route::get('/colors', [ColorsController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('colors')->group(function () {
+    Route::get('/index', [ColorsController::class, 'index']);
     Route::post('/', [ColorsController::class, 'store']);
     Route::get('/{id}', [ColorsController::class, 'edit']);
     Route::put('/{id}', [ColorsController::class, 'update']);
@@ -80,6 +81,7 @@ Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('colors')->group(funct
 
 Route::get('/sizes', [SizeController::class, 'index']);
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('sizes')->group(function () {
+    Route::get('/index', [SizeController::class, 'index']);
     Route::post('/', [SizeController::class, 'store']);
     Route::get('/{id}', [SizeController::class, 'edit']);
     Route::put('/{id}', [SizeController::class, 'update']);
