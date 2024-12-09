@@ -25,7 +25,7 @@ class Colors extends Model
     public function listColors($role)
     {
         if ($role === 'Admin') {
-            return Colors::all(); 
+            return Colors::all();
         } else {
             return Colors::where('status', 'ACTIVE')->get();
         }
@@ -35,6 +35,7 @@ class Colors extends Model
     {
         return Colors::create([
             'ColorName' => $data['ColorName'],
+            'status' => "ACTIVE",
         ]);
     }
 

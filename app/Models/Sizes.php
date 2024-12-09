@@ -34,6 +34,7 @@ class Sizes extends Model
     {
         return Sizes::create([
             'SizeName' => $data['SizeName'],
+            'status' => "ACTIVE",
         ]);
     }
 
