@@ -76,7 +76,20 @@ class UserController extends Controller
 
     public function showUser(Request $request)
     {
-        $user = Auth::user();
+        $userId = auth()->id();
+
+        // Fetch the user details by joining with the roles table
+        $user = User::join('addresses', 'users.UserID', '=', 'addresses.UserID') // Join with addresses table
+            ->select('users.*', 'addresses.*') // Select all user and address fields
+            ->where('users.UserID', $userId)
+            ->first(); // Get the first result
+
+        // Check if user exists
+        if (!$user) {
+            return response()->json([
+                'message' => 'Người dùng không tồn tại.'
+            ], 404);
+        }
 
         return response()->json([
             'message' => 'Thông tin tài khoản',
@@ -86,6 +99,7 @@ class UserController extends Controller
                 'email' => $user->Email,
                 'is_active' => $user->IsActive,
                 'image' => $user->Image,
+                'ProvinceID' => $user->ProvinceID,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ]

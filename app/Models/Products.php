@@ -33,7 +33,7 @@ class Products extends Model
         'updated_at',
     ];
 
-    public function listProducts($search, $offset, $limit, $category_id = null, $status = null, $color_id = null, $size_id = null, $sortBy = null)
+    public function listProducts($search = null, $offset = null, $limit = null, $category_id = null, $role = null, $color_id = null, $size_id = null, $sortBy = null)
     {
         $query = Products::select(
             "{$this->table}.*",
@@ -42,27 +42,34 @@ class Products extends Model
             DB::raw('COALESCE(AVG(r.RatingLevelID), 5) as average_rating'),
             DB::raw('COALESCE(SUM(order_items.Quantity), 0) as total_sold')
         )
-            ->join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
+            ->leftJoin('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
             ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
             ->leftJoin('product_variants', 'order_items.VariantID', '=', 'product_variants.VariantID')
             ->leftJoin(DB::raw('(SELECT ProductID, AVG(RatingLevelID) AS RatingLevelID FROM reviews GROUP BY ProductID) as r'), 'products.ProductID', '=', 'r.ProductID')
             ->where('products.ProductName', 'like', "%{$search}%")
-            ->groupBy("{$this->table}.ProductID", 'categories.CategoryName')
-            ->skip($offset)
-            ->take($limit);
+            ->groupBy("{$this->table}.ProductID", 'categories.CategoryName');
+
+        if ($offset || $limit) {
+            $query->skip($offset)
+                ->take($limit);
+        }
 
         if ($sortBy) {
-            $query->where('products.created_at', '>=', now()->subMonths(2)); // Chỉ định rõ ràng bảng
+            $query->where('products.created_at', '>=', now()->subMonths(2));
 
-            if ($sortBy === 'average_rating') {
-                $query
-                    ->orderBy('average_rating', 'desc')->take(10);
-            } elseif ($sortBy === 'created_at') {
-                $query->orderBy('created_at', 'desc')->take(10);
-            } elseif ($sortBy === 'total_sold') {
-                $query->orderBy('total_sold', 'desc')->take(10);
-            } elseif ($sortBy === 'view') {
-                $query->orderBy('Views', 'desc')->take(10);
+            switch ($sortBy) {
+                case 'average_rating':
+                    $query->orderBy('average_rating', 'desc')->take(12);
+                    break;
+                case 'created_at':
+                    $query->orderBy('created_at', 'desc')->take(12);
+                    break;
+                case 'total_sold':
+                    $query->orderBy('total_sold', 'desc')->take(12);
+                    break;
+                case 'view':
+                    $query->orderBy('Views', 'desc')->take(12);
+                    break;
             }
         }
 
@@ -94,8 +101,10 @@ class Products extends Model
             });
         }
 
-        if ($status) {
-            $query->where("{$this->table}.Status", $status);
+        if ($role == 'Admin') {
+            $query->orderBy("{$this->table}.created_at", 'desc');
+        } else {
+            $query->where("{$this->table}.Status", 'ACTIVE');
         }
 
         return $query->get();
@@ -205,12 +214,16 @@ class Products extends Model
         }
     }
 
-    public function countProducts($status, $category_id, $color_id, $size_id)
+    public function countProducts($search = null, $role = null, $category_id = null, $color_id = null, $size_id = null)
     {
-        $query = Products::join('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
+        $query = Products::select(
+            DB::raw('COUNT(*) as total_count')
+        )
+            ->leftJoin('categories', 'categories.CategoryID', '=', "{$this->table}.CategoryID")
             ->leftJoin('order_items', 'products.ProductID', '=', 'order_items.ProductID')
             ->leftJoin('product_variants', 'order_items.VariantID', '=', 'product_variants.VariantID')
-            ->leftJoin(DB::raw('(SELECT ProductID, AVG(RatingLevelID) AS RatingLevelID FROM reviews GROUP BY ProductID) as r'), 'products.ProductID', '=', 'r.ProductID');
+            ->leftJoin(DB::raw('(SELECT ProductID, AVG(RatingLevelID) AS RatingLevelID FROM reviews GROUP BY ProductID) as r'), 'products.ProductID', '=', 'r.ProductID')
+            ->where('products.ProductName', 'like', "%{$search}%");
 
         if ($category_id) {
             $query->where("categories.CategoryID", "=", $category_id);
@@ -240,10 +253,12 @@ class Products extends Model
             });
         }
 
-        if ($status) {
-            $query->where("{$this->table}.Status", $status);
+        if ($role == 'Admin') {
+            $query->orderBy("{$this->table}.created_at", 'desc');
+        } else {
+            $query->where("{$this->table}.Status", 'ACTIVE');
         }
 
-        return $query->count();
+        return $query->value('total_count');
     }
 }

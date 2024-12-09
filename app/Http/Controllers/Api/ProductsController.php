@@ -25,29 +25,35 @@ class ProductsController extends Controller
     {
         $role = auth()->check() ? auth()->user()->role->RoleName : 'User';
 
-        $total = $this->repoProducts->countProducts(
-            $role == 'Admin' ? null : 'ACTIVE',
-            $request->input('CategoryID'),
-            $request->input('ColorID'),
-            $request->input('SizeID'),
-        );
-
         $page = $request->input('Page', 1);
         $limit = $request->input('Limit', 10);
         $categoryId = $request->input('CategoryID');
 
-        $listProducts = $this->repoProducts->listProducts(
+        $totalProduct = $this->repoProducts->listProducts(
             $request->input('Search'),
-            ($page - 1) * $limit,
-            $limit,
+            null,
+            null,
             $categoryId,
-            $role == 'Admin' ? null : 'ACTIVE',
+            $role == 'Admin' ?? null,
             $request->input('ColorID'),
             $request->input('SizeID'),
             $request->input('SortBy')
         );
 
+        $total = count($totalProduct);
+
         $totalPage = ceil($total / $limit);
+
+        $listProducts = $this->repoProducts->listProducts(
+            $request->input(key: 'Search'),
+            ($page - 1) * $limit,
+            $limit,
+            $categoryId,
+            $role == 'Admin' ?? null,
+            $request->input('ColorID'),
+            $request->input('SizeID'),
+            $request->input('SortBy')
+        );
 
         return response()->json([
             'message' => 'Success',

@@ -29,7 +29,7 @@ class ProductsRequest extends FormRequest
             'CategoryID' => 'required|exists:categories,CategoryID',
             'ProductName' => 'required|unique:products,ProductName,' . $id . ',ProductID',
             'MainImageURL' => 'required|image|mimes:jpeg,png,jpg,gif|max:10000',
-            'ImagePath' => 'required',
+            'ImagePath' => 'required|array|max:3',
             'ImagePath.*' => 'image|mimes:jpeg,png,jpg,gif|max:10000',
             'Price' => 'required|numeric|min:0',
             'SalePrice' => 'nullable|numeric|min:0|lte:Price',
@@ -55,7 +55,7 @@ class ProductsRequest extends FormRequest
             'ImagePath.array' => 'URL hình ảnh phải là một mảng',
             'ImagePath.*.image' => 'Mỗi URL hình ảnh phải là một tệp hình ảnh',
             'Price.required' => 'Giá sản phẩm không được bỏ trống',
-            'SalePrice.lte' => 'Giá khuyến mãi phải nhỏ hơn hoặc bằng giá gốc',
+            'SalePrice.lte' => 'Giá khuyến mãi ph���i nhỏ hơn hoặc bằng giá gốc',
         ];
     }
     /**

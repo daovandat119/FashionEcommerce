@@ -18,7 +18,7 @@ class StatisticsController extends Controller
             $total->where('users.UserName', 'like', '%' . $request->UserName . '%');
         }
         $total = $total->count();
-        $limit = $request->input('Limit', 2);
+        $limit = $request->input('Limit', 5);
         $page = $request->input('page', 1);
         $totalPage = ceil($total / $limit);
 
@@ -116,7 +116,7 @@ class StatisticsController extends Controller
             ->get();
 
         $total = count($total);
-        $limit = $request->input('Limit', 3);
+        $limit = $request->input('Limit', 5);
         $page = $request->input('page', 1);
         $totalPage = ceil($total / $limit);
 
@@ -188,7 +188,7 @@ class StatisticsController extends Controller
             $total->where('o.OrderCode', '=', $request->OrderCode);
         }
         $total = $total->count();
-        $limit = $request->input('Limit', 2);
+        $limit = $request->input('Limit', 5);
         $page = $request->input('Page', 1);
         $totalPage = ceil($total / $limit);
 

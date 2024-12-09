@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->prefix('users')->group(function () {
 Route::post('/products/index', [ProductsController::class, 'index']);
 Route::post('/products/view/{id}', [ProductsController::class, 'view']);
 Route::get('/products/{id}', [ProductsController::class, 'edit']);
+
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('products')->group(function () {
     Route::post('/admin', [ProductsController::class, 'index']);
     Route::post('/', [ProductsController::class, 'store']);
