@@ -12,6 +12,7 @@ use App\Models\Payments;
 use App\Http\Requests\OrderRequest;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ZaloPayController;
 use App\Http\Controllers\Api\CouponController;
 use App\Models\CartItems;
 use App\Models\ProductVariant;
@@ -68,22 +69,20 @@ class OrderController extends Controller
         ], 200);
     }
 
-    //
     public function store(OrderRequest $request)
     {
-
         $userId = auth()->id();
 
         $checkOrderStatus = $this->order->countCanceledOrders($userId);
 
-        if ($checkOrderStatus > 3 && $request->PaymentMethodID != 2) {
+        if ($checkOrderStatus > 3 && $request->PaymentMethodID != 2 && $request->PaymentMethodID != 3) {
             return response()->json(['message' => 'Bạn đã hủy quá 3 lần. Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
         }
 
         $countCartItems = (new CartItems())->countCartItemsByUserId($userId);
 
-        if ($countCartItems > 100 && $request->PaymentMethodID != 2) {
-            return response()->json(['message' => 'Số lượng mua quá lớn. Vui lòng thanh toán chuy��n khoản để tiếp tục.'], 200);
+        if ($countCartItems > 100 && $request->PaymentMethodID != 2 && $request->PaymentMethodID != 3) {
+            return response()->json(['message' => 'Số lượng mua quá lớn. Vui lòng thanh toán chuyển khoản để tiếp tục.'], 200);
         }
 
         $cart = (new Cart())->getCartByUserID($userId);
@@ -139,17 +138,21 @@ class OrderController extends Controller
                 'OrderCode' => $codeOrder,
             ];
 
-
             // if (!empty($user->Email) && filter_var($user->Email, FILTER_VALIDATE_EMAIL)) {
             //     Mail::to($user->Email)->send(new OrderPlacedMail($orderDetails));
             // } else {
             //     return response()->json(['message' => 'Invalid email address'], 400);
             // }
 
-
             return response()->json(['status' => 'success', 'data' => $payment, 'shippingFee' => $shippingFee, 'message' => 'Order created successfully, waiting for delivery.'], 201);
-        } else {
+        } else if ($request->PaymentMethodID == 2){
+
             return (new PaymentController())->addPayment($userId, $request);
+
+        } else if ($request->PaymentMethodID == 3){
+
+            return (new ZaloPayController())->addPayment($userId, $request);
+
         }
     }
 

@@ -7,7 +7,8 @@
 </head>
 <body>
     <h1>Đặt hàng</h1>
-    <form id="orderForm">
+    <form id="orderForm" method="POST" action="{{ route('payment.process') }}">
+        @csrf
         <label for="PaymentMethodID">Phương thức thanh toán:</label>
         <input type="number" id="PaymentMethodID" name="PaymentMethodID" required>
         <br>
@@ -17,27 +18,5 @@
         <button type="submit">Gửi</button>
     </form>
 
-    <div id="response"></div>
-
-    <script>
-        document.getElementById('orderForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const paymentMethodID = document.getElementById('PaymentMethodID').value;
-            const totalAmount = document.getElementById('TotalAmount').value;
-
-            fetch('http://127.0.0.1:8000/api/order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    PaymentMethodID: paymentMethodID,
-                    TotalAmount: totalAmount
-                }),
-            })
-
-        });
-    </script>
 </body>
 </html>

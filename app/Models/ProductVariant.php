@@ -105,5 +105,4 @@ class ProductVariant extends Model
         return ProductVariant::where('VariantID', $variantID)->update(['Quantity' => $quantity]);
     }
 
-
 }

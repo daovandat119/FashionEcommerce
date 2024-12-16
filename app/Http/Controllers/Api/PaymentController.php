@@ -21,7 +21,6 @@ class PaymentController extends Controller
 
     public function addPayment($userId, Request $request)
     {
-
         $vnp_TmnCode = env('VNP_TMN_CODE');
         $vnp_HashSecret = env('VNP_HASH_SECRET');
         $vnp_Url = env('VNP_URL');
@@ -33,7 +32,6 @@ class PaymentController extends Controller
             'CouponID' => $request->CouponID,
             'Discount' => $request->Discount,
         ];
-
 
         $jsonData = json_encode($data);
         $base64Data = base64_encode($jsonData);
@@ -142,7 +140,7 @@ class PaymentController extends Controller
 
                 $this->processPayment($paymentData, $cartItems, $cart);
 
-                return redirect()->to("http://localhost:5173/shop_order_complete/$orderID");
+                return redirect()->to("http://localhost:5173/shop_order_complete");
             } else {
                 return redirect()->to("http://localhost:5173/shop_cart");
             }

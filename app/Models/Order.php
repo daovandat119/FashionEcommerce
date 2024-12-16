@@ -174,7 +174,8 @@ class Order extends Model
                 pv.Price AS VariantPrice,
                 c.ColorName AS VariantColor,
                 s.SizeName AS VariantSize,
-                SUM(oi.Quantity * pv.Price) AS TotalPrice
+                SUM(oi.Quantity * pv.Price) AS TotalPrice,
+                p.ProductID
             ')
             ->when($userId, function ($query, $userId) {
                 return $query->where('o.UserID', $userId);
@@ -187,7 +188,8 @@ class Order extends Model
                 'p.MainImageURL',
                 'pv.Price',
                 'c.ColorName',
-                's.SizeName'
+                's.SizeName',
+                'p.ProductID'
             )
             ->get();
     }

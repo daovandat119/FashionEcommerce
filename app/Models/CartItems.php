@@ -118,6 +118,7 @@ class CartItems extends Model
     public function countCartItemsByUserId($userId)
     {
         return CartItems::join('carts as c', 'cart_items.CartID', '=', 'c.CartID')
+            ->where('cart_items.Status', 'ACTIVE')
             ->where('c.UserID', $userId)
             ->sum('cart_items.Quantity');
     }

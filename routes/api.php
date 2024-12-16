@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\ShippingController;
 use App\Http\Controllers\Api\CouponController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ZaloPayController;
 use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\OrderReviewController;
 use Illuminate\Http\Request;
@@ -153,6 +154,9 @@ Route::middleware(['auth:sanctum'])->prefix('reviews')->group(function () {
 
 Route::post('/pay', [PaymentController::class, 'addPayment'])->name('pay');
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
+
+Route::post('/payment/add', [ZaloPayController::class, 'addPayment'])->name('payment.process');
+Route::post('/zalopay-return', [ZaloPayController::class, 'paymentCallback']);
 
 Route::middleware(['auth:sanctum', 'auth.admin'])->prefix('statistics')->group(function () {
     Route::post('/products-statistics', [StatisticsController::class, 'getProductStatistics']);

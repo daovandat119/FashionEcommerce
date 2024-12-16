@@ -10,7 +10,7 @@ use App\Models\ProductImage;
 use App\Http\Requests\ProductsRequest;
 use Cloudinary\Cloudinary;
 use Cloudinary\Api\Upload\UploadApi;
-
+use App\Models\ProductVariant;
 
 class ProductsController extends Controller
 {
@@ -131,6 +131,17 @@ class ProductsController extends Controller
 
         if (!$product) {
             return response()->json(['message' => 'Không tìm thấy sản phẩm.'], 404);
+        }
+
+        $variants = (new ProductVariant)->getAll($id);
+
+        for ($i = 0; $i < count($variants); $i++) {
+            $variantPrice = $variants[$i]->Price;
+            if($variantPrice < $product->Price && $variantPrice > $product->SalePrice){
+                return response()->json([
+                    'message' => "Giá tiền phải lớn hơn " . (int)$variantPrice . " và giá Sale nhỏ hơn " . (int)$variantPrice
+                ], 404);
+            }
         }
 
         $data = [
