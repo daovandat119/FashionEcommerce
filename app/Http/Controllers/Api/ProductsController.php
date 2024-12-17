@@ -135,12 +135,25 @@ class ProductsController extends Controller
 
         $variants = (new ProductVariant)->getAll($id);
 
+        if ($request->Price < $request->SalePrice) {
+            return response()->json([
+                'message' => "Giá sản phẩm phải lớn hơn hoặc giá giảm"
+            ], 400);
+        }
+
         for ($i = 0; $i < count($variants); $i++) {
             $variantPrice = $variants[$i]->Price;
-            if($variantPrice < $product->Price && $variantPrice > $product->SalePrice){
+
+            if ($request->Price < $variantPrice) {
                 return response()->json([
-                    'message' => "Giá tiền phải lớn hơn " . (int)$variantPrice . " và giá Sale nhỏ hơn " . (int)$variantPrice
-                ], 404);
+                    'message' => "Giá sản phẩm phải lớn hơn hoặc bằng " . number_format($variantPrice, 0)
+                ], 400);
+            }
+
+            if ($request->SalePrice > $variantPrice) {
+                return response()->json([
+                    'message' => "Giá sale phải nhỏ hơn hoặc bằng " . number_format($variantPrice, 0)
+                ], 400);
             }
         }
 

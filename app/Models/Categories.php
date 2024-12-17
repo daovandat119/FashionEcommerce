@@ -123,15 +123,6 @@ class Categories extends Model
         DB::beginTransaction();
 
         try {
-
-            DB::table('product_variants')
-                ->where('ProductID', function ($query) use ($categoryId) {
-                    $query->select('ProductID')
-                        ->from('products')
-                        ->where('CategoryID', $categoryId);
-                })
-                ->update(['Status' => $status]);
-
             DB::table('products')
                 ->where('CategoryID', $categoryId)
                 ->update(['Status' => $status]);
